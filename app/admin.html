@@ -143,15 +143,15 @@ textarea{min-height:86px;resize:vertical}
     if (success) setTimeout(() => { $('notice').classList.remove('show'); }, 3500);
   }
   async function waitForTelegramServerless(maxAttempts = 30) {
-    try { webApp?.ready?.(); } catch (_) {}
+    try { window.Telegram?.WebApp?.ready?.(); window.Telegram?.WebApp?.expand?.(); } catch (_) {}
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const app = window.Telegram?.WebApp;
       // Serverless can exist before Telegram has supplied initData; calling too early
       // triggers WebAppServerlessInitDataUnavailable and leaves the page in a bad state.
-      if (app?.Serverless?.call && typeof app.initData === 'string' && app.initData.length > 0) return app;
+      if (app?.Serverless?.call && (typeof app.initData === 'string' && app.initData.length > 0 || app.initDataUnsafe?.user?.id)) return app;
       await new Promise((resolve) => setTimeout(resolve, 150));
     }
-    throw new Error('لم تصل بيانات التحقق من Telegram. أغلق اللوحة وافتحها من زر «لوحة الإدارة» داخل البوت، وليس من رابط خارجي.');
+    throw new Error('لم تصل بيانات التحقق من Telegram. افتح اللوحة من زر «لوحة الإدارة» داخل البوت، ثم أعد المحاولة.');
   }
   async function api(action, payload = {}) {
     const app = await waitForTelegramServerless();

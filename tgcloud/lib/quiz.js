@@ -58,7 +58,7 @@ export function homeKeyboard(isAdmin = false) {
   const rows = [
     [{ text: '📱 الاختبار التفاعلي', web_app: { url: MINI_APP_URL } }],
   ];
-  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261024b` } }]);
+  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261024d` } }]);
   rows.push(
     [{ text: '📝 ابدأ اختبارًا نصيًا', callback_data: 'quiz:start' }],
     [{ text: '❔ طريقة الاستخدام', callback_data: 'menu:help' }],
@@ -70,7 +70,7 @@ export function helpKeyboard(isAdmin = false) {
   const rows = [
     [{ text: '📱 فتح الاختبار التفاعلي', web_app: { url: MINI_APP_URL } }],
   ];
-  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261024b` } }]);
+  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261024d` } }]);
   rows.push(
     [{ text: '📝 ابدأ اختبارًا نصيًا', callback_data: 'quiz:start' }],
     [{ text: '🏠 القائمة الرئيسية', callback_data: 'menu:home' }],

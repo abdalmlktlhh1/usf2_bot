@@ -142,17 +142,25 @@ textarea{min-height:86px;resize:vertical}
     $('notice').className = 'banner show' + (success ? ' success' : '');
     if (success) setTimeout(() => { $('notice').classList.remove('show'); }, 3500);
   }
-  function api(action, payload = {}) {
+  async function waitForTelegramServerless(maxAttempts = 30) {
+    try { webApp?.ready?.(); } catch (_) {}
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const app = window.Telegram?.WebApp;
+      // Serverless can exist before Telegram has supplied initData; calling too early
+      // triggers WebAppServerlessInitDataUnavailable and leaves the page in a bad state.
+      if (app?.Serverless?.call && typeof app.initData === 'string' && app.initData.length > 0) return app;
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    throw new Error('لم تصل بيانات التحقق من Telegram. أغلق اللوحة وافتحها من زر «لوحة الإدارة» داخل البوت، وليس من رابط خارجي.');
+  }
+  async function api(action, payload = {}) {
+    const app = await waitForTelegramServerless();
     return new Promise((resolve, reject) => {
-      if (!webApp?.Serverless?.call) {
-        reject(new Error('افتح هذه الصفحة من داخل Telegram Mini App حتى يمكن التحقق من هويتك.'));
-        return;
-      }
       let settled = false;
       const timeout = setTimeout(() => {
         if (settled) return;
         settled = true;
-        reject(new Error('استغرق الخادم وقتًا أطول من المعتاد في تحميل البيانات. اضغط «إعادة المحاولة»؛ لم تتغير بياناتك.'));
+        reject(new Error('انتهت مهلة اتصال لوحة الإدارة بالخادم. أعد المحاولة؛ لم تتغير بياناتك.'));
       }, action === 'dashboard' ? 25000 : 18000);
       const finish = (callback, value) => {
         if (settled) return;
@@ -161,7 +169,7 @@ textarea{min-height:86px;resize:vertical}
         callback(value);
       };
       try {
-        webApp.Serverless.call('adminApi', { action, ...payload }, (err, result) => {
+        app.Serverless.call('adminApi', { action, ...payload }, (err, result) => {
           if (err) finish(reject, new Error(err.description || err.message || 'تعذر تنفيذ العملية.'));
           else if (result === undefined || result === null) finish(reject, new Error('لم يُرجع الخادم بيانات. أعد المحاولة.'));
           else finish(resolve, result);
@@ -959,7 +967,7 @@ textarea{min-height:86px;resize:vertical}
   }
   // Independent watchdog: if Telegram's Serverless bridge never calls back, don't leave a permanent spinner.
   const startupWatchdog = setTimeout(() => {
-    const loading = $('content').textContent.includes('يتم التحقق من الصلاحيات وتحميل البيانات');
+    const loading = !state && $('nav').hidden === false && $('content').textContent.includes('يتم التحقق');
     if (!loading || state) return;
     $('accountBadge').textContent = 'تعذر بدء الاتصال';
     $('content').innerHTML = '<div class="panel empty"><h2>تعذّر بدء الاتصال بلوحة الإدارة</h2><p>لم يستجب جسر الاتصال داخل Telegram. افتح اللوحة من زر الإدارة في البوت بعد تحديثه، ثم أعد المحاولة.</p><button class="btn primary" type="button" data-action="refresh" style="margin:8px">↻ إعادة المحاولة</button></div>';

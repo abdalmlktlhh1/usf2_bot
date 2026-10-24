@@ -1,0 +1,30 @@
+import { EndpointError } from 'sdk';
+import { fetch } from 'sdk/fetch';
+
+const SUPABASE_URL = 'https://jrrsnpijbizbwxopyvam.supabase.co';
+const CONTENT_SYNC_SECRET = process.env.CONTENT_SYNC_SECRET;
+if (!CONTENT_SYNC_SECRET) throw new Error('Missing CONTENT_SYNC_SECRET environment variable');
+
+export async function supabaseContentRequest(action, payload = {}, auth = {}) {
+  let response;
+  try {
+    response = await fetch(`${SUPABASE_URL}/functions/v1/content-admin`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-content-sync-secret': CONTENT_SYNC_SECRET,
+      },
+      body: JSON.stringify({ action, payload, auth }),
+    });
+  } catch {
+    throw new EndpointError('تعذر الاتصال بقاعدة محتوى Supabase.', { code: 'SUPABASE_UNAVAILABLE' });
+  }
+  let result;
+  try { result = await response.json(); } catch { result = {}; }
+  if (!response.ok) {
+    throw new EndpointError(result?.error || 'تعذر تنفيذ العملية على قاعدة المحتوى.', {
+      code: result?.code || 'SUPABASE_ERROR',
+    });
+  }
+  return result;
+}

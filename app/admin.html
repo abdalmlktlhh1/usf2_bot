@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123b34">
+<title>لوحة الإدارة | بوت الاختبارات</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{color-scheme:light;--ink:#172d28;--muted:#697a74;--green:#176b58;--deep:#123b34;--paper:#f3f6f2;--line:#dce6df;--white:#fff;--red:#a6423c;--gold:#bd8737;--shadow:0 12px 36px #17392d10}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 95% 0,#e1eee6 0,transparent 33%),var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.shell{max-width:1200px;margin:auto;padding:18px 16px 55px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 23px;background:linear-gradient(125deg,var(--deep),#1e6c57);color:#fff;border-radius:23px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:43px;height:43px;display:grid;place-items:center;border:1px solid #ffffff40;background:#ffffff12;border-radius:14px;font-size:1.25rem;font-weight:900}.header h1{font-size:clamp(1.2rem,3.6vw,1.75rem);margin:0}.header p{margin:2px 0 0;color:#d5e9df;font-size:.9rem}
+.owner-label{white-space:nowrap;border:1px solid #ffffff40;background:#ffffff12;border-radius:999px;padding:7px 11px;font-size:.82rem;font-weight:750}
+.banner{display:none;margin-top:14px;padding:12px 14px;border:1px solid #edb7ae;border-radius:14px;background:#fff1ee;color:#8d302a}
+.banner.show{display:block}.banner.success{border-color:#b5dbc5;background:#edf8f1;color:#176443}
+.layout{display:grid;grid-template-columns:205px minmax(0,1fr);gap:17px;margin-top:17px}
+.nav{display:flex;flex-direction:column;gap:6px;align-self:start;position:sticky;top:12px;padding:12px;background:#ffffffb8;border:1px solid var(--line);border-radius:18px}
+.nav button{display:flex;align-items:center;gap:9px;width:100%;text-align:right;border:1px solid transparent;background:transparent;color:#52655d;padding:10px 12px;border-radius:12px;font-weight:750}
+.nav button.active{background:#e5f2ea;border-color:#cde2d4;color:var(--green)}
+.nav button:hover{background:#f0f6f1}
+.content{min-width:0}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 0 14px}
+.page-head h2{font-size:1.35rem;margin:0}.page-head p{margin:3px 0 0;color:var(--muted);font-size:.9rem}
+.btn{border:1px solid transparent;border-radius:12px;padding:9px 14px;min-height:42px;font-weight:800;white-space:nowrap}
+.btn.primary{background:var(--green);color:#fff}.btn.secondary{background:#edf4ef;border-color:#d6e4da;color:var(--green)}.btn.light{background:#fff;border-color:var(--line);color:#586b63}.btn.danger{background:#fff0ed;border-color:#f0ccc5;color:#a23b32}.btn.small{min-height:32px;padding:4px 9px;font-size:.83rem;border-radius:9px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:14px}
+.stat{padding:17px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 15px #183a2e05}.stat span{display:block;color:var(--muted);font-size:.86rem}.stat strong{display:block;margin-top:4px;font-size:1.65rem;color:var(--green);font-variant-numeric:tabular-nums}
+.panel{padding:16px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 18px #17392d05}
+.panel h3{margin:0 0 10px;font-size:1.04rem}
+.table-wrap{width:100%;overflow:auto;border:1px solid var(--line);border-radius:13px}
+table{border-collapse:collapse;width:100%;min-width:640px;background:#fff}
+th,td{padding:11px 12px;text-align:right;border-bottom:1px solid #edf1ed;vertical-align:top}
+th{background:#f5f8f5;color:#52665d;font-size:.84rem;white-space:nowrap}
+td{font-size:.91rem}tr:last-child td{border-bottom:0}
+.muted{color:var(--muted)}.status{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;background:#edf7f0;color:#176b49;font-size:.78rem;font-weight:750}.status.off{background:#f0f1f0;color:#65716b}.status.warn{background:#fff4df;color:#8b631c}
+.row-actions{display:flex;flex-wrap:wrap;gap:5px}
+.row-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.row-actions .btn{min-height:36px;padding:7px 10px;font-size:.82rem;white-space:nowrap}
+@media(max-width:640px){.row-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.row-actions .btn{width:100%;min-width:0}.table-wrap{overflow-x:auto}}
+.empty{padding:30px 15px;text-align:center;color:var(--muted)}
+.search{width:min(100%,330px);padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;outline:none}.search:focus,input:focus,select:focus,textarea:focus{border-color:#72a58e;box-shadow:0 0 0 3px #176b5814;outline:none}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.field{display:grid;gap:5px;min-width:0}.field.full{grid-column:1/-1}.field label,.field .label{font-size:.88rem;font-weight:800;color:#42554d}
+input,select,textarea{width:100%;min-width:0;border:1px solid #d5e1d9;border-radius:11px;background:#fff;color:var(--ink);padding:10px 11px}
+textarea{min-height:86px;resize:vertical}
+.hint{font-size:.79rem;color:var(--muted);margin:1px 0 0}
+.modal{position:fixed;inset:0;z-index:80;display:none;place-items:center;padding:15px;background:#0f29238a;backdrop-filter:blur(3px)}.modal.show{display:grid}
+.form-error{display:none;margin:0 0 12px;padding:10px 12px;border:1px solid #edb7ae;border-radius:11px;background:#fff1ee;color:#8d302a;font-size:.9rem}.form-error.show{display:block}.modal-card{width:min(100%,680px);max-height:min(90dvh,900px);overflow:auto;padding:20px;border-radius:20px;background:#fff;box-shadow:0 25px 75px #071c1740}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.modal-head h2{margin:0;font-size:1.25rem}.close{border:0;border-radius:10px;background:#f0f4f1;color:#53665d;width:37px;height:37px;font-size:1.35rem}
+.modal-actions{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.permissions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.check{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fbfcfa;font-size:.84rem}.check input{width:17px;height:17px;flex:0 0 auto;margin-top:3px;padding:0;accent-color:var(--green)}
+.scopes{border:1px solid var(--line);border-radius:12px;padding:11px}.scopes>label{display:flex;align-items:center;gap:8px;font-weight:800}.scopes>label input{width:17px}
+.audit-details{max-width:320px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8rem;color:var(--muted)}
+.footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:20px}.maintenance-panel{max-width:620px;margin:10px auto;text-align:center;padding:28px}.maintenance-icon{font-size:3rem;margin-bottom:8px}.maintenance-panel h3{font-size:1.35rem;margin:12px 0 4px}.maintenance-state{display:flex;justify-content:space-between;align-items:center;margin:20px 0;padding:14px 16px;border:1px solid var(--line);border-radius:13px;background:#f7faf7}.maintenance-panel>.btn{width:100%;min-height:50px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.nav{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.nav button{justify-content:center;text-align:center;padding:8px 5px;font-size:.86rem}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.shell{padding:10px 10px 35px}.header{padding:15px 14px;border-radius:18px}.logo{width:38px;height:38px}.owner-label{font-size:.72rem;padding:6px 8px}.nav{grid-template-columns:repeat(2,minmax(0,1fr));padding:8px}.nav button{font-size:.8rem}.page-head{flex-direction:column}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:1.4rem}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.permissions{grid-template-columns:1fr}.panel{padding:12px}.modal-card{padding:15px}.page-head h2{font-size:1.2rem}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="header">
+    <div class="brand"><div class="logo">⚖</div><div><h1>لوحة إدارة بوت الاختبارات</h1><p id="subtitle">إدارة المحتوى والصلاحيات</p></div></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><a class="btn secondary" href="index.html" style="text-decoration:none;display:inline-flex;align-items:center">← منصة الاختبارات</a><span class="owner-label" id="accountBadge">جارٍ التحقق…</span></div>
+  </header>
+  <div id="notice" class="banner" role="status"></div>
+  <div class="layout">
+    <nav id="nav" class="nav" aria-label="أقسام الإدارة">
+      <button data-page="dashboard" class="active">◈ نظرة عامة</button>
+      <button data-page="levels">▤ المستويات</button>
+      <button data-page="courses">▧ المقررات</button>
+      <button data-page="questions">☷ الأسئلة</button>
+      <button data-page="reviewQueue">📋 قائمة المراجعة</button>
+      <button data-page="models">▦ النماذج</button>
+      <button data-page="botMenu" id="botMenuNav" hidden>☷ أزرار البوت</button>
+      <button data-page="maintenance" id="maintenanceNav" hidden>🛠️ صيانة الموقع</button>
+      <button data-page="moderators" id="moderatorsNav" hidden>♙ المشرفون</button>
+      <button data-page="logs" id="logsNav" hidden>◷ سجل العمليات</button>
+    </nav>
+    <main id="content" class="content" aria-live="polite"><div class="panel empty">يتم التحقق من الصلاحيات وتحميل البيانات…</div></main>
+  </div>
+  <footer class="footer">تُطبّق الصلاحيات على الخادم أيضًا؛ إخفاء الأزرار ليس وسيلة الحماية الوحيدة.</footer>
+</div>
+
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <section class="modal-card">
+    <div class="modal-head"><h2 id="modalTitle">إضافة</h2><button id="modalClose" class="close" type="button" aria-label="إغلاق">×</button></div>
+    <form id="entityForm"><div id="formError" class="form-error" role="alert"></div><div id="formFields"></div><div class="modal-actions"><button type="submit" class="btn primary" id="saveBtn">حفظ</button><button type="button" class="btn light" id="cancelBtn">إلغاء</button></div></form>
+  </section>
+</div>
+
+<script>
+(function () {
+  const webApp = window.Telegram && window.Telegram.WebApp;
+  if (webApp) { webApp.ready(); webApp.expand(); }
+  const $ = (id) => document.getElementById(id);
+  const PERMISSIONS = [
+    ['levels.read','عرض المستويات'],['levels.write','إضافة وتعديل المستويات'],
+    ['subjects.read','عرض المواد'],['subjects.write','إضافة وتعديل المواد'],
+    ['courses.read','عرض المقررات'],['courses.write','إضافة وتعديل المقررات'],
+    ['questions.read','عرض الأسئلة والإجابات'],['questions.write','إضافة وتعديل الأسئلة'],
+    ['questions.publish','نشر الأسئلة وإلغاء نشرها'],['questions.delete','أرشفة الأسئلة'],
+    ['statistics.read','عرض إحصائيات المحتوى'],['audit.read','عرض سجل العمليات']
+  ];
+  const ROLE_DEFAULTS = {
+    academic_manager: ['levels.read','levels.write','subjects.read','subjects.write','courses.read','courses.write','questions.read','questions.write','questions.publish','statistics.read'],
+    question_editor: ['courses.read','questions.read','questions.write'],
+    reviewer: ['courses.read','questions.read','questions.publish'],
+    content_viewer: ['levels.read','subjects.read','courses.read','questions.read'],
+    statistics_viewer: ['statistics.read'],
+    auditor: ['audit.read','statistics.read'],
+    custom: []
+  };
+  const ROLE_NAMES = {
+    academic_manager:'مدير محتوى أكاديمي', question_editor:'محرر أسئلة',
+    reviewer:'مراجع وناشر', content_viewer:'مشاهدة فقط',
+    statistics_viewer:'إحصائيات فقط', auditor:'مراجع سجل العمليات', custom:'صلاحيات مخصصة'
+  };
+  let state = null;
+  let activePage = 'dashboard';
+  let editItem = null;
+  let searchValue = '';
+  let questionPage = 1;
+  let questionModelFilter = null;
+  const questionPageSize = 25;
+  let questionTotal = 0;
+  let questionSearchTimer = null;
+  let menuItems = [];
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[ch]);
+  }
+  function showNotice(message, success = false) {
+    $('notice').textContent = message;
+    $('notice').className = 'banner show' + (success ? ' success' : '');
+    if (success) setTimeout(() => { $('notice').classList.remove('show'); }, 3500);
+  }
+  function api(action, payload = {}) {
+    return new Promise((resolve, reject) => {
+      if (!webApp?.Serverless?.call) {
+        reject(new Error('افتح هذه الصفحة من داخل Telegram Mini App حتى يمكن التحقق من هويتك.'));
+        return;
+      }
+      let settled = false;
+      const timeout = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        reject(new Error('استغرق الخادم وقتًا أطول من المعتاد في تحميل البيانات. اضغط «إعادة المحاولة»؛ لم تتغير بياناتك.'));
+      }, action === 'dashboard' ? 25000 : 18000);
+      const finish = (callback, value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        callback(value);
+      };
+      try {
+        webApp.Serverless.call('adminApi', { action, ...payload }, (err, result) => {
+          if (err) finish(reject, new Error(err.description || err.message || 'تعذر تنفيذ العملية.'));
+          else if (result === undefined || result === null) finish(reject, new Error('لم يُرجع الخادم بيانات. أعد المحاولة.'));
+          else finish(resolve, result);
+        });
+      } catch (error) {
+        finish(reject, new Error(error?.message || 'تعذر الاتصال بخادم الإدارة.'));
+      }
+    });
+  }
+  function can(permission) {
+    return Boolean(state?.user?.isOwner || state?.permissions?.includes('*') || state?.permissions?.includes(permission));
+  }
+  function canCatalog(permission) {
+    return can(permission) && Boolean(state?.canManageCatalog);
+  }
+  function scopeAll() {
+    return Boolean(state?.user?.isOwner || state?.courses?.length === state?.allCoursesCount);
+  }
+  function idName(rows, id, key = 'name') {
+    return rows?.find((row) => Number(row.id) === Number(id))?.[key] || '—';
+  }
+  function status(active) {
+    return '<span class="status' + (active ? '' : ' off') + '">' + (active ? 'نشط' : 'مؤرشف') + '</span>';
+  }
+  function button(label, action, id, kind = 'light') {
+    return '<button class="btn small ' + kind + '" data-action="' + action + '" data-id="' + escapeHtml(id) + '">' + label + '</button>';
+  }
+  function startPage(title, description, addLabel, addAction, allowAdd = true) {
+    return '<div class="page-head"><div><h2>' + title + '</h2><p>' + description + '</p></div>' +
+      (allowAdd ? '<button class="btn primary" data-action="' + addAction + '">' + addLabel + '</button>' : '') + '</div>';
+  }
+  function table(headers, rows, emptyText = 'لا توجد سجلات في هذا القسم.') {
+    if (!rows.length) return '<div class="panel empty">' + escapeHtml(emptyText) + '</div>';
+    return '<div class="table-wrap"><table><thead><tr>' + headers.map((h) => '<th>' + h + '</th>').join('') +
+      '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>';
+  }
+  function filtered(rows, getter) {
+    const term = searchValue.trim().toLowerCase();
+    return !term ? rows : rows.filter((row) => getter(row).toLowerCase().includes(term));
+  }
+  function toolbar() {
+    return '<div style="margin-bottom:12px"><input class="search" id="listSearch" type="search" placeholder="ابحث في السجلات…" value="' + escapeHtml(searchValue) + '"></div>';
+  }
+  function levelName(id) { return idName(state.levels, id); }
+  function subjectName(id) { return idName(state.subjects, id); }
+  function courseName(id) { return idName(state.courses, id); }
+
+  function renderMaintenance() {
+    const enabled = Boolean(state?.maintenance?.enabled);
+    return startPage('صيانة الموقع','إيقاف ظهور منصة الاختبارات للطلاب مؤقتًا، ثم إعادتها بنقرة واحدة.','تحديث الحالة','refreshMaintenance',false) +
+      '<div class="panel maintenance-panel"><div class="maintenance-icon">🛠️</div><span class="status ' + (enabled ? 'warn' : '') + '">' + (enabled ? 'الموقع تحت الصيانة' : 'الموقع يعمل بشكل طبيعي') + '</span><h3>' + (enabled ? 'وضع الصيانة مفعّل' : 'المنصة متاحة للطلاب') + '</h3><p class="muted">هذا الإعداد يتحكم في ظهور صفحة الصيانة للزوار، ولا يحذف الأسئلة أو حسابات الطلاب أو نتائجهم.</p><div class="maintenance-state"><span>حالة الموقع</span><strong>' + (enabled ? '🔒 صيانة' : '🟢 يعمل') + '</strong></div><button class="btn ' + (enabled ? 'primary' : 'danger') + '" data-action="toggleMaintenance">' + (enabled ? '✓ إنهاء الصيانة وإظهار الموقع' : '🛠️ تفعيل وضع الصيانة') + '</button><p class="hint">يستطيع المدير الرئيسي فقط تغيير هذه الحالة.</p></div>';
+  }
+  function renderDashboard() {
+    const stats = state.stats || {};
+    const statCards = [
+      ['المستويات', stats.levels],['المواد', stats.subjects],['المقررات', stats.courses],['الأسئلة', stats.questions],
+      ...(state.user?.isOwner ? [['إجمالي الزوار', stats.totalVisitors ?? 0], ['المستخدمون الآن', stats.currentUsers ?? 0]] : [])
+    ].filter((entry) => entry[1] !== undefined && entry[1] !== null);
+    let html = startPage('نظرة عامة','ملخص سريع لمحتوى الاختبارات وحالة الإدارة.','تحديث البيانات','refresh',false);
+    if (statCards.length) {
+      html += '<div class="stats">' + statCards.map(([label,value]) =>
+        '<div class="stat"><span>' + label + '</span><strong>' + escapeHtml(value) + '</strong></div>').join('') + '</div>';
+    }
+    html += '<div class="panel"><h3>حساب الإدارة الحالي</h3><p style="margin:0">الاسم: <b>' + escapeHtml(state.user.displayName) +
+      '</b><br>معرّف Telegram: <b dir="ltr">' + escapeHtml(state.user.telegramId) +
+      '</b><br>الدور: <b>' + (state.user.isOwner ? 'المدير الرئيسي (مالك النظام)' : escapeHtml(ROLE_NAMES[state.user.roleKey] || state.user.roleKey)) + '</b></p>';
+    if (state.user.isOwner) {
+      html += '<p class="hint">حساب المالك الأساسي ثابت. لا يستطيع أي مشرف تعديله أو تعطيله أو خفض صلاحياته.</p>';
+    } else {
+      html += '<p class="hint">تُقيد العمليات بالمقررات والصلاحيات التي منحها لك المدير الرئيسي.</p>';
+    }
+    html += '</div><div class="panel" style="margin-top:12px"><h3>سيناريوهات الإدارة</h3><p class="muted" style="margin:0">يمكنك إدارة الهيكل الأكاديمي، وإضافة أسئلة أو تعديلها أو أرشفتها، وتحديد ما يظهر للطلاب. صلاحية إدارة المشرفين وإسناد الصلاحيات مخصصة للمدير الرئيسي وحده.</p></div>';
+    return html;
+  }
+
+  function renderLevels() {
+    const rows = filtered(state.levels || [], (r) => r.name + ' ' + (r.description || ''));
+    return startPage('المستويات','إضافة مستوى دراسي أو تعديل اسمه ووصفه وترتيبه.','＋ مستوى جديد','addLevel',canCatalog('levels.write')) +
+      toolbar() + table(['المستوى','الوصف','الحالة','الإجراءات'], rows.map((r) =>
+        '<tr><td><b>' + escapeHtml(r.name) + '</b></td><td>' + escapeHtml(r.description || '—') + '</td><td>' + status(r.isActive) +
+        '</td><td><div class="row-actions">' + (canCatalog('levels.write') ? button('تعديل','editLevel',r.id) + button(r.isActive?'أرشفة':'تفعيل','toggleLevel',r.id,r.isActive?'danger':'secondary') : '—') +
+        '</div></td></tr>'));
+  }
+  function renderSubjects() {
+    const rows = filtered(state.subjects || [], (r) => r.name + ' ' + levelName(r.levelId) + ' ' + (r.description || ''));
+    return startPage('المواد','ربط كل مادة بمستواها الدراسي الصحيح.','＋ مادة جديدة','addSubject',canCatalog('subjects.write')) +
+      toolbar() + table(['المادة','المستوى','الوصف','الحالة','الإجراءات'], rows.map((r) =>
+        '<tr><td><b>' + escapeHtml(r.name) + '</b></td><td>' + escapeHtml(levelName(r.levelId)) + '</td><td>' + escapeHtml(r.description || '—') +
+        '</td><td>' + status(r.isActive) + '</td><td><div class="row-actions">' +
+        (canCatalog('subjects.write') ? button('تعديل','editSubject',r.id) + button(r.isActive?'أرشفة':'تفعيل','toggleSubject',r.id,r.isActive?'danger':'secondary') : '—') +
+        '</div></td></tr>'));
+  }
+  function renderCourses() {
+    const rows = filtered(state.courses || [], (r) => r.name + ' ' + subjectName(r.subjectId) + ' ' + levelName(state.subjects.find(s=>s.id===r.subjectId)?.levelId));
+    return startPage('المواد الدراسية','تظهر المواد تحت مستوياتها، ثم تُدار النماذج والأسئلة من أقسامها المخصصة.','＋ مادة جديدة','addCourse',canCatalog('courses.write')) +
+      toolbar() + table(['المستوى','المقرر','مدة الاختبار','درجة النجاح','الحالة','الإجراءات'], rows.map((r) =>
+        '<tr><td>' + escapeHtml(levelName(state.subjects.find(s=>s.id===r.subjectId)?.levelId)) + '</td><td><b>' + escapeHtml(r.name) + '</b></td><td>' + escapeHtml(r.durationMinutes) + ' دقيقة</td><td>' + escapeHtml(r.passingScore) + '%</td><td>' +
+        status(r.isActive) + '</td><td><div class="row-actions">' +
+        (canCatalog('courses.write') ? button('تعديل','editCourse',r.id) + button(r.isActive?'أرشفة':'تفعيل','toggleCourse',r.id,r.isActive?'danger':'secondary') : '—') +
+        '</div></td></tr>'));
+  }
+  function renderQuestions() {
+    const rows = state.questions || [];
+    const pageCount = Math.max(1, Math.ceil(questionTotal / questionPageSize));
+    const pager = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px">' +
+      '<button class="btn secondary" data-action="prevQuestionPage"' + (questionPage <= 1 ? ' disabled' : '') + '>السابق</button>' +
+      '<span class="hint">الصفحة ' + escapeHtml(questionPage) + ' من ' + escapeHtml(pageCount) + ' · إجمالي النتائج: ' + escapeHtml(questionTotal) + '</span>' +
+      '<button class="btn secondary" data-action="nextQuestionPage"' + (questionPage >= pageCount ? ' disabled' : '') + '>التالي</button></div>';
+    return startPage('الأسئلة','اختر المستوى ثم المادة ثم النموذج للوصول إلى الأسئلة وتعديلها أو أرشفتها.','＋ سؤال جديد','addQuestion',can('questions.write')) +
+      toolbar() + table(['السؤال','المادة','النموذج','الخيارات','الإجابة','الحالة','الإجراءات'], rows.map((r) =>
+        '<tr><td style="min-width:230px"><b>' + escapeHtml(r.questionText) + '</b><div class="hint">رقم: ' + escapeHtml(r.id) + '</div></td><td>' +
+        escapeHtml(levelName(state.subjects.find(s=>Number(s.id)===Number(state.courses.find(c=>Number(c.id)===Number(r.courseId))?.subjectId))?.levelId)) + ' · ' + escapeHtml(courseName(r.courseId)) + '</td><td>' + escapeHtml((r.sourceYear || '—') + ' · ' + (r.sourceFile || 'بلا اسم')) + '</td><td>' + escapeHtml((r.options || []).length) + '</td><td>' +
+        escapeHtml((r.options || [])[r.correctIndex] || '—') + '</td><td>' + status(r.isActive) + '</td><td><div class="row-actions">' +
+        (can('questions.write') ? button('تعديل','editQuestion',r.id) : '') +
+        (!r.isActive && can('questions.publish') ? button('نشر','toggleQuestion',r.id,'secondary') : '') +
+        (r.isActive && can('questions.delete') ? button('أرشفة','toggleQuestion',r.id,'danger') : '') +
+        '</div></td></tr>'), 'لا توجد أسئلة تطابق البحث.') + pager;
+  }
+  function renderReviewQueue() {
+    const rows = state.questions || [];
+    const pageCount = Math.max(1, Math.ceil(questionTotal / questionPageSize));
+    const pager = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px">' +
+      '<button class="btn secondary" data-action="prevQuestionPage"' + (questionPage <= 1 ? ' disabled' : '') + '>السابق</button>' +
+      '<span class="hint">الصفحة ' + escapeHtml(questionPage) + ' من ' + escapeHtml(pageCount) + ' · عناصر المراجعة: ' + escapeHtml(questionTotal) + '</span>' +
+      '<button class="btn secondary" data-action="nextQuestionPage"' + (questionPage >= pageCount ? ' disabled' : '') + '>التالي</button></div>';
+    return startPage('قائمة المراجعة','الأسئلة التي تحتاج إلى تدقيق قبل اعتمادها. لن تُحذف العناصر من هذه القائمة إلا بعد مراجعتها واعتماد حالتها.','', '', false) + toolbar() +
+      table(['السؤال','المقرر','النموذج','سبب المراجعة','الإجراءات'], rows.map((r) => {
+        const flags = Array.isArray(r.reviewFlags) ? r.reviewFlags : [];
+        const labels = flags.map((flag) => ({blank_option:'خيار فارغ',answer_points_blank:'الإجابة تحتاج إلى تدقيق',content_key_not_independently_verified:'لم يُتحقق من مفتاح الإجابة'}[flag] || flag));
+        const statusLabel = r.reviewStatus === 'needs_manual_review' ? 'تحتاج مراجعة يدوية' : r.reviewStatus === 'structure_checked_content_key_not_independently_verified' ? 'مفتاح الإجابة غير متحقق' : (r.reviewStatus || 'غير محدد');
+        return '<tr><td style="min-width:230px"><b>' + escapeHtml(r.questionText) + '</b><div class="hint">رقم: ' + escapeHtml(r.id) + ' · ' + escapeHtml(statusLabel) + '</div></td>' +
+          '<td>' + escapeHtml(courseName(r.courseId)) + '</td><td>' + escapeHtml((r.sourceYear || '—') + ' · ' + (r.sourceFile || 'بلا اسم')) + '</td>' +
+          '<td>' + escapeHtml(labels.join('، ') || 'مطلوب التحقق من الإجابة') + '</td><td><div class="row-actions">' +
+          (can('questions.write') ? button('مراجعة / تعديل','editReviewQuestion',r.id,'primary') : 'عرض فقط') + '</div></td></tr>';
+      }), 'لا توجد أسئلة بانتظار المراجعة.') + pager;
+  }
+
+  function buildModels() {
+    const map = new Map();
+    for (const q of state.questions || []) {
+      const sourceYear = Number(q.sourceYear) || 0;
+      const sourceFile = String(q.sourceFile || "بلا اسم");
+      const key = encodeURIComponent(JSON.stringify([Number(q.courseId), sourceYear, sourceFile]));
+      if (!map.has(key)) map.set(key, {
+        id:key,courseId:Number(q.courseId),sourceYear,sourceFile,total:0,activeCount:0,isActive:false,
+      });
+      const model = map.get(key);
+      model.total++;
+      if (q.isActive) model.activeCount++;
+      model.isActive = model.activeCount > 0;
+    }
+    return [...map.values()].sort((a,b) =>
+      courseName(a.courseId).localeCompare(courseName(b.courseId),"ar") ||
+      b.sourceYear-a.sourceYear || a.sourceFile.localeCompare(b.sourceFile,"ar"));
+  }
+  function renderModels() {
+    const rows = filtered(state.models || [], (r) => r.sourceFile + " " + r.sourceYear + " " + courseName(r.courseId) + " " + levelName(state.subjects.find(s=>Number(s.id)===Number(state.courses.find(c=>Number(c.id)===Number(r.courseId))?.subjectId))?.levelId));
+    const getCourse = id => (state.courses||[]).find(c=>Number(c.id)===Number(id));
+    const getSubject = id => { const c=getCourse(id); return (state.subjects||[]).find(s=>Number(s.id)===Number(c?.subjectId)); };
+    let html = startPage('النماذج والأسئلة','اختر المستوى ثم المادة؛ ستجد نماذجها مجمعة وعدد الأسئلة داخل كل نموذج.','＋ إضافة سؤال','addQuestion',can('questions.write')) + toolbar();
+    if (state?.user?.isOwner) {
+      const levelOf = (courseId) => { const c=(state.courses||[]).find(x=>Number(x.id)===Number(courseId)); const sub=(state.subjects||[]).find(x=>Number(x.id)===Number(c?.subjectId)); return Number(sub?.levelId||0); };
+      const courseOptions=(state.courses||[]).map(c=>'<option value="'+c.id+'">'+escapeHtml(levelName(levelOf(c.id))+' · '+courseName(c.id))+'</option>').join('');
+      html += '<section class="panel" style="margin:12px 0;border-color:#b8d9c7"><h3>📥 استيراد نموذج من JSON</h3><p class="hint" style="margin-bottom:12px">الصق JSON للنموذج، حدّد المادة والسنة واسم النموذج، ثم استيراد. ستُحفظ الأسئلة في قاعدة البيانات وتظهر ضمن النماذج المنشورة بالموقع.</p><div class="form-grid"><div class="field full"><label for="jsonModelCourse">المستوى والمادة</label><select id="jsonModelCourse" required>'+courseOptions+'</select></div><div class="field"><label for="jsonModelYear">سنة النموذج</label><input id="jsonModelYear" type="number" min="0" max="2100" value="'+new Date().getFullYear()+'" required></div><div class="field"><label for="jsonModelName">اسم النموذج</label><input id="jsonModelName" maxlength="500" placeholder="مثال: اختبار نهائي" required></div><div class="field full"><label for="jsonModelInput">كود JSON</label><textarea id="jsonModelInput" dir="ltr" style="min-height:220px;font-family:ui-monospace,monospace;text-align:left" placeholder='{"questions":[{"question":"نص السؤال؟","options":["الخيار الأول","الخيار الثاني"],"correctAnswer":0,"explanation":"","difficulty":"normal"}]}'></textarea><p class="hint">داخل questions: question أو questionText، و options مصفوفة نصوص، و correctAnswer أو correctIndex يبدأ من 0. ويمكن إضافة explanation و difficulty.</p></div><div class="field full"><button type="button" class="btn primary" data-action="importModelJson" id="importModelJsonBtn">⬆ استيراد النموذج والأسئلة</button></div></div></section>';
+    }
+    for (const level of (state.levels||[])) {
+      const levelSubjects=(state.subjects||[]).filter(s=>Number(s.levelId)===Number(level.id));
+      let subjectHtml='';
+      for (const subject of levelSubjects) {
+        const subjectCourses=(state.courses||[]).filter(c=>Number(c.subjectId)===Number(subject.id));
+        const subjectModels=rows.filter(m=>subjectCourses.some(c=>Number(c.id)===Number(m.courseId)));
+        const count=subjectModels.reduce((n,m)=>n+Number(m.total||0),0);
+        subjectHtml += '<details class="panel" style="margin:8px 0;padding:0;overflow:hidden"><summary style="cursor:pointer;list-style:none;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800"><span>📘 '+escapeHtml(subject.name)+'</span><span class="status">'+subjectModels.length+' نماذج · '+count+' سؤال</span></summary><div style="padding:0 12px 12px">';
+        if (!subjectModels.length) subjectHtml += '<p class="hint">لا توجد نماذج لهذه المادة بعد.</p><button class="btn primary small" data-action="addQuestion">＋ إنشاء أول سؤال ونموذج</button>';
+        else for (const m of subjectModels) subjectHtml += '<div class="panel" style="margin:8px 0;padding:12px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+escapeHtml(m.sourceFile)+'</b><div class="hint">'+escapeHtml(m.sourceYear||'بلا سنة')+' · '+escapeHtml(m.total)+' سؤال · نشط '+escapeHtml(m.activeCount)+'</div></div><div class="row-actions">'+(can('questions.write')?button('عرض الأسئلة','viewModelQuestions',encodeURIComponent(JSON.stringify([m.courseId,m.sourceFile,m.sourceYear])))+button('＋ سؤال','addModelQuestion',encodeURIComponent(JSON.stringify([subject.id,m.courseId,m.sourceYear,m.sourceFile])))+button('تعديل النموذج','editModel',m.id):'')+(m.isActive&&can('questions.delete')?button('أرشفة','toggleModel',m.id,'danger'):(!m.isActive&&can('questions.publish')?button('نشر','toggleModel',m.id,'secondary'):''))+'</div></div></div>';
+        subjectHtml+='</div></details>';
+      }
+      html += '<details class="panel" style="margin:12px 0;padding:0;overflow:hidden" '+(Number(level.id)>=3?'':'open')+'><summary style="cursor:pointer;list-style:none;padding:16px;font-size:17px;font-weight:900">'+escapeHtml(level.name)+' <span class="hint">· '+levelSubjects.length+' مادة</span></summary><div style="padding:0 12px 12px">'+subjectHtml+'</div></details>';
+    }
+    return html;
+  }
+
+  function renderBotMenu() {
+    if (!state?.canManageModerators) return '<div class="panel empty">إدارة أزرار البوت للمدير الرئيسي فقط.</div>';
+    const all = state.menuItems || [];
+    const typeNames = {submenu:'قائمة فرعية',web_app:'منصة داخل Telegram',catalog:'محتوى محدد',url:'رابط خارجي',command:'وظيفة في البوت',message:'عرض رسالة'};
+    const rows = [];
+    function walk(parentId, depth = 0, ancestors = []) {
+      if (depth > 5) return;
+      const siblings = all.filter((item) => (item.parentId == null ? null : Number(item.parentId)) === (parentId == null ? null : Number(parentId)));
+      siblings.forEach((item, index) => {
+        if (ancestors.includes(Number(item.id))) return;
+        const parent = item.parentId == null ? null : all.find((entry) => Number(entry.id) === Number(item.parentId));
+        const isFolder = item.type === 'submenu';
+        const actions = [
+          button('↑','moveMenuUp',item.id,'light'),
+          button('↓','moveMenuDown',item.id,'light'),
+          button('تعديل','editBotMenu',item.id,'secondary'),
+          ...(isFolder ? [button('＋ داخل هذا الزر','addBotChild',item.id,'primary')] : []),
+          button(item.isActive ? 'إخفاء' : 'إظهار','toggleBotMenu',item.id,item.isActive?'danger':'secondary'),
+          '<button type="button" class="btn small danger" data-action="deleteBotMenu" data-id="' + escapeHtml(item.id) + '"' + (all.some((child) => Number(child.parentId) === Number(item.id)) ? ' disabled title="احذف الأزرار الفرعية أولًا"' : (item.parentId == null && all.filter((row) => row.parentId == null).length <= 1 ? ' disabled title="لا يمكن حذف آخر زر رئيسي"' : '')) + '>حذف</button>'
+        ].join('');
+        rows.push('<tr><td style="min-width:210px"><div style="padding-right:' + Math.min(depth * 16,80) + 'px"><b>' +
+          (depth ? '↳ ' : '● ') + escapeHtml(item.text) + '</b><div class="hint">' + (parent ? 'داخل: ' + escapeHtml(parent.text) : 'زر رئيسي') + '</div></div></td>' +
+          '<td>' + escapeHtml(typeNames[item.type] || item.type) + '</td>' +
+          '<td>' + (item.adminOnly ? '<span class="status warn">للمدير فقط</span>' : '<span class="status">للجميع</span>') + '</td>' +
+          '<td>' + status(item.isActive) + '</td><td><div class="row-actions">' + actions + '</div></td></tr>');
+        walk(Number(item.id), depth + 1, [...ancestors, Number(item.id)]);
+      });
+    }
+    walk(null);
+    return startPage('أزرار البوت','تحكّم بالقائمة التي تظهر عند إرسال /start: أضف الأزرار، واجعل بداخلها قوائم فرعية، وغيّر ترتيبها ووظائفها.','＋ إضافة زر','addBotMenu',true) +
+      '<div class="panel" style="margin-bottom:12px"><b>كيف تعمل؟</b><p class="muted" style="margin:5px 0 0">اختر «قائمة فرعية» لإنشاء زر يحتوي أزرارًا أخرى. استخدم الأسهم لترتيب الأزرار داخل نفس القائمة. تغييرات الأزرار تظهر في قائمة /start الجديدة؛ الرسائل القديمة في Telegram لا تتغير تلقائيًا.</p><p class="hint">روابط المنصة ولوحة الإدارة مقيدة بعناوين آمنة، ووظائف الأزرار من قائمة محددة وليست أوامر برمجية مفتوحة.</p></div>' +
+      table(['الزر / مكانه','الوظيفة','الوصول','الحالة','التحكم'],rows,'لا توجد أزرار بعد؛ اضغط «إضافة زر» للبدء.');
+  }
+
+  function renderModerators() {
+    if (!state.canManageModerators) return '<div class="panel empty">هذه الصفحة للمدير الرئيسي فقط.</div>';
+    const rows = filtered(state.moderators || [], (r) => r.displayName + ' ' + r.telegramId + ' ' + (ROLE_NAMES[r.roleKey] || r.roleKey));
+    return startPage('المشرفون والصلاحيات','أضف مشرفين وحدد صلاحياتهم والمقررات التي يمكنهم إدارتها.','＋ مشرف جديد','addModerator',true) +
+      '<div class="panel" style="margin-bottom:12px"><b>قاعدة الحماية:</b><span class="muted"> المعرّف 5187563344 هو المالك الثابت؛ لا يمكن تعطيله أو استبداله من هذه الشاشة. منح صلاحية إدارة المشرفين غير متاح لأي دور آخر.</span></div>' +
+      toolbar() + table(['المشرف','معرّف Telegram','الدور','النطاق','الصلاحيات','الحالة','الإجراءات'], rows.map((r) =>
+        '<tr><td><b>' + escapeHtml(r.displayName) + '</b></td><td dir="ltr">' + escapeHtml(r.telegramId) + '</td><td>' +
+        escapeHtml(ROLE_NAMES[r.roleKey] || r.roleKey) + '</td><td>' + (r.scopeCourseIds?.includes('*') ? 'جميع المقررات' : escapeHtml((r.scopeCourseIds || []).map(courseName).join('، ') || 'لا توجد مقررات')) +
+        '</td><td>' + escapeHtml((r.permissions || []).length) + ' صلاحية</td><td>' + status(r.isActive) + '</td><td><div class="row-actions">' +
+        button('تعديل','editModerator',r.telegramId) + button(r.isActive?'سحب الوصول':'تفعيل الوصول','toggleModerator',r.telegramId,r.isActive?'danger':'secondary') +
+        '</div></td></tr>'));
+  }
+  function renderLogs() {
+    const rows = filtered(state.logs || [], (r) => r.action + ' ' + r.entityType + ' ' + r.actorName + ' ' + r.actorId);
+    return startPage('سجل العمليات','آخر العمليات الإدارية المسجلة للمراجعة والتدقيق.','تحديث','refresh',false) +
+      table(['الوقت','منفذ العملية','العملية','النوع','التفاصيل'], rows.map((r) =>
+        '<tr><td>' + escapeHtml(new Date(r.createdAt).toLocaleString('en-GB')) + '</td><td>' + escapeHtml(r.actorName) +
+        '<div class="hint" dir="ltr">' + escapeHtml(r.actorId) + '</div></td><td>' + escapeHtml(r.action) + '</td><td>' +
+        escapeHtml(r.entityType) + ' #' + escapeHtml(r.entityId) + '</td><td><div class="audit-details">' +
+        escapeHtml(JSON.stringify(r.details || {})) + '</div></td></tr>'), 'لا توجد عمليات مسجلة بعد.');
+  }
+  const renderers = {maintenance:renderMaintenance,dashboard:renderDashboard,levels:renderLevels,subjects:renderSubjects,courses:renderCourses,questions:renderQuestions,reviewQueue:renderReviewQueue,models:renderModels,botMenu:renderBotMenu,moderators:renderModerators,logs:renderLogs};
+  function render() {
+    $('content').innerHTML = (renderers[activePage] || renderDashboard)();
+    document.querySelectorAll('[data-page]').forEach((btn) => btn.classList.toggle('active',btn.dataset.page===activePage));
+    const search = $('listSearch');
+    if(search) search.addEventListener('input', () => {
+      searchValue = search.value;
+      if (activePage === 'questions' && searchValue) questionModelFilter = null;
+      if (activePage === 'questions' || activePage === 'reviewQueue') {
+        clearTimeout(questionSearchTimer);
+        questionPage = 1;
+        questionSearchTimer = setTimeout(() => { loadQuestionsPage(false).catch((error) => showNotice(error.message)); }, 350);
+        return;
+      }
+      const pos=search.selectionStart; render(); const next=$('listSearch'); next?.focus(); next?.setSelectionRange(pos,pos);
+    });
+  }
+  async function loadQuestionsPage(resetPage = false) {
+    if (!state) return;
+    if (resetPage) questionPage = 1;
+    const result = await api('questionsPage', { page: questionPage, pageSize: questionPageSize, query: searchValue, reviewOnly: activePage === 'reviewQueue', model: questionModelFilter });
+    state.questions = Array.isArray(result.questions) ? result.questions : [];
+    questionPage = Number(result.page) || 1;
+    questionTotal = Number(result.total) || 0;
+    render();
+  }
+
+  async function reload(keepPage = true) {
+    const result = await api('dashboard');
+    state = result;
+    state.questions = [];
+    state.models = Array.isArray(result.models) ? result.models : [];
+    questionTotal = Number(result.questionCount) || 0;
+    menuItems = [];
+    const backgroundTasks = [];
+    if (result.user.isOwner) {
+      backgroundTasks.push(api('getMaintenance').then((value) => { state.maintenance = value; })
+        .catch(() => { state.maintenance = { enabled: false, message: '' }; }));
+    }
+    if (result.canManageModerators) {
+      backgroundTasks.push(api('listBotMenuItems').then((value) => {
+        menuItems = Array.isArray(value.items) ? value.items : [];
+      }).catch((error) => { showNotice('تعذر تحميل أزرار البوت: ' + error.message); }));
+    }
+    // Do not block the first paint on optional admin-only data.
+    // These requests update their own state when they finish and never hold the dashboard spinner.
+    Promise.all(backgroundTasks).then(() => {
+      if (!state) return;
+      state.menuItems = menuItems;
+      if (activePage === 'botMenu') render();
+      if (activePage === 'maintenance' && state.user?.isOwner) render();
+    }).catch(() => {});
+    state.menuItems = menuItems;
+    $('botMenuNav').hidden = !result.canManageModerators;
+    $('accountBadge').textContent = result.user.isOwner ? 'المدير الرئيسي' : 'مشرف بصلاحيات محددة';
+    $('subtitle').textContent = result.user.displayName + ' · إدارة آمنة للمحتوى';
+    $('moderatorsNav').hidden = !result.canManageModerators;
+    $('maintenanceNav').hidden = !result.user.isOwner;
+    $('logsNav').hidden = !(result.user.isOwner || result.permissions.includes('audit.read'));
+    const pagePermissions = {
+      levels: ['levels.read','levels.write'], subjects: ['subjects.read','subjects.write'],
+      courses: ['courses.read','courses.write'],
+      questions: ['questions.read','questions.write','questions.publish','questions.delete'],
+      models: ['questions.read','questions.write','questions.publish','questions.delete'],
+      botMenu: ['bot_menu.write'],
+      maintenance: ['maintenance.manage']
+    };
+    document.querySelectorAll('#nav [data-page]').forEach((button) => {
+      const page = button.dataset.page;
+      const required = pagePermissions[page];
+      button.hidden = page === 'moderators' ? !result.canManageModerators
+        : page === 'logs' ? !(result.user.isOwner || result.permissions.includes('audit.read'))
+        : required ? !required.some((permission) => result.user.isOwner || result.permissions.includes('*') || result.permissions.includes(permission))
+        : false;
+    });
+    if (!keepPage || !renderers[activePage] || document.querySelector('#nav [data-page="' + activePage + '"]')?.hidden) activePage = 'dashboard';
+    if (activePage === 'questions') await loadQuestionsPage(false);
+    else render();
+  }
+
+  function field(label, id, value = '', type = 'text', extra = '') {
+    return '<div class="field"><label for="' + id + '">' + label + '</label><input id="' + id + '" name="' + id + '" type="' + type + '" value="' + escapeHtml(value) + '" ' + extra + '></div>';
+  }
+  function selectField(label, id, options, selected, placeholder = '— اختر —') {
+    return '<div class="field"><label for="' + id + '">' + label + '</label><select id="' + id + '" name="' + id + '"><option value="">' + placeholder + '</option>' +
+      options.map((o) => '<option value="' + escapeHtml(o.id) + '"' + (String(o.id)===String(selected)?' selected':'') + '>' + escapeHtml(o.label || o.name) + '</option>').join('') + '</select></div>';
+  }
+  function openModal(title, body, item = null) {
+    editItem = item;
+    $('formError').textContent = ''; $('formError').classList.remove('show');
+    $('modalTitle').textContent = title;
+    $('formFields').innerHTML = body;
+    $('modal').classList.add('show');
+    $('modalCard')?.scrollTo(0,0);
+    $('formFields').querySelector('input,select,textarea')?.focus();
+  }
+  function closeModal() { $('modal').classList.remove('show'); $('formFields').replaceChildren(); $('formError').textContent=''; $('formError').classList.remove('show'); editItem = null; }
+  function showFormError(message) { const box=$('formError'); box.textContent=String(message||'تعذر الحفظ.'); box.classList.add('show'); box.scrollIntoView({block:'nearest',behavior:'smooth'}); }
+  function botMenuValueControl(type, value = '') {
+    const current = String(value || '');
+    if (type === 'catalog') {
+      let target = {}; try { target = JSON.parse(current); } catch (_) {}
+      const targetType = target.targetType || 'level';
+      const levels = state.levels || [], subjects = state.subjects || [], courses = state.courses || [], models = state.models || [];
+      const subjectLevel = (subjectId) => Number(subjects.find((subject) => Number(subject.id) === Number(subjectId))?.levelId || 0);
+      const courseLevel = (courseId) => {
+        const course = courses.find((row) => Number(row.id) === Number(courseId));
+        return course ? subjectLevel(course.subjectId) : 0;
+      };
+      const inferredLevel = Number(target.levelId || (targetType === 'subject' ? subjectLevel(target.targetId) : targetType === 'course' ? courseLevel(target.targetId) : (targetType === 'model' ? courseLevel(target.courseId) : 0))) || Number(levels[0]?.id || 0);
+      const targetLevelId = String(inferredLevel);
+      const optionsFor = (items, id, label, selected) => (items || []).map((row) =>
+        '<option value="' + escapeHtml(id(row)) + '"' + (String(id(row)) === String(selected ?? '') ? ' selected' : '') + '>' +
+        escapeHtml(label(row)) + '</option>').join('');
+      let choices = '';
+      if (targetType === 'level') {
+        choices = optionsFor(levels, (row) => row.id, (row) => row.name, target.targetId);
+      } else if (targetType === 'subject') {
+        choices = optionsFor(subjects.filter((row) => Number(row.levelId) === inferredLevel),
+          (row) => row.id, (row) => row.name, target.targetId);
+      } else if (targetType === 'course') {
+        choices = optionsFor(courses.filter((row) => courseLevel(row.id) === inferredLevel),
+          (row) => row.id, (row) => row.name, target.targetId);
+      } else {
+        const filteredModels = models.filter((row) => courseLevel(row.courseId) === inferredLevel);
+        const courseIds = [...new Set(filteredModels.map((row) => Number(row.courseId)))];
+        choices = courseIds.map((courseId) => {
+          const course = courses.find((row) => Number(row.id) === courseId);
+          const subject = course && subjects.find((row) => Number(row.id) === Number(course.subjectId));
+          const level = subject && levels.find((row) => Number(row.id) === Number(subject.levelId));
+          const label = [level?.name, subject?.name, course?.name].filter(Boolean).join(' · ');
+          const options = filteredModels.filter((row) => Number(row.courseId) === courseId).map((row) =>
+            '<option value="' + escapeHtml(JSON.stringify([row.courseId, row.sourceYear, row.sourceFile])) + '"' +
+            (Number(row.courseId) === Number(target.courseId) && Number(row.sourceYear) === Number(target.sourceYear) && row.sourceFile === target.sourceFile ? ' selected' : '') +
+            '>' + escapeHtml((row.sourceYear || 'بلا سنة') + ' · ' + row.sourceFile + ' (' + row.total + ' سؤال)') + '</option>').join('');
+          return '<optgroup label="' + escapeHtml(label) + '">' + options + '</optgroup>';
+        }).join('');
+      }
+      const levelFilter = targetType === 'level' ? '' :
+        '<label for="targetLevelId">المستوى أولًا</label><select id="targetLevelId" name="targetLevelId">' +
+        optionsFor(levels, (row) => row.id, (row) => row.name, targetLevelId) + '</select>';
+      return '<div class="field full" id="menuValueField"><label for="targetType">نوع المحتوى المرتبط</label><select id="targetType" name="targetType">' +
+        [['level','مستوى'],['subject','مادة'],['course','مقرر'],['model','نموذج محدد']].map(([value,label]) =>
+          '<option value="' + value + '"' + (targetType === value ? ' selected' : '') + '>' + label + '</option>').join('') +
+        '</select>' + levelFilter +
+        '<label for="targetId">اختر المحتوى</label><select id="targetId" name="targetId" required>' + choices + '</select>' +
+        '<p class="hint">اختر المستوى أولًا؛ ستظهر المواد والمقررات التابعة له فقط، والنماذج مجمّعة حسب المادة والمقرر والسنة. النموذج المختار يفتح مباشرة.</p></div>';
+    }
+    if (type === 'web_app') {
+      const choices = [['exam','منصة الاختبارات'],['admin','لوحة الإدارة (للمدير فقط)']];
+      return '<div class="field" id="menuValueField"><label for="value">وجهة المنصة</label><select id="value" name="value">' +
+        choices.map(([key,label]) => '<option value="' + key + '"' + (current === key ? ' selected' : '') + '>' + label + '</option>').join('') +
+        '</select></div>';
+    }
+    if (type === 'command') {
+      const choices = [['quiz','بدء الاختبار النصي'],['help','طريقة الاستخدام'],['about','معلومات عن البوت'],['home','القائمة الرئيسية']];
+      return '<div class="field" id="menuValueField"><label for="value">وظيفة الزر</label><select id="value" name="value">' +
+        choices.map(([key,label]) => '<option value="' + key + '"' + (current === key ? ' selected' : '') + '>' + label + '</option>').join('') +
+        '</select></div>';
+    }
+    if (type === 'url') {
+      return '<div class="field" id="menuValueField"><label for="value">الرابط الخارجي (HTTPS)</label><input id="value" name="value" type="url" value="' +
+        escapeHtml(current || 'https://') + '" placeholder="https://example.com" required maxlength="2048"></div>';
+    }
+    if (type === 'message') {
+      return '<div class="field" id="menuValueField"><label>محتوى الزر</label><input type="hidden" id="value" name="value" value=""><p class="hint">اكتب نص الرسالة في حقل الوصف بالأسفل.</p></div>';
+    }
+    return '<div class="field" id="menuValueField"><label>القائمة الفرعية</label><input type="hidden" id="value" name="value" value=""><p class="hint">لا تحتاج القائمة الفرعية إلى رابط؛ أضف العناصر من زر «＋ داخل هذا الزر» بعد حفظها.</p></div>';
+  }
+
+  function formHtml(kind, item = {}) {
+    if (kind === 'botMenu') {
+      const all = state.menuItems || [];
+      const itemId = Number(item.id || 0);
+      const blocked = new Set(itemId ? [itemId] : []);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const row of all) {
+          if (row.parentId != null && blocked.has(Number(row.parentId)) && !blocked.has(Number(row.id))) {
+            blocked.add(Number(row.id)); changed = true;
+          }
+        }
+      }
+      const parents = all.filter((row) => row.type === 'submenu' && row.isActive && !blocked.has(Number(row.id)));
+      const parentSelect = '<div class="field"><label for="parentId">مكان الزر</label><select id="parentId" name="parentId"><option value="">القائمة الرئيسية</option>' +
+        parents.map((row) => '<option value="' + row.id + '"' + (Number(item.parentId) === Number(row.id) ? ' selected' : '') + '>' +
+          escapeHtml(row.text + (row.parentId == null ? '' : ' · قائمة فرعية')) + '</option>').join('') + '</select><p class="hint">اختر القائمة الرئيسية أو قائمة فرعية ليظهر هذا الزر داخلها.</p></div>';
+      const typeLabels = {submenu:'قائمة فرعية تحتوي أزرارًا',web_app:'فتح منصة داخل Telegram',catalog:'فتح مستوى أو مادة أو مقرر أو نموذج محدد',url:'فتح رابط خارجي',command:'تنفيذ وظيفة في البوت',message:'عرض رسالة نصية'};
+      const selectedType = item.type || 'submenu';
+      const typeSelect = '<div class="field"><label for="type">وظيفة الزر</label><select id="type" name="type">' +
+        Object.entries(typeLabels).map(([value,label]) => '<option value="' + value + '"' + (selectedType === value ? ' selected' : '') + '>' + label + '</option>').join('') +
+        '</select></div>';
+      const defaultValue = item.value ?? (selectedType === 'web_app' ? 'exam' : selectedType === 'command' ? 'quiz' : selectedType === 'url' ? 'https://' : '');
+      const valueControl = botMenuValueControl(selectedType, defaultValue);
+      return '<input type="hidden" name="id" value="' + escapeHtml(item.id || '') + '">' +
+        '<div class="form-grid">' +
+        field('النص الذي يظهر على الزر','text',item.text || '', 'text','required maxlength="64"') +
+        field('ترتيب الزر داخل قائمته','sortOrder',item.sortOrder ?? (((all.filter((r) => (r.parentId == null ? null : Number(r.parentId)) === (item.parentId == null ? null : Number(item.parentId))).length) + 1) * 10),'number','required min="0" max="1000000"') +
+        parentSelect + typeSelect + valueControl +
+        '<div class="field full"><label for="description">وصف القائمة أو نص الرسالة (اختياري لبعض الأنواع)</label><textarea id="description" name="description" maxlength="3500">' + escapeHtml(item.description || '') + '</textarea></div>' +
+        '<label class="check"><input type="checkbox" name="isActive"' + (item.isActive !== false ? ' checked' : '') + '><span>الزر نشط ويظهر للمستخدمين</span></label>' +
+        '<label class="check"><input type="checkbox" name="adminOnly"' + (item.adminOnly ? ' checked' : '') + '><span>إظهار الزر للمدير فقط</span></label>' +
+        '</div><p class="hint" style="margin-top:12px">لإنشاء زر داخل زر آخر، اختر «قائمة فرعية» واحفظ، ثم استخدم «＋ داخل هذا الزر» من قائمة الأزرار.</p>';
+    }
+    if (kind === 'level') return '<input type="hidden" name="id" value="' + escapeHtml(item.id || '') + '">' +
+      '<div class="form-grid">' + field('اسم المستوى','name',item.name || '') +
+      field('ترتيب العرض','sortOrder',item.sortOrder ?? 0,'number','min="0"') +
+      '<div class="field full"><label for="description">وصف مختصر</label><textarea id="description" name="description">' + escapeHtml(item.description || '') + '</textarea></div></div>';
+    if (kind === 'subject') return '<input type="hidden" name="id" value="' + escapeHtml(item.id || '') + '">' +
+      '<div class="form-grid">' + selectField('المستوى','levelId',state.levels || [],item.levelId) +
+      field('اسم المادة','name',item.name || '') + field('ترتيب العرض','sortOrder',item.sortOrder ?? 0,'number','min="0"') +
+      '<div class="field full"><label for="description">وصف مختصر</label><textarea id="description" name="description">' + escapeHtml(item.description || '') + '</textarea></div></div>';
+    if (kind === 'course') {
+      const courseSubject=(state.subjects||[]).find(x=>Number(x.id)===Number(item.subjectId));
+      const selectedLevel=Number(courseSubject?.levelId||state.levels?.[0]?.id||0);
+      const levelOptions=(state.levels||[]).map(x=>'<option value="'+x.id+'"'+(Number(x.id)===selectedLevel?' selected':'')+'>'+escapeHtml(x.name)+'</option>').join('');
+      const subjectOptions=(state.subjects||[]).filter(x=>Number(x.levelId)===selectedLevel).map(x=>'<option value="'+x.id+'"'+(Number(x.id)===Number(item.subjectId||0)?' selected':'')+'>'+escapeHtml(x.name)+'</option>').join('');
+      return '<input type="hidden" name="id" value="' + escapeHtml(item.id || '') + '">' +
+      '<div class="form-grid"><div class="field full"><label for="courseLevelId">1. المستوى</label><select id="courseLevelId" name="courseLevelId" required>'+levelOptions+'</select></div><div class="field full"><label for="subjectId">2. المادة</label><select id="subjectId" name="subjectId" required>'+subjectOptions+'</select></div>' +
+      field('اسم المقرر','name',item.name || '') +
+      field('مدة الاختبار بالدقائق','durationMinutes',item.durationMinutes ?? 60,'number','min="1" max="300"') +
+      field('درجة النجاح من 100','passingScore',item.passingScore ?? 50,'number','min="0" max="100"') +
+      field('ترتيب العرض','sortOrder',item.sortOrder ?? 0,'number','min="0"') +
+      '<div class="field full"><label for="description">وصف المقرر</label><textarea id="description" name="description">' + escapeHtml(item.description || '') + '</textarea></div></div>';
+    }
+    if (kind === 'model') {
+      return '<input type="hidden" name="courseId" value="' + escapeHtml(item.courseId || '') + '">' +
+        '<input type="hidden" name="sourceYear" value="' + escapeHtml(item.sourceYear ?? 0) + '">' +
+        '<input type="hidden" name="sourceFile" value="' + escapeHtml(item.sourceFile || '') + '">' +
+        '<div class="form-grid">' + field('المقرر','modelCourseName',courseName(item.courseId),'text','disabled') +
+        field('السنة الجديدة','newSourceYear',item.sourceYear ?? new Date().getFullYear(),'number','min="0" max="2100" required') +
+        field('اسم النموذج الجديد','newSourceFile',item.sourceFile || '','text','maxlength="500" required') +
+        '</div><p class="hint">سيتم تعديل السنة واسم النموذج لجميع الأسئلة المرتبطة بالنموذج الحالي.</p>';
+    }
+    if (kind === 'question') {
+      const opts = Array.isArray(item.options) ? item.options : ['','','',''];
+      let options = '';
+      for (let i=0;i<Math.max(4,opts.length);i++) options += '<div class="field full"><label for="opt'+i+'">الخيار '+(i+1)+'</label><input id="opt'+i+'" name="opt'+i+'" value="'+escapeHtml(opts[i] || '')+'" maxlength="500"></div>';
+      const subjects = state.subjects || [], courses = state.courses || [], levels = state.levels || [], models = state.models || [];
+      const levelOfCourse = (courseId) => { const c=courses.find(x=>Number(x.id)===Number(courseId)); const sub=c&&subjects.find(x=>Number(x.id)===Number(c.subjectId)); return Number(sub?.levelId||0); };
+      const initialCourse = courses.find(x=>Number(x.id)===Number(item.courseId)) || courses[0];
+      const initialLevel = levelOfCourse(initialCourse?.id) || Number(levels[0]?.id||0);
+      const levelOptions = levels.map(x=>'<option value="'+x.id+'"'+(Number(x.id)===initialLevel?' selected':'')+'>'+escapeHtml(x.name)+'</option>').join('');
+      const subjectIdsForLevel = subjects.filter(x=>Number(x.levelId)===initialLevel);
+      const initialSubject = subjectIdsForLevel.find(x=>Number(x.id)===Number(initialCourse?.subjectId)) || subjectIdsForLevel[0];
+      const subjectOptions = subjectIdsForLevel.map(x=>'<option value="'+x.id+'"'+(Number(x.id)===Number(initialSubject?.id)?' selected':'')+'>'+escapeHtml(x.name)+'</option>').join('');
+      const courseOptions = courses.filter(x=>Number(x.subjectId)===Number(initialSubject?.id)).map(x=>'<option value="'+x.id+'"'+(Number(x.id)===Number(item.courseId||initialCourse?.id)?' selected':'')+'>'+escapeHtml(x.name)+'</option>').join('');
+      const chosenCourse = Number(item.courseId||initialCourse?.id||0);
+      const modelOptions = '<option value="__new__">＋ إنشاء نموذج جديد لهذا المقرر</option>'+models.filter(x=>Number(x.courseId)===chosenCourse).map(x=>'<option value="'+escapeHtml(JSON.stringify([x.courseId,x.sourceYear,x.sourceFile]))+'"'+(Number(x.sourceYear)===Number(item.sourceYear||0)&&String(x.sourceFile)===String(item.sourceFile||'')?' selected':'')+'>'+escapeHtml((x.sourceYear||'بلا سنة')+' · '+x.sourceFile+' ('+x.total+' سؤال)')+'</option>').join('');
+      return '<input type="hidden" name="id" value="' + escapeHtml(item.id || '') + '">' +
+        '<div class="form-grid"><div class="field full"><label for="questionLevelId">1. المستوى</label><select id="questionLevelId" name="questionLevelId" required>'+levelOptions+'</select></div>'+
+        '<div class="field full"><label for="questionSubjectId">2. المادة</label><select id="questionSubjectId" name="questionSubjectId" required>'+subjectOptions+'</select></div>'+
+        '<input type="hidden" id="courseId" name="courseId" value="'+chosenCourse+'">'+
+        '<div class="field full"><label for="questionModel">3. نموذج المادة</label><select id="questionModel" name="questionModel" required>'+modelOptions+'</select></div>' + '<div class="field full hidden" id="newModelFields"><div class="form-grid">'+field('اسم النموذج الجديد','newModelName','نموذج جديد','text','maxlength="500" required')+field('سنة النموذج الجديد','newModelYear',new Date().getFullYear(),'number','min="0" max="2100" required')+'</div><p class="hint">سيُنشأ النموذج تحت المقرر المحدد، ثم يُحفظ السؤال داخله.</p></div>' +
+        selectField('مستوى الصعوبة','difficulty',[{id:'easy',label:'سهل'},{id:'normal',label:'متوسط'},{id:'hard',label:'صعب'}],item.difficulty || 'normal') +
+        '<div class="field full"><label for="questionText">4. نص السؤال</label><textarea id="questionText" name="questionText" required maxlength="3000">' + escapeHtml(item.questionText || '') + '</textarea></div>' + options +
+        '<div class="field"><label for="correctIndex">الإجابة الصحيحة</label><select id="correctIndex" name="correctIndex">' +
+        opts.map((v,i)=>'<option value="'+i+'"'+(i===Number(item.correctIndex||0)?' selected':'')+'>'+(i+1)+'. '+escapeHtml(v || 'الخيار '+(i+1))+'</option>').join('') +
+        '</select></div>' + field('ترتيب السؤال','sortOrder',item.sortOrder ?? 0,'number','min="0"') +
+        '<div class="field full"><label for="explanation">التوضيح (اختياري)</label><textarea id="explanation" name="explanation" maxlength="1500">' + escapeHtml(item.explanation || '') + '</textarea></div></div><p class="hint">التسلسل واضح: المستوى ← المادة ← النموذج ← السؤال. أدخل خيارين على الأقل وحدد الإجابة الصحيحة.</p>';
+    }
+    if (kind === 'moderator') {
+      const scope = Array.isArray(item.scopeCourseIds) ? item.scopeCourseIds : [];
+      const all = scope.includes('*');
+      const selectedPermissions = Array.isArray(item.permissions) ? item.permissions : (ROLE_DEFAULTS[item.roleKey || 'academic_manager'] || []);
+      const permissionChecks = PERMISSIONS.map(([key,label]) => '<label class="check"><input type="checkbox" name="permission" value="'+key+'"'+(selectedPermissions.includes(key)?' checked':'')+'><span>'+label+'</span></label>').join('');
+      return '<div class="form-grid">' + field('معرّف Telegram للمشرف','telegramId',item.telegramId || '','number','required min="1"') +
+        field('اسم المشرف للعرض','displayName',item.displayName || '') +
+        '<div class="field full"><label for="roleKey">الدور الأساسي</label><select id="roleKey" name="roleKey">'+Object.entries(ROLE_NAMES).map(([key,label])=>'<option value="'+key+'"'+((item.roleKey||'academic_manager')===key?' selected':'')+'>'+label+'</option>').join('')+'</select><p class="hint">يمكنك تخصيص الصلاحيات يدويًا بعد اختيار الدور.</p></div>' +
+        '<div class="field full"><span class="label">الصلاحيات</span><div class="permissions">'+permissionChecks+'</div></div>' +
+        '<div class="field full"><div class="scopes"><label><input type="checkbox" id="allScopes"'+(all?' checked':'')+'> السماح بإدارة جميع المقررات</label><p class="hint">إذا لم تُحدد جميع المقررات، اختر المقررات المسموح بها للمشرف. قائمة المقررات لا تتجاوز نطاق الإدارة الذي تمنحه.</p>' +
+        '<label for="scopeCourses">المقررات المسموح بها</label><select id="scopeCourses" name="scopeCourses" multiple size="5"'+(all?' disabled':'')+'>'+(state.courses||[]).map(c=>'<option value="'+c.id+'"'+(scope.map(Number).includes(Number(c.id))?' selected':'')+'>'+escapeHtml(c.name)+'</option>').join('')+'</select></div></div></div>';
+    }
+    return '';
+  }
+
+  function openEntity(kind, item = null) {
+    if (kind === 'level' && !canCatalog('levels.write')) return;
+    if (kind === 'subject' && !canCatalog('subjects.write')) return;
+    if (kind === 'course' && !canCatalog('courses.write')) return;
+    if (kind === 'question' && !can('questions.write')) return;
+    if (kind === 'model' && !can('questions.write')) return;
+    if (kind === 'moderator' && !state.canManageModerators) return;
+    if (kind === 'botMenu' && !state.canManageModerators) return;
+    const title = ((item?.id ? 'تعديل ' : 'إضافة ') + ({level:'مستوى',subject:'مادة',course:'مقرر',question:'سؤال',model:'نموذج',moderator:'مشرف',botMenu:'زر في البوت'}[kind]));
+    openModal(title,formHtml(kind,item || {}),item ? {...item,_kind:kind} : {_kind:kind});
+    const role=$('roleKey');
+    role?.addEventListener('change',()=>{
+      const defaults=ROLE_DEFAULTS[role.value] || [];
+      $('formFields').querySelectorAll('input[name="permission"]').forEach((checkbox)=>{checkbox.checked=defaults.includes(checkbox.value)});
+    });
+    $('allScopes')?.addEventListener('change',(event)=>{
+      const select=$('scopeCourses');select.disabled=event.target.checked;
+    });
+    $('type')?.addEventListener('change',()=>{
+      const type=$('type').value;const prior=$('value')?.value || '';let nextValue='';
+      if(type==='web_app')nextValue=['exam','admin'].includes(prior)?prior:'exam';
+      else if(type==='command')nextValue=['quiz','help','about','home'].includes(prior)?prior:'quiz';
+      else if(type==='url')nextValue=/^https:\/\//i.test(prior)?prior:'https://';
+      const slot=$('menuValueField');if(slot)slot.outerHTML=botMenuValueControl(type,nextValue);
+    });
+    $('formFields')?.addEventListener('change',(event)=>{
+      if(event.target?.id==='targetType') {
+        const slot=$('menuValueField');if(slot)slot.outerHTML=botMenuValueControl('catalog',JSON.stringify({targetType:event.target.value}));
+      } else if(event.target?.id==='targetLevelId') {
+        const type=$('targetType')?.value || 'level';
+        const slot=$('menuValueField');
+        if(slot)slot.outerHTML=botMenuValueControl('catalog',JSON.stringify({targetType:type,levelId:Number(event.target.value)}));
+      }
+    });
+    $('courseLevelId')?.addEventListener('change', () => {
+      const levelId=Number($('courseLevelId').value);
+      const subjects=(state.subjects||[]).filter(x=>Number(x.levelId)===levelId);
+      $('subjectId').innerHTML=subjects.map(x=>'<option value="'+x.id+'">'+escapeHtml(x.name)+'</option>').join('');
+    });
+    $('questionLevelId')?.addEventListener('change', () => {
+      const levelId=Number($('questionLevelId').value);
+      const subjects=(state.subjects||[]).filter(x=>Number(x.levelId)===levelId);
+      $('questionSubjectId').innerHTML=subjects.map(x=>'<option value="'+x.id+'">'+escapeHtml(x.name)+'</option>').join('');
+      $('questionSubjectId').dispatchEvent(new Event('change'));
+    });
+    $('questionSubjectId')?.addEventListener('change', () => {
+      const subjectId=Number($('questionSubjectId').value);
+      const courses=(state.courses||[]).filter(x=>Number(x.subjectId)===subjectId);
+      const selected=courses[0]; $('courseId').value=selected?.id||'';
+      $('courseId').dispatchEvent(new Event('change'));
+    });
+    $('courseId')?.addEventListener('change', () => {
+      const courseId=Number($('courseId').value);
+      const models=(state.models||[]).filter(x=>Number(x.courseId)===courseId);
+      $('questionModel').innerHTML='<option value="__new__">＋ إنشاء نموذج جديد لهذا المقرر</option>'+models.map(x=>'<option value="'+escapeHtml(JSON.stringify([x.courseId,x.sourceYear,x.sourceFile]))+'">'+escapeHtml((x.sourceYear||'بلا سنة')+' · '+x.sourceFile+' ('+x.total+' سؤال)')+'</option>').join(''); $('questionModel').dispatchEvent(new Event('change'));
+    });
+    $('questionModel')?.addEventListener('change', () => { const create=$('questionModel').value==='__new__'; $('newModelFields')?.classList.toggle('hidden',!create); $('newModelName')?.toggleAttribute('required',create); $('newModelYear')?.toggleAttribute('required',create); }); $('questionModel')?.dispatchEvent(new Event('change'));
+    for(let i=0;i<8;i++) $('opt'+i)?.addEventListener('input',updateCorrectOptions);
+  }
+  function updateCorrectOptions() {
+    const select=$('correctIndex');if(!select)return;
+    const prior=select.value;
+    select.innerHTML='';
+    for(let i=0;i<8;i++){
+      const input=$('opt'+i);
+      if(!input)break;
+      const option=document.createElement('option');option.value=String(i);
+      option.textContent=(i+1)+'. '+(input.value.trim() || 'الخيار '+(i+1));select.append(option);
+    }
+    if([...select.options].some(o=>o.value===prior))select.value=prior;
+  }
+  function formData() {
+    const form=$('entityForm');const kind=editItem?._kind;
+    const fd=new FormData(form);const id=fd.get('id') ? Number(fd.get('id')) : undefined;
+    if(kind==='botMenu') { let value=fd.get('value') || ''; if(fd.get('type')==='catalog') { const targetType=fd.get('targetType'); let targetId=Number(fd.get('targetId')),courseId,sourceYear,sourceFile; if(targetType==='model'){try{[courseId,sourceYear,sourceFile]=JSON.parse(fd.get('targetId'));targetId=Number(courseId)}catch(_){}} value=JSON.stringify({targetType,targetId,courseId,sourceYear,sourceFile}); } return {id,parentId:fd.get('parentId') === '' ? null : Number(fd.get('parentId')),text:fd.get('text'),type:fd.get('type'),value,description:fd.get('description') || '',sortOrder:Number(fd.get('sortOrder') || 0),isActive:fd.get('isActive') === 'on',adminOnly:fd.get('adminOnly') === 'on'}; }
+    if(kind==='level') return {id,name:fd.get('name'),description:fd.get('description'),sortOrder:Number(fd.get('sortOrder')||0)};
+    if(kind==='subject') return {id,levelId:Number(fd.get('levelId')),name:fd.get('name'),description:fd.get('description'),sortOrder:Number(fd.get('sortOrder')||0)};
+    if(kind==='course') return {id,subjectId:Number(fd.get('subjectId')),name:fd.get('name'),description:fd.get('description'),durationMinutes:Number(fd.get('durationMinutes')||60),passingScore:Number(fd.get('passingScore')||50),sortOrder:Number(fd.get('sortOrder')||0)};
+    if(kind==='question'){
+      const options=[];for(let i=0;i<8;i++){const value=String(fd.get('opt'+i)||'').trim();if(value)options.push({oldIndex:i,value})}
+      const selectedOld=Number(fd.get('correctIndex'));
+      const correctIndex=options.findIndex(o=>o.oldIndex===selectedOld);
+      let sourceYear=0,sourceFile='لوحة الإدارة'; const rawModel=fd.get('questionModel');
+      if(rawModel==='__new__'){sourceYear=Number(fd.get('newModelYear')||new Date().getFullYear());sourceFile=String(fd.get('newModelName')||'').trim()} else if(rawModel){try{const parsed=JSON.parse(rawModel);sourceYear=Number(parsed[1]||0);sourceFile=String(parsed[2]||'لوحة الإدارة')}catch(_){}}
+      return {id,courseId:Number(fd.get('courseId')),sourceYear,sourceFile,questionText:fd.get('questionText'),options:options.map(o=>o.value),correctIndex,explanation:fd.get('explanation'),difficulty:fd.get('difficulty'),sortOrder:Number(fd.get('sortOrder')||0)};
+    }
+    if(kind==='model') return {courseId:Number(fd.get('courseId')),sourceYear:Number(fd.get('sourceYear')||0),sourceFile:fd.get('sourceFile'),newSourceYear:Number(fd.get('newSourceYear')||0),newSourceFile:fd.get('newSourceFile')};
+    if(kind==='moderator'){
+      const scopeAll=$('allScopes').checked;
+      return {telegramId:Number(fd.get('telegramId')),displayName:fd.get('displayName')||'مشرف',roleKey:fd.get('roleKey'),permissions:fd.getAll('permission'),scopeCourseIds:scopeAll?['*']:Array.from($('scopeCourses').selectedOptions).map(o=>Number(o.value))};
+    }
+    return {};
+  }
+  async function submitForm(event) {
+    event.preventDefault();
+    const kind=editItem?._kind;const payload=formData();
+    const actions={level:'saveLevel',subject:'saveSubject',course:'saveCourse',question:'saveQuestion',model:'renameModel',moderator:'saveModerator',botMenu:'saveBotMenuItem'};
+    if(kind==='question' && (!payload.courseId || !payload.sourceFile || !payload.questionText?.trim())){showNotice('اختر المستوى والمقرر والنموذج، أو أدخل بيانات النموذج الجديد.');return;}
+    if(kind==='question' && (payload.options.length<2 || payload.correctIndex<0)){
+      showNotice('أدخل خيارين على الأقل وحدد الإجابة الصحيحة من الخيارات غير الفارغة.');return;
+    }
+    if(kind==='model' && (!payload.sourceFile || !payload.newSourceFile || !payload.courseId)){
+      showNotice('اسم النموذج والمقرر مطلوبان.');return;
+    }
+    if(kind==='moderator' && !payload.scopeCourseIds.length){
+      showNotice('حدد نطاق المقررات، أو فعّل خيار جميع المقررات.');return;
+    }
+    if(kind==='botMenu' && !payload.text.trim()) { showNotice('اكتب اسم الزر.'); return; }
+    $('saveBtn').disabled=true;$('saveBtn').textContent='جارٍ الحفظ…';
+    try{
+      await api(actions[kind],payload);closeModal();showNotice('تم حفظ التغييرات بنجاح.',true);await reload();
+    }catch(error){showFormError(error.message || 'تعذر الحفظ؛ تحقق من الاتصال والصلاحيات ثم أعد المحاولة.')}
+    finally{$('saveBtn').disabled=false;$('saveBtn').textContent='حفظ'}
+  }
+  async function toggleEntity(type,id) {
+    const mapping={
+      level:{field:'id',action:'setLevelActive',rows:state.levels,label:'المستوى'},
+      subject:{field:'id',action:'setSubjectActive',rows:state.subjects,label:'المادة'},
+      course:{field:'id',action:'setCourseActive',rows:state.courses,label:'المقرر'},
+      question:{field:'id',action:'setQuestionActive',rows:state.questions,label:'السؤال'},
+      model:{field:'id',action:'setModelActive',rows:state.models,label:'النموذج'},
+      moderator:{field:'telegramId',action:'setModeratorActive',rows:state.moderators,label:'المشرف'}
+    };
+    const m=mapping[type];const row=m.rows.find(r=>String(r[m.field])===String(id));if(!row)return;
+    const isActive=!row.isActive;
+    const message=isActive?'تأكيد تفعيل '+m.label+'؟':'ستتم أرشفة '+m.label+' دون حذف بياناته. هل تريد المتابعة؟';
+    if(!confirm(message))return;
+    const payload=type==='model'
+      ? {courseId:row.courseId,sourceYear:row.sourceYear,sourceFile:row.sourceFile,isActive}
+      : {[m.field]:id,isActive};
+    try{await api(m.action,payload);showNotice(isActive?'تم التفعيل.':'تمت الأرشفة.',true);await reload()}
+    catch(error){showNotice(error.message)}
+  }
+
+  $('nav').addEventListener('click', async (event)=>{
+    const btn=event.target.closest('[data-page]');if(!btn)return;
+    if(btn.dataset.page==='moderators'&&!state?.canManageModerators)return;
+    if(btn.dataset.page==='maintenance'&&!state?.user?.isOwner)return;
+    activePage=btn.dataset.page;searchValue='';
+
+    if (activePage === 'questions' || activePage === 'reviewQueue') {
+      questionPage = 1;
+      state.questions = [];
+      render();
+      try { await loadQuestionsPage(false); } catch (error) { showNotice(error.message); }
+    } else render();
+  });
+  $('content').addEventListener('click',async(event)=>{
+    const btn=event.target.closest('[data-action]');if(!btn)return;
+    const action=btn.dataset.action;const id=btn.dataset.id;
+
+    if (action === 'refreshMaintenance') {
+      try { state.maintenance = await api('getMaintenance'); render(); showNotice('تم تحديث حالة الصيانة.', true); }
+      catch (error) { showNotice(error.message); }
+      return;
+    }
+    if (action === 'toggleMaintenance') {
+      if (!state?.user?.isOwner) { showNotice('هذا الإجراء مخصص للمدير الرئيسي.'); return; }
+      const enabled = !Boolean(state?.maintenance?.enabled);
+      if (!confirm(enabled ? 'تفعيل وضع الصيانة؟ سيظهر للطلاب إشعار بأن الموقع تحت الصيانة.' : 'إنهاء الصيانة وإظهار الموقع للطلاب؟')) return;
+      try { state.maintenance = await api('setMaintenance', { enabled, message: 'الموقع تحت الصيانة حاليًا. نعمل على تحسين الخدمة، يرجى العودة لاحقًا.' }); render(); showNotice(enabled ? 'تم تفعيل وضع الصيانة.' : 'تم إظهار الموقع للطلاب.', true); }
+      catch (error) { showNotice(error.message); }
+      return;
+    }
+    if (action === 'addBotMenu') {
+      openEntity('botMenu',{parentId:null,sortOrder:((menuItems.filter((row)=>row.parentId==null).length)+1)*10,isActive:true,adminOnly:false});
+      return;
+    }
+    if (action === 'editBotMenu') {
+      const item=menuItems.find((row)=>String(row.id)===String(id));
+      if(item) openEntity('botMenu',item);
+      return;
+    }
+    if (action === 'addBotChild') {
+      const parent=menuItems.find((row)=>String(row.id)===String(id));
+      if(!parent || parent.type!=='submenu') { showNotice('اختر زرًا من نوع قائمة فرعية أولًا.'); return; }
+      const children=menuItems.filter((row)=>Number(row.parentId)===Number(parent.id));
+      openEntity('botMenu',{parentId:Number(parent.id),sortOrder:(children.length+1)*10,isActive:true,adminOnly:Boolean(parent.adminOnly)});
+      return;
+    }
+    if (action === 'moveMenuUp' || action === 'moveMenuDown') {
+      try { const result=await api('moveBotMenuItem',{id:Number(id),direction:action==='moveMenuUp'?'up':'down'}); if(!result.moved){showNotice('الزر موجود بالفعل في هذا الطرف من القائمة.');return;} showNotice('تم تغيير ترتيب الزر.',true);await reload(); }
+      catch(error){showNotice(error.message)}
+      return;
+    }
+    if (action === 'toggleBotMenu') {
+      const item=menuItems.find((row)=>String(row.id)===String(id));if(!item)return;
+      const isActive=!item.isActive;
+      if(!confirm(isActive?'إظهار هذا الزر للمستخدمين؟':'إخفاء هذا الزر من قائمة البوت؟'))return;
+      try { await api('toggleBotMenuItem',{id:Number(id),isActive});showNotice(isActive?'تم إظهار الزر.':'تم إخفاء الزر.',true);await reload(); }
+      catch(error){showNotice(error.message)}
+      return;
+    }
+    if (action === 'deleteBotMenu') {
+      const item=menuItems.find((row)=>String(row.id)===String(id));if(!item)return;
+      if(!confirm('حذف زر «'+item.text+'» نهائيًا؟ لن يُحذف أي محتوى دراسي، لكن هذا الزر سيُزال من قائمة البوت.'))return;
+      try { await api('deleteBotMenuItem',{id:Number(id)});showNotice('تم حذف الزر.',true);await reload(); }
+      catch(error){showNotice(error.message)}
+      return;
+    }
+    if (action === 'prevQuestionPage' && questionPage > 1) {
+      questionPage--;
+      try { await loadQuestionsPage(false); } catch (error) { showNotice(error.message); }
+      return;
+    }
+    if (action === 'nextQuestionPage' && questionPage < Math.max(1, Math.ceil(questionTotal / questionPageSize))) {
+      questionPage++;
+      try { await loadQuestionsPage(false); } catch (error) { showNotice(error.message); }
+      return;
+    }
+    if (action === 'importModelJson') {
+      if (!state?.user?.isOwner) { showNotice('استيراد النماذج متاح للمدير الرئيسي فقط.'); return; }
+      const courseId=Number($('jsonModelCourse')?.value);
+      const sourceYear=Number($('jsonModelYear')?.value);
+      const sourceFile=String($('jsonModelName')?.value||'').trim();
+      let parsed;
+      try { parsed=JSON.parse(String($('jsonModelInput')?.value||'')); }
+      catch (_) { showNotice('كود JSON غير صالح؛ راجع الفواصل والأقواس.'); return; }
+      const questions=Array.isArray(parsed)?parsed:parsed?.questions;
+      if(!courseId || !sourceFile || !Array.isArray(questions) || !questions.length) { showNotice('حدد المادة واسم النموذج، وتأكد أن JSON يحتوي مصفوفة questions غير فارغة.'); return; }
+      if(questions.length>500) { showNotice('الحد الأقصى 500 سؤال في عملية الاستيراد الواحدة.'); return; }
+      if(!confirm('سيتم استيراد '+questions.length+' سؤالًا إلى «'+sourceFile+'» وحفظها في قاعدة البيانات. متابعة؟')) return;
+      const btn=$('importModelJsonBtn'); if(btn){btn.disabled=true;btn.textContent='جارٍ استيراد الأسئلة…';}
+      try {
+        const result=await api('importModelJson',{courseId,sourceYear,sourceFile,questions});
+        showNotice('تم استيراد '+result.imported+' سؤالًا إلى النموذج بنجاح.',true);
+        $('jsonModelInput').value='';
+        await reload();
+      } catch(error) { showNotice(error.message||'تعذر استيراد النموذج.'); }
+      finally { const current=$('importModelJsonBtn'); if(current){current.disabled=false;current.textContent='⬆ استيراد النموذج والأسئلة';} }
+      return;
+    }
+    if (action === 'viewModelQuestions') {
+      const [courseId,file,year]=JSON.parse(decodeURIComponent(id));
+      questionModelFilter={courseId:Number(courseId),sourceFile:String(file||'بلا اسم'),sourceYear:Number(year)||0};
+      searchValue='';questionPage=1;activePage='questions';
+      document.querySelectorAll('#nav [data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page==='questions'));
+      try { await loadQuestionsPage(true); showNotice('عرض أسئلة النموذج: '+file+' · '+year,true); } catch(error) { showNotice(error.message); }
+      return;
+    }
+    if (action === 'addSubjectQuestion' || action === 'addModelQuestion') {
+      let item={};
+      if(action==='addSubjectQuestion') {
+        const subject=(state.subjects||[]).find(x=>Number(x.id)===Number(id));
+        const course=(state.courses||[]).find(x=>Number(x.subjectId)===Number(subject?.id));
+        if(course)item.courseId=course.id;
+      } else {
+        const [subjectId,courseId,year,file]=JSON.parse(decodeURIComponent(id));
+        item={courseId:Number(courseId),sourceYear:Number(year)||0,sourceFile:String(file||'')};
+      }
+      openEntity('question',item);return;
+    }
+    const types={
+      addLevel:['level',null],editLevel:['level',(state.levels||[]).find(r=>String(r.id)===id)],
+      addSubject:['subject',null],editSubject:['subject',(state.subjects||[]).find(r=>String(r.id)===id)],
+      addCourse:['course',null],editCourse:['course',(state.courses||[]).find(r=>String(r.id)===id)],
+      addQuestion:['question',null],editQuestion:['question',(state.questions||[]).find(r=>String(r.id)===id)],
+      editReviewQuestion:['question',(state.questions||[]).find(r=>String(r.id)===id)],
+      addModel:['model',null],editModel:['model',(state.models||[]).find(r=>String(r.id)===id)],
+      addModerator:['moderator',null],editModerator:['moderator',(state.moderators||[]).find(r=>String(r.telegramId)===id)]
+    };
+    if(types[action]){openEntity(types[action][0],types[action][1]||null);return}
+    if(action.startsWith('toggle')){await toggleEntity(action.slice(6).toLowerCase(),id);return}
+    if(action==='refresh'){try{await reload();showNotice('تم تحديث البيانات.',true)}catch(error){showNotice(error.message)}}
+  });
+  $('entityForm').addEventListener('submit',submitForm);
+  $('modalClose').addEventListener('click',closeModal);$('cancelBtn').addEventListener('click',closeModal);
+  $('modal').addEventListener('click',(event)=>{if(event.target===$('modal'))closeModal()});
+  document.addEventListener('keydown',(event)=>{if(event.key==='Escape')closeModal()});
+
+  async function init() {
+    try { await reload(false); }
+    catch(error) {
+      const errorText = String(error?.message || 'تعذر تحميل البيانات.');
+      const accessProblem = /غير مخوّل|مخول|صلاحية|Telegram|UNAUTHENTICATED|FORBIDDEN/i.test(errorText);
+      $('accountBadge').textContent = accessProblem ? 'غير مصرح' : 'تعذر الاتصال';
+      $('content').innerHTML='<div class="panel empty"><h2>تعذّر فتح لوحة الإدارة</h2><p>'+escapeHtml(errorText)+'</p><p>يمكنك إعادة المحاولة دون إعادة فتح الصفحة. إذا استمر الخطأ فسيظهر سبب الاتصال بدل بقاء التحميل معلقًا.</p><button class="btn primary" type="button" data-action="refresh" style="margin:8px">↻ إعادة المحاولة</button><a class="btn secondary" href="index.html" style="display:inline-block;text-decoration:none;margin:8px">العودة للاختبار</a></div>';
+      $('nav').hidden=true;
+      showNotice(error.message);
+    }
+  }
+  // Independent watchdog: if Telegram's Serverless bridge never calls back, don't leave a permanent spinner.
+  const startupWatchdog = setTimeout(() => {
+    const loading = $('content').textContent.includes('يتم التحقق من الصلاحيات وتحميل البيانات');
+    if (!loading || state) return;
+    $('accountBadge').textContent = 'تعذر بدء الاتصال';
+    $('content').innerHTML = '<div class="panel empty"><h2>تعذّر بدء الاتصال بلوحة الإدارة</h2><p>لم يستجب جسر الاتصال داخل Telegram. افتح اللوحة من زر الإدارة في البوت بعد تحديثه، ثم أعد المحاولة.</p><button class="btn primary" type="button" data-action="refresh" style="margin:8px">↻ إعادة المحاولة</button></div>';
+    showNotice('انتهت مهلة بدء الاتصال؛ لم يتم تغيير أي بيانات.');
+  }, 12000);
+  init().finally(() => clearTimeout(startupWatchdog));
+})();
+</script>
+</body>
+</html>

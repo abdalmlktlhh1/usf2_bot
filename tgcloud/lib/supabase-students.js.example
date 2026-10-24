@@ -1,0 +1,23 @@
+import { EndpointError } from 'sdk';
+import { fetch } from 'sdk/fetch';
+
+const SUPABASE_URL = 'https://jrrsnpijbizbwxopyvam.supabase.co';
+const STUDENT_SYNC_SECRET = process.env.STUDENT_SYNC_SECRET;
+if (!STUDENT_SYNC_SECRET) throw new Error('Missing STUDENT_SYNC_SECRET environment variable');
+
+export async function supabaseStudentRequest(action, payload = {}, auth = {}) {
+  let response;
+  try {
+    response = await fetch(`${SUPABASE_URL}/functions/v1/student-data`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-student-sync-secret': STUDENT_SYNC_SECRET },
+      body: JSON.stringify({ action, payload, auth }),
+    });
+  } catch {
+    throw new EndpointError('تعذر الاتصال بحساب الطالب وحفظ التقدم.', { code: 'STUDENT_DATA_UNAVAILABLE' });
+  }
+  let result;
+  try { result = await response.json(); } catch { result = {}; }
+  if (!response.ok) throw new EndpointError(result?.error || 'تعذر حفظ بيانات الطالب.', { code: 'STUDENT_DATA_ERROR' });
+  return result;
+}

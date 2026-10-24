@@ -1,2 +1,10 @@
-.tgcloud/
 node_modules/
+.tgcloud/
+backups/
+.env
+.env.*
+*.log
+tgcloud/lib/supabase-content.js
+
+*.bak*
+tgcloud/lib/supabase-students.js

@@ -113,7 +113,7 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null) {
       button = { text: item.text, callback_data: 'menu:open:' + item.id };
     } else if (item.type === 'web_app') {
       if (item.value === 'admin' && !isAdmin) continue;
-      button = { text: item.text, web_app: { url: item.value === 'admin' ? MINI_APP_URL + 'admin.html?v=20261024d' : MINI_APP_URL } };
+      button = { text: item.text, web_app: { url: item.value === 'admin' ? MINI_APP_URL + 'admin.html?v=20261025a' : MINI_APP_URL } };
     } else if (item.type === 'catalog') {
       let target;
       try { target = JSON.parse(item.value); } catch { continue; }

@@ -116,7 +116,7 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
   <header class="app-header"><button id="menuBtn" class="icon-button" type="button" aria-label="فتح القائمة الجانبية" aria-controls="drawer" aria-expanded="false">☰</button><div class="app-brand"><span class="app-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Zm0 14h15M8 7h7M8 11h5"/></svg></span><span class="brand-name">منصة الاختبارات <small>| اللجنة العلمية</small></span></div><span id="connectionStatus" class="offline-tag" role="status" aria-live="polite"></span></header>
   <header class="hero"><h1>بنك نماذج الاختبارات</h1></header>
   <section id="authPanel" class="auth-panel hidden" aria-labelledby="authTitle" aria-hidden="true">
-    <h2 id="authTitle">تسجيل الدخول للطلاب</h2><p>أنشئ حسابك واختر مستواك الدراسي. يتطلب الوصول إلى الاختبارات موافقة المشرف.</p>
+    <h2 id="authTitle">دخول المتصفح</h2><p>للدخول من المتصفح، استخدم اسم المستخدم الثابت الذي يُنشأ لك تلقائيًا وكلمة المرور التي اخترتها. عند فتح المنصة من داخل Telegram، يُربط حسابك تلقائيًا دون تسجيل دخول يدوي.</p>
     <div class="auth-tabs"><button id="loginTab" class="active" type="button">تسجيل الدخول</button><button id="signupTab" type="button">إنشاء حساب</button></div>
     <form id="loginForm" class="auth-grid"><div class="auth-field"><label for="loginIdentifier">اسم المستخدم</label><input id="loginIdentifier" autocomplete="username" required maxlength="64"></div><div class="auth-field"><label for="loginPassword">كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" required minlength="8"></div><button class="btn btn-primary" type="submit">دخول</button></form>
     <form id="signupForm" class="auth-grid hidden"><div class="auth-field"><label for="signupName">الاسم الكامل</label><input id="signupName" autocomplete="name" maxlength="120" required></div><div class="auth-field"><label for="signupPassword">كلمة المرور (8 أحرف على الأقل)</label><input id="signupPassword" type="password" autocomplete="new-password" minlength="8" required></div><div class="auth-field"><label for="signupLevel">المستوى الدراسي</label><select id="signupLevel" required><option value="">جارٍ تحميل المستويات…</option></select></div><button class="btn btn-primary" type="submit">إنشاء الحساب وإرساله للموافقة</button></form><div id="authMessage" class="auth-message hidden" role="status" aria-live="polite"></div>
@@ -124,7 +124,7 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
 
   <div id="authUserbar" class="auth-userbar hidden"><span id="authWelcome"></span><button id="logoutBtn" class="btn btn-secondary" type="button">تسجيل الخروج</button></div>
   <main>
-    <section id="start" class="panel start-panel" aria-label="اختيار الاختبار">
+    <section id="start" class="panel start-panel hidden" aria-label="اختيار الاختبار">
       <nav class="journey" aria-label="خطوات اختيار الاختبار"><button type="button" data-step="0" aria-current="step"><span>1</span>المستوى</button><button type="button" data-step="1" disabled><span>2</span>المواد</button><button type="button" data-step="2" disabled><span>3</span>النماذج</button><button type="button" data-step="3" disabled><span>4</span>الإعداد</button></nav>
       <section id="levelScreen" aria-labelledby="levelTitle"><h2 id="levelTitle" class="section-title" tabindex="-1">اختر المستوى الدراسي</h2><p class="lead">ابدأ بالمستوى الدراسي للوصول إلى مواده ونماذجه فقط.</p><div id="levelList" class="level-list"></div></section>
       <section id="coursesScreen" class="hidden" aria-labelledby="coursesTitle"><div class="screen-heading"><button id="coursesBackBtn" class="back-button" type="button" aria-label="الرجوع إلى المستويات">›</button><h2 id="coursesTitle" class="section-title" tabindex="-1">مواد المستوى الأول</h2></div><p id="subjectsIntro" class="lead">اختر المادة لعرض نماذجها المتاحة.</p><div id="courseList" class="course-list"></div></section>
@@ -1575,10 +1575,10 @@ async function activateStudent(){
    const available = await ensureSiteAvailable();
    if (!available) return;
  }
- $("authPanel").classList.add("hidden");$("authUserbar").classList.remove("hidden");$("authWelcome").textContent="مرحبًا "+(studentSession.profile.displayName||studentSession.profile.username)+" — "+(studentSession.profile.levelName||"مستواك الدراسي");
+ $("authPanel").classList.add("hidden");$("authPanel").setAttribute("aria-hidden","true");$("authUserbar").classList.remove("hidden");$("authWelcome").textContent="مرحبًا "+(studentSession.profile.displayName||studentSession.profile.username)+" — "+(studentSession.profile.levelName||"مستواك الدراسي");
  $("start").classList.remove("hidden");
  try{await loadCatalogFromSupabase();$("connectionStatus").textContent="الحساب معتمد";}
- catch(e){$("start").classList.add("hidden");$("authPanel").classList.remove("hidden");showAuthMessage(e.message,"error");}
+ catch(e){$("start").classList.add("hidden");$("authPanel").classList.remove("hidden");$("authPanel").setAttribute("aria-hidden","false");showAuthMessage(e.message,"error");}
 }
 $("logoutBtn").addEventListener("click",()=>{studentSession=null;sessionStorage.removeItem(AUTH_SESSION_KEY);location.reload();});
 // Start with the maintenance overlay cleared; the live status check below may re-enable it.
@@ -1821,27 +1821,66 @@ try {
   studentSession = null;
   sessionStorage.removeItem(AUTH_SESSION_KEY);
 }
-if (studentSession) {
+const telegramAppAtStartup = window.Telegram?.WebApp || null;
+const telegramLaunch = Boolean(
+  telegramAppAtStartup?.Serverless?.call ||
+  (typeof telegramAppAtStartup?.initData === "string" && telegramAppAtStartup.initData.trim())
+);
+
+if (telegramLaunch) {
+  // Telegram users are identified by TGCloud's server-verified initData, not by a browser password.
+  studentSession = null;
+  $("authPanel").classList.add("hidden");
+  $("authPanel").setAttribute("aria-hidden", "true");
+  $("authUserbar").classList.add("hidden");
+  $("start").classList.remove("hidden");
+
+  ensureSiteAvailable().then(async available => {
+    if (!available) return;
+    if (telegramAppAtStartup?.Serverless?.call) {
+      try {
+        // The server validates Telegram initData and upserts the user's stable Telegram profile.
+        studentCloudData = await studentApi("me");
+      } catch (error) {
+        console.warn("تعذر ربط حساب Telegram تلقائيًا:", error);
+      }
+    }
+    return loadCatalogFromSupabase();
+  }).then(() => {
+    $("connectionStatus").textContent = catalogLoadState === "loaded"
+      ? "مرتبط بـ Telegram" : "تعذر تحميل المحتوى";
+  }).catch((error) => {
+    catalogLoadState = "error";
+    renderLevels();
+    $("connectionStatus").textContent = navigator.onLine ? "تعذر تحميل المحتوى" : "بدون اتصال";
+    console.error("تعذر تهيئة المنصة داخل Telegram:", error);
+  });
+} else if (studentSession) {
+  // Browser sessions use the fixed username assigned to the account and its password.
   ensureSiteAvailable().then(available => {
     if (available) return activateStudent();
   }).then(() => {
-    $("connectionStatus").textContent = catalogLoadState === 'loaded'
+    $("connectionStatus").textContent = catalogLoadState === "loaded"
       ? "متصل" : "تعذر تحميل المحتوى";
-  }).catch((e) => {
+  }).catch((error) => {
     $("connectionStatus").textContent = "تعذر تحميل المحتوى";
-    console.error(e);
+    console.error(error);
   });
 } else {
-  // التحقق من الصيانة قبل عرض الفهرس العام للزائر.
+  // No anonymous browser session: show the username/password flow before exposing the test bank.
+  $("authPanel").classList.remove("hidden");
+  $("authPanel").setAttribute("aria-hidden", "false");
+  $("authUserbar").classList.add("hidden");
+  $("start").classList.add("hidden");
+  switchAuthTab(false);
+  loadSignupLevels();
+
   ensureSiteAvailable().then(available => {
     if (!available) return;
-    $("connectionStatus").textContent = navigator.onLine ? "متصل" : "بدون اتصال";
-    return loadCatalogFromSupabase();
+    $("connectionStatus").textContent = navigator.onLine ? "دخول المتصفح" : "بدون اتصال";
   }).catch((error) => {
-    catalogLoadState = 'error';
-    renderLevels();
-    $("connectionStatus").textContent = navigator.onLine ? "تعذر تحميل المحتوى" : "بدون اتصال";
-    console.error("تعذر تحميل الفهرس العام:", error);
+    $("connectionStatus").textContent = navigator.onLine ? "تعذر الاتصال" : "بدون اتصال";
+    console.error("تعذر التحقق من حالة الموقع:", error);
   });
 }
 </script>

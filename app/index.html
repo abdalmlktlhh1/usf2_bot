@@ -1873,15 +1873,15 @@ if (telegramLaunch) {
 
   ensureSiteAvailable().then(available => {
     if (!available) return;
-    const telegramIdentityPromise = telegramAppAtStartup?.Serverless?.call
-      ? studentApi("me").then(data => {
-          // TGCloud validates Telegram initData and upserts the stable Telegram profile.
-          studentCloudData = data;
-        }).catch(error => {
-          console.warn("تعذر ربط حساب Telegram تلقائيًا:", error);
-        })
-      : Promise.resolve();
-    return telegramIdentityPromise.then(() => loadCatalogFromSupabase());
+    if (telegramAppAtStartup?.Serverless?.call) {
+      // Start identity linking in parallel so a slow profile request doesn't delay loading the exam bank.
+      studentApi("me").then(data => {
+        studentCloudData = data;
+      }).catch(error => {
+        console.warn("تعذر ربط حساب Telegram تلقائيًا:", error);
+      });
+    }
+    return loadCatalogFromSupabase();
   }).then(() => {
     $("connectionStatus").textContent = catalogLoadState === "loaded"
       ? "مرتبط بـ Telegram" : "تعذر تحميل المحتوى";

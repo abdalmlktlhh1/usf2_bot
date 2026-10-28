@@ -113,7 +113,7 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
 </head>
 <body>
 <div class="wrap">
-  <header class="app-header"><button id="menuBtn" class="icon-button" type="button" aria-label="فتح القائمة الجانبية" aria-controls="drawer" aria-expanded="false">☰</button><div class="app-brand"><span class="app-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Zm0 14h15M8 7h7M8 11h5"/></svg></span><span class="brand-name">منصة الاختبارات <small>| اللجنة العلمية</small></span></div><span id="connectionStatus" class="offline-tag" role="status" aria-live="polite"></span></header>
+  <header class="app-header"><button id="menuBtn" class="icon-button hidden" type="button" aria-label="فتح القائمة الجانبية" aria-controls="drawer" aria-expanded="false">☰</button><div class="app-brand"><span class="app-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Zm0 14h15M8 7h7M8 11h5"/></svg></span><span class="brand-name">منصة الاختبارات <small>| اللجنة العلمية</small></span></div><span id="connectionStatus" class="offline-tag" role="status" aria-live="polite"></span></header>
   <header class="hero"><h1>بنك نماذج الاختبارات</h1></header>
   <section id="authPanel" class="auth-panel hidden" aria-labelledby="authTitle" aria-hidden="true">
     <h2 id="authTitle">دخول المتصفح</h2><p>للدخول من المتصفح، استخدم اسم المستخدم الثابت الذي يُنشأ لك تلقائيًا وكلمة المرور التي اخترتها. عند فتح المنصة من داخل Telegram، يُربط حسابك تلقائيًا دون تسجيل دخول يدوي.</p>
@@ -1575,7 +1575,7 @@ async function activateStudent(){
    const available = await ensureSiteAvailable();
    if (!available) return;
  }
- $("authPanel").classList.add("hidden");$("authPanel").setAttribute("aria-hidden","true");$("authUserbar").classList.remove("hidden");$("authWelcome").textContent="مرحبًا "+(studentSession.profile.displayName||studentSession.profile.username)+" — "+(studentSession.profile.levelName||"مستواك الدراسي");
+ $("authPanel").classList.add("hidden");$("authPanel").setAttribute("aria-hidden","true");$("menuBtn").classList.remove("hidden");$("authUserbar").classList.remove("hidden");$("authWelcome").textContent="مرحبًا "+(studentSession.profile.displayName||studentSession.profile.username)+" — "+(studentSession.profile.levelName||"مستواك الدراسي");
  $("start").classList.remove("hidden");
  try{await loadCatalogFromSupabase();$("connectionStatus").textContent="الحساب معتمد";}
  catch(e){$("start").classList.add("hidden");$("authPanel").classList.remove("hidden");$("authPanel").setAttribute("aria-hidden","false");showAuthMessage(e.message,"error");}
@@ -1833,6 +1833,7 @@ if (telegramLaunch) {
   $("authPanel").classList.add("hidden");
   $("authPanel").setAttribute("aria-hidden", "true");
   $("authUserbar").classList.add("hidden");
+  $("menuBtn").classList.remove("hidden");
   $("start").classList.remove("hidden");
 
   ensureSiteAvailable().then(async available => {
@@ -1871,6 +1872,7 @@ if (telegramLaunch) {
   $("authPanel").classList.remove("hidden");
   $("authPanel").setAttribute("aria-hidden", "false");
   $("authUserbar").classList.add("hidden");
+  $("menuBtn").classList.add("hidden");
   $("start").classList.add("hidden");
   switchAuthTab(false);
   loadSignupLevels();

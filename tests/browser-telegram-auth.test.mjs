@@ -18,7 +18,7 @@ test('browser visitors must use the fixed account username and password before s
 
 test('Telegram launch bypasses browser login and links identity through server-verified Telegram data', () => {
   assert.match(miniApp, /const telegramLaunch = Boolean\(/);
-  assert.match(miniApp, /if \(telegramLaunch\) \{[\s\S]*?studentSession = null;[\s\S]*?studentCloudData = await studentApi\("me"\)[\s\S]*?return loadCatalogFromSupabase\(\)/);
+  assert.match(miniApp, /if \(telegramLaunch\) \{[\s\S]*?studentSession = null;[\s\S]*?studentApi\("me"\)\.then\(data => \{[\s\S]*?studentCloudData = data;[\s\S]*?return loadCatalogFromSupabase\(\)/);
   assert.match(miniApp, /if \(telegramLaunch\) \{[\s\S]*?\$\("authPanel"\)\.classList\.add\("hidden"\)/);
   assert.match(studentApi, /const user = ctx\?\.initData\?\.user/);
   assert.match(studentApi, /return await supabaseStudentRequest\(action, input\.payload \|\| \{\}, auth\)/);

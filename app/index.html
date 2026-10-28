@@ -1886,7 +1886,7 @@ if (telegramLaunch) {
     $("connectionStatus").textContent = catalogLoadState === "loaded"
       ? "مرتبط بـ Telegram" : "تعذر تحميل المحتوى";
   }).catch((error) => {
-    catalogLoadState = "error";
+    catalogLoadState = 'error';
     renderLevels();
     $("connectionStatus").textContent = navigator.onLine ? "تعذر تحميل المحتوى" : "بدون اتصال";
     console.error("تعذر تهيئة المنصة داخل Telegram:", error);

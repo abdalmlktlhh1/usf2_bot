@@ -1836,17 +1836,17 @@ if (telegramLaunch) {
   $("menuBtn").classList.remove("hidden");
   $("start").classList.remove("hidden");
 
-  ensureSiteAvailable().then(async available => {
+  ensureSiteAvailable().then(available => {
     if (!available) return;
-    if (telegramAppAtStartup?.Serverless?.call) {
-      try {
-        // The server validates Telegram initData and upserts the user's stable Telegram profile.
-        studentCloudData = await studentApi("me");
-      } catch (error) {
-        console.warn("تعذر ربط حساب Telegram تلقائيًا:", error);
-      }
-    }
-    return loadCatalogFromSupabase();
+    const telegramIdentityPromise = telegramAppAtStartup?.Serverless?.call
+      ? studentApi("me").then(data => {
+          // TGCloud validates Telegram initData and upserts the stable Telegram profile.
+          studentCloudData = data;
+        }).catch(error => {
+          console.warn("تعذر ربط حساب Telegram تلقائيًا:", error);
+        })
+      : Promise.resolve();
+    return telegramIdentityPromise.then(() => loadCatalogFromSupabase());
   }).then(() => {
     $("connectionStatus").textContent = catalogLoadState === "loaded"
       ? "مرتبط بـ Telegram" : "تعذر تحميل المحتوى";

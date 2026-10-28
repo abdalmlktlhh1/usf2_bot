@@ -100,3 +100,18 @@ test('واجهة إدارة الأسئلة لا تعرض أي خيارات لم�
   assert.doesNotMatch(adminHtml, /مستوى الصعوبة|difficulty/);
   assert.match(adminHtml, /يمكن إضافة explanation/);
 });
+
+test('النسخة الاحتياطية تصدّر كامل المحتوى دون تعديل البيانات وبصلاحية المدير الرئيسي', async () => {
+  const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  assert.match(adminHtml, /data-action="exportBackup"/);
+  assert.match(adminHtml, /async function exportContentBackup\(\)/);
+  assert.match(adminHtml, /format: 'usf2_bot_content_backup'/);
+  assert.match(adminHtml, /api\('questionsPage', \{ page: 1, pageSize, query: '', reviewOnly: false \}\)/);
+  assert.match(adminHtml, /questions\.length !== expectedTotal/);
+  assert.match(adminHtml, /URL\.createObjectURL\(blob\)/);
+  assert.match(adminHtml, /لا تتضمن حسابات الطلاب أو نتائجهم/);
+  assert.match(adminApi, /if \(action === 'recordBackupExport'\) return recordBackupExport\(auth, input\)/);
+  assert.match(adminApi, /تصدير النسخة الاحتياطية مخصص للمدير الرئيسي فقط/);
+  assert.match(adminApi, /await audit\(auth, 'export', 'content_backup'/);
+});

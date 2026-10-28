@@ -95,7 +95,7 @@ test('التصفح الدراسي هرمي وروابط أزرار المستو�
   assert.equal(matcher.exec('menu:open:12')?.[1], '12');
 });
 
-test('واجهة إدارة الأسئلة لا تعرض مقياس الصعوبة ولا ترسله عند الحفظ أو الاستيراد', async () => {
+test('واجهة إدارة الأسئلة لا تعرض أي خيارات لمقياس الصعوبة', async () => {
   const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
   assert.doesNotMatch(adminHtml, /مستوى الصعوبة|difficulty/);
   assert.match(adminHtml, /يمكن إضافة explanation/);

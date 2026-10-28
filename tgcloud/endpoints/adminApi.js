@@ -507,6 +507,23 @@ async function moveBotMenuItem(auth, input) {
   return { id, moved: true };
 }
 
+async function recordBackupExport(auth, input) {
+  if (!auth.isOwner) fail('تصدير النسخة الاحتياطية مخصص للمدير الرئيسي فقط.', 'FORBIDDEN');
+  const count = (value, label) => {
+    const n = Number(value);
+    if (!Number.isSafeInteger(n) || n < 0 || n > 10000000) fail('عدد ' + label + ' غير صالح.');
+    return n;
+  };
+  const counts = {
+    levels: count(input.levelCount, 'المستويات'),
+    subjects: count(input.subjectCount, 'المواد'),
+    courses: count(input.courseCount, 'المقررات'),
+    questions: count(input.questionCount, 'الأسئلة'),
+  };
+  await audit(auth, 'export', 'content_backup', 0, counts);
+  return { recorded: true, counts };
+}
+
 async function importModelJson(auth, input) {
   if (!auth.isOwner) fail('استيراد النماذج من JSON مخصص للمدير الرئيسي فقط.', 'FORBIDDEN');
   const courseId = positiveId(input.courseId, 'المادة');
@@ -569,6 +586,7 @@ export default async function (input = {}, ctx) {
   }
   if (action === 'dashboard') return rowsForDashboard(auth);
   if (action === 'questionsPage') return rowsForQuestionsPage(auth, input);
+  if (action === 'recordBackupExport') return recordBackupExport(auth, input);
 
   if (action === 'saveLevel') return saveLevel(auth, input);
   if (action === 'setLevelActive') return setLevelActive(auth, input);

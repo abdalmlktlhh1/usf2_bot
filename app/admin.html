@@ -333,7 +333,7 @@ textarea{min-height:86px;resize:vertical}
     if (state?.user?.isOwner) {
       const levelOf = (courseId) => { const c=(state.courses||[]).find(x=>Number(x.id)===Number(courseId)); const sub=(state.subjects||[]).find(x=>Number(x.id)===Number(c?.subjectId)); return Number(sub?.levelId||0); };
       const courseOptions=(state.courses||[]).map(c=>'<option value="'+c.id+'">'+escapeHtml(levelName(levelOf(c.id))+' · '+courseName(c.id))+'</option>').join('');
-      html += '<section class="panel" style="margin:12px 0;border-color:#b8d9c7"><h3>📥 استيراد نموذج من JSON</h3><p class="hint" style="margin-bottom:12px">الصق JSON للنموذج، حدّد المادة والسنة واسم النموذج، ثم استيراد. ستُحفظ الأسئلة في قاعدة البيانات وتظهر ضمن النماذج المنشورة بالموقع.</p><div class="form-grid"><div class="field full"><label for="jsonModelCourse">المستوى والمادة</label><select id="jsonModelCourse" required>'+courseOptions+'</select></div><div class="field"><label for="jsonModelYear">سنة النموذج</label><input id="jsonModelYear" type="number" min="0" max="2100" value="'+new Date().getFullYear()+'" required></div><div class="field"><label for="jsonModelName">اسم النموذج</label><input id="jsonModelName" maxlength="500" placeholder="مثال: اختبار نهائي" required></div><div class="field full"><label for="jsonModelInput">كود JSON</label><textarea id="jsonModelInput" dir="ltr" style="min-height:220px;font-family:ui-monospace,monospace;text-align:left" placeholder="{&quot;questions&quot;:[{&quot;question&quot;:&quot;نص السؤال؟&quot;,&quot;options&quot;:[&quot;الخيار الأول&quot;,&quot;الخيار الثاني&quot;],&quot;correctAnswer&quot;:0,&quot;explanation&quot;:&quot;&quot;,&quot;difficulty&quot;:&quot;normal&quot;}]}"></textarea><p class="hint">داخل questions: question أو questionText، و options مصفوفة نصوص، و correctAnswer أو correctIndex يبدأ من 0. ويمكن إضافة explanation و difficulty.</p></div><div class="field full"><button type="button" class="btn primary" data-action="importModelJson" id="importModelJsonBtn">⬆ استيراد النموذج والأسئلة</button></div></div></section>';
+      html += '<section class="panel" style="margin:12px 0;border-color:#b8d9c7"><h3>📥 استيراد نموذج من JSON</h3><p class="hint" style="margin-bottom:12px">الصق JSON للنموذج، حدّد المادة والسنة واسم النموذج، ثم استيراد. ستُحفظ الأسئلة في قاعدة البيانات وتظهر ضمن النماذج المنشورة بالموقع.</p><div class="form-grid"><div class="field full"><label for="jsonModelCourse">المستوى والمادة</label><select id="jsonModelCourse" required>'+courseOptions+'</select></div><div class="field"><label for="jsonModelYear">سنة النموذج</label><input id="jsonModelYear" type="number" min="0" max="2100" value="'+new Date().getFullYear()+'" required></div><div class="field"><label for="jsonModelName">اسم النموذج</label><input id="jsonModelName" maxlength="500" placeholder="مثال: اختبار نهائي" required></div><div class="field full"><label for="jsonModelInput">كود JSON</label><textarea id="jsonModelInput" dir="ltr" style="min-height:220px;font-family:ui-monospace,monospace;text-align:left" placeholder="{&quot;questions&quot;:[{&quot;question&quot;:&quot;نص السؤال؟&quot;,&quot;options&quot;:[&quot;الخيار الأول&quot;,&quot;الخيار الثاني&quot;],&quot;correctAnswer&quot;:0,&quot;explanation&quot;:&quot;&quot;}]}"></textarea><p class="hint">داخل questions: question أو questionText، و options مصفوفة نصوص، و correctAnswer أو correctIndex يبدأ من 0. ويمكن إضافة explanation.</p></div><div class="field full" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn primary" data-action="importModelJson" id="importModelJsonBtn">⬆ استيراد النموذج والأسئلة</button><button type="button" class="btn secondary" data-action="exportBackup" id="exportBackupBtn">⬇ تصدير نسخة احتياطية</button></div><p class="hint">النسخة الاحتياطية تتضمن المستويات والمواد والمقررات والنماذج والأسئلة النشطة والمؤرشفة. لا تتضمن حسابات الطلاب أو نتائجهم، ولا تُغيّر أي بيانات عند التصدير.</p></div></section>';
     }
     for (const level of (state.levels||[])) {
       const levelSubjects=(state.subjects||[]).filter(s=>Number(s.levelId)===Number(level.id));
@@ -432,6 +432,113 @@ textarea{min-height:86px;resize:vertical}
     questionPage = Number(result.page) || 1;
     questionTotal = Number(result.total) || 0;
     render();
+  }
+
+  async function exportContentBackup() {
+    if (!state?.user?.isOwner) throw new Error('تصدير النسخة الاحتياطية مخصص للمدير الرئيسي فقط.');
+    const button = $('exportBackupBtn');
+    if (button) { button.disabled = true; button.textContent = 'جارٍ تجهيز النسخة…'; }
+    try {
+      const pageSize = 25;
+      const first = await api('questionsPage', { page: 1, pageSize, query: '', reviewOnly: false });
+      const expectedTotal = Number(first.total);
+      if (!Number.isSafeInteger(expectedTotal) || expectedTotal < 0) {
+        throw new Error('أعاد الخادم عدد أسئلة غير صالح؛ لم يتم إنشاء النسخة الاحتياطية.');
+      }
+      const pageCount = Math.max(1, Math.ceil(expectedTotal / pageSize));
+      const questions = Array.isArray(first.questions) ? [...first.questions] : [];
+      for (let start = 2; start <= pageCount; start += 5) {
+        const pages = [];
+        for (let page = start; page < Math.min(start + 5, pageCount + 1); page++) pages.push(page);
+        const results = await Promise.all(pages.map((page) =>
+          api('questionsPage', { page, pageSize, query: '', reviewOnly: false })
+        ));
+        for (const result of results) {
+          if (Number(result.total) !== expectedTotal) {
+            throw new Error('تغير عدد الأسئلة أثناء التصدير. أعد المحاولة لضمان اكتمال النسخة.');
+          }
+          if (Array.isArray(result.questions)) questions.push(...result.questions);
+        }
+      }
+      if (questions.length !== expectedTotal) {
+        throw new Error('لم تُحمّل جميع الأسئلة؛ لم يتم تنزيل نسخة ناقصة.');
+      }
+      const seenIds = new Set();
+      for (const question of questions) {
+        const id = Number(question.id);
+        if (!Number.isSafeInteger(id) || id <= 0 || seenIds.has(id)) {
+          throw new Error('تعذر التحقق من عدم تكرار الأسئلة أثناء التصدير؛ لم يتم إنشاء النسخة.');
+        }
+        seenIds.add(id);
+      }
+      const levels = (state.levels || []).map((row) => ({
+        id: Number(row.id), name: String(row.name || ''), description: String(row.description || ''),
+        sortOrder: Number(row.sortOrder || 0), isActive: row.isActive !== false,
+      }));
+      const subjects = (state.subjects || []).map((row) => ({
+        id: Number(row.id), levelId: Number(row.levelId), name: String(row.name || ''),
+        description: String(row.description || ''), sortOrder: Number(row.sortOrder || 0),
+        isActive: row.isActive !== false,
+      }));
+      const courses = (state.courses || []).map((row) => ({
+        id: Number(row.id), subjectId: Number(row.subjectId), name: String(row.name || ''),
+        description: String(row.description || ''), durationMinutes: Number(row.durationMinutes || 60),
+        passingScore: Number(row.passingScore ?? 50), sortOrder: Number(row.sortOrder || 0),
+        isActive: row.isActive !== false,
+      }));
+      const safeQuestions = questions.map((row) => ({
+        id: Number(row.id), courseId: Number(row.courseId), questionText: String(row.questionText || ''),
+        options: Array.isArray(row.options) ? row.options.map((option) => String(option)) : [],
+        correctIndex: Number(row.correctIndex), explanation: String(row.explanation || ''),
+        sourceYear: Number(row.sourceYear) || 0, sourceFile: String(row.sourceFile || 'بلا اسم'),
+        sortOrder: Number(row.sortOrder || 0), isActive: row.isActive !== false,
+        reviewStatus: row.reviewStatus || null,
+        reviewFlags: Array.isArray(row.reviewFlags) ? row.reviewFlags : [],
+      }));
+      const modelMap = new Map();
+      for (const question of safeQuestions) {
+        const key = JSON.stringify([question.courseId, question.sourceYear, question.sourceFile]);
+        if (!modelMap.has(key)) modelMap.set(key, {
+          courseId: question.courseId, sourceYear: question.sourceYear, sourceFile: question.sourceFile,
+          total: 0, activeCount: 0,
+        });
+        const model = modelMap.get(key);
+        model.total++;
+        if (question.isActive) model.activeCount++;
+      }
+      const generatedAt = new Date().toISOString();
+      const backup = {
+        format: 'usf2_bot_content_backup',
+        schemaVersion: 1,
+        generatedAt,
+        counts: {
+          levels: levels.length, subjects: subjects.length, courses: courses.length,
+          models: modelMap.size, questions: safeQuestions.length,
+        },
+        content: { levels, subjects, courses, models: [...modelMap.values()], questions: safeQuestions },
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'usf2_bot-content-backup-' + generatedAt.slice(0, 10) + '.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      try {
+        await api('recordBackupExport', {
+          levelCount: levels.length, subjectCount: subjects.length,
+          courseCount: courses.length, questionCount: safeQuestions.length,
+        });
+        showNotice('تم تنزيل النسخة الاحتياطية. عدد الأسئلة: ' + safeQuestions.length + '.', true);
+      } catch (error) {
+        showNotice('تم تنزيل النسخة، لكن تعذّر تسجيل التصدير في سجل العمليات: ' + error.message);
+      }
+    } finally {
+      const current = $('exportBackupBtn');
+      if (current) { current.disabled = false; current.textContent = '⬇ تصدير نسخة احتياطية'; }
+    }
   }
 
   async function reload(keepPage = true) {
@@ -662,7 +769,6 @@ textarea{min-height:86px;resize:vertical}
         '<div class="field full"><label for="questionSubjectId">2. المادة</label><select id="questionSubjectId" name="questionSubjectId" required>'+subjectOptions+'</select></div>'+
         '<input type="hidden" id="courseId" name="courseId" value="'+chosenCourse+'">'+
         '<div class="field full"><label for="questionModel">3. نموذج المادة</label><select id="questionModel" name="questionModel" required>'+modelOptions+'</select></div>' + '<div class="field full hidden" id="newModelFields"><div class="form-grid">'+field('اسم النموذج الجديد','newModelName','نموذج جديد','text','maxlength="500" required')+field('سنة النموذج الجديد','newModelYear',new Date().getFullYear(),'number','min="0" max="2100" required')+'</div><p class="hint">سيُنشأ النموذج تحت المقرر المحدد، ثم يُحفظ السؤال داخله.</p></div>' +
-        selectField('مستوى الصعوبة','difficulty',[{id:'easy',label:'سهل'},{id:'normal',label:'متوسط'},{id:'hard',label:'صعب'}],item.difficulty || 'normal') +
         '<div class="field full"><label for="questionText">4. نص السؤال</label><textarea id="questionText" name="questionText" required maxlength="3000">' + escapeHtml(item.questionText || '') + '</textarea></div>' + options +
         '<div class="field"><label for="correctIndex">الإجابة الصحيحة</label><select id="correctIndex" name="correctIndex">' +
         opts.map((v,i)=>'<option value="'+i+'"'+(i===Number(item.correctIndex||0)?' selected':'')+'>'+(i+1)+'. '+escapeHtml(v || 'الخيار '+(i+1))+'</option>').join('') +
@@ -768,7 +874,7 @@ textarea{min-height:86px;resize:vertical}
       const correctIndex=options.findIndex(o=>o.oldIndex===selectedOld);
       let sourceYear=0,sourceFile='لوحة الإدارة'; const rawModel=fd.get('questionModel');
       if(rawModel==='__new__'){sourceYear=Number(fd.get('newModelYear')||new Date().getFullYear());sourceFile=String(fd.get('newModelName')||'').trim()} else if(rawModel){try{const parsed=JSON.parse(rawModel);sourceYear=Number(parsed[1]||0);sourceFile=String(parsed[2]||'لوحة الإدارة')}catch(_){}}
-      return {id,courseId:Number(fd.get('courseId')),sourceYear,sourceFile,questionText:fd.get('questionText'),options:options.map(o=>o.value),correctIndex,explanation:fd.get('explanation'),difficulty:fd.get('difficulty'),sortOrder:Number(fd.get('sortOrder')||0)};
+      return {id,courseId:Number(fd.get('courseId')),sourceYear,sourceFile,questionText:fd.get('questionText'),options:options.map(o=>o.value),correctIndex,explanation:fd.get('explanation'),sortOrder:Number(fd.get('sortOrder')||0)};
     }
     if(kind==='model') return {courseId:Number(fd.get('courseId')),sourceYear:Number(fd.get('sourceYear')||0),sourceFile:fd.get('sourceFile'),newSourceYear:Number(fd.get('newSourceYear')||0),newSourceFile:fd.get('newSourceFile')};
     if(kind==='moderator'){
@@ -892,6 +998,11 @@ textarea{min-height:86px;resize:vertical}
     if (action === 'nextQuestionPage' && questionPage < Math.max(1, Math.ceil(questionTotal / questionPageSize))) {
       questionPage++;
       try { await loadQuestionsPage(false); } catch (error) { showNotice(error.message); }
+      return;
+    }
+    if (action === 'exportBackup') {
+      try { await exportContentBackup(); }
+      catch (error) { showNotice(error.message || 'تعذر إنشاء النسخة الاحتياطية.'); }
       return;
     }
     if (action === 'importModelJson') {

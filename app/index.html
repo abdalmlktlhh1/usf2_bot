@@ -137,7 +137,7 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
         <div class="field hidden"><label for="courseSelect">المقرر</label><select id="courseSelect"><option value="all">كل المقررات</option></select></div>
         <div class="field hidden"><label for="yearSelect">سنة الاختبار</label><select id="yearSelect"><option value="all">كل السنوات</option></select></div>
       </div>
-      <div class="start-note">تُحفظ نتائجك على هذا الجهاز فقط.</div>
+      <div id="resultsStorageNote" class="start-note">تُحفظ نتائجك على هذا الجهاز فقط.</div>
       <div class="start-actions"><button id="startBtn" class="btn btn-primary" type="button">ابدأ الاختبار</button></div>
 
       </section>
@@ -1326,6 +1326,30 @@ function openInfo(kind) {
   }
 
   if (kind === "account") {
+    if (studentSession) {
+      const profile = studentSession.profile || {};
+      const history = readResults();
+      p.textContent = "بيانات حساب المتصفح المرتبط باسم المستخدم الثابت.";
+      body.append(p);
+      const card = document.createElement("article");
+      card.className = "history-entry";
+      const name = document.createElement("h3");
+      name.textContent = profile.displayName || "حساب الطالب";
+      const username = document.createElement("p");
+      username.textContent = "اسم المستخدم الثابت: " + (profile.username || studentSession.loginUsername || "—");
+      const level = document.createElement("p");
+      level.textContent = profile.levelName || (profile.levelId ? "المستوى رقم " + profile.levelId : "مستوى دراسي");
+      const role = document.createElement("p");
+      role.textContent = profile.role === "admin" ? "حساب الإدارة" : "حساب طالب";
+      card.append(name, username, level, role);
+      body.append(card);
+      const note = document.createElement("p");
+      note.textContent = "النتائج المحفوظة على هذا الجهاز: " + arabicNum(history.length) +
+        ". نتائج المتصفح لا تتزامن تلقائيًا مع سجل Telegram.";
+      body.append(note);
+      $("infoDialog").classList.remove("hidden");
+      return;
+    }
     p.textContent = "جار تحميل بيانات حسابك وتقدمك المحفوظ…";
     body.append(p);
     studentApi("me").then((data) => {
@@ -1576,7 +1600,7 @@ async function activateStudent(){
    if (!available) return;
  }
  $("authPanel").classList.add("hidden");$("authPanel").setAttribute("aria-hidden","true");$("menuBtn").classList.remove("hidden");$("authUserbar").classList.remove("hidden");$("authWelcome").textContent="مرحبًا "+(studentSession.profile.displayName||studentSession.profile.username)+" — "+(studentSession.profile.levelName||"مستواك الدراسي");
- $("start").classList.remove("hidden");
+ $("start").classList.remove("hidden");$("resultsStorageNote").textContent="تُحفظ نتائج الاختبارات على هذا الجهاز فقط حاليًا.";
  try{await loadCatalogFromSupabase();$("connectionStatus").textContent="الحساب معتمد";}
  catch(e){$("start").classList.add("hidden");$("authPanel").classList.remove("hidden");$("authPanel").setAttribute("aria-hidden","false");showAuthMessage(e.message,"error");}
 }
@@ -1835,6 +1859,7 @@ if (telegramLaunch) {
   $("authUserbar").classList.add("hidden");
   $("menuBtn").classList.remove("hidden");
   $("start").classList.remove("hidden");
+  $("resultsStorageNote").textContent = "يُربط تقدمك ونتائجك تلقائيًا بحساب Telegram.";
 
   ensureSiteAvailable().then(available => {
     if (!available) return;

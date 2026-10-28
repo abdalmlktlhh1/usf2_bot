@@ -1314,14 +1314,24 @@ function openInfo(kind) {
   if (kind === "leaderboard") {
     p.textContent = "جارٍ تحميل ترتيب الطلاب حسب عدد النماذج المكتملة…";
     body.append(p);
-    studentApi("leaderboard").then((data) => {
+    const leaderboardRequest = telegramLaunch
+      ? studentApi("leaderboard")
+      : fetch(SUPABASE_URL + "/functions/v1/public-leaderboard", {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+        }).then(async response => {
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || "تعذر تحميل لوحة الصدارة.");
+          return { leaders: result.leaderboard || [], totalStudents: result.totalStudents || 0 };
+        });
+    leaderboardRequest.then((data) => {
       body.replaceChildren();
       const rows = Array.isArray(data.leaders) ? data.leaders : Array.isArray(data.leaderboard) ? data.leaderboard : [];
       if (!rows.length) { const empty=document.createElement("p"); empty.textContent="لا توجد اختبارات مكتملة كافية لعرض لوحة الصدارة بعد."; body.append(empty); return; }
       const intro=document.createElement("p");intro.textContent="الترتيب حسب عدد النماذج المختلفة التي أكملها كل طالب، وليس عدد مرات إعادة النموذج.";body.append(intro);
       const list=document.createElement("div");list.className="leaderboard-list";
       rows.forEach((item,index)=>{const row=document.createElement("article");row.className="history-entry leaderboard-row";const rank=document.createElement("strong");rank.className="leaderboard-rank";rank.textContent=index===0?"🥇":index===1?"🥈":index===2?"🥉":String(index+1);const info=document.createElement("div");info.className="leaderboard-info";const name=document.createElement("h4");name.textContent=item.displayName||"طالب";const username=document.createElement("p");username.textContent=item.username?"@"+item.username:"طالب";const count=document.createElement("span");count.className="profile-badge";count.textContent=arabicNum(item.completedModels||0)+" نموذج مكتمل";info.append(name,username,count);row.append(rank,info);list.append(row);});body.append(list);
-    }).catch(() => { body.replaceChildren(); const error=document.createElement("p");error.textContent="تعذر تحميل لوحة الصدارة الآن. افتح المنصة من Telegram ثم أعد المحاولة.";body.append(error); });
+    }).catch(() => { body.replaceChildren(); const error=document.createElement("p");error.textContent="تعذر تحميل لوحة الصدارة الآن. تحقق من الاتصال ثم أعد المحاولة.";body.append(error); });
     $("infoDialog").classList.remove("hidden");return;
   }
 

@@ -42,6 +42,23 @@ td{font-size:.91rem}tr:last-child td{border-bottom:0}
 .row-actions{display:flex;flex-wrap:wrap;gap:5px}
 .row-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.row-actions .btn{min-height:36px;padding:7px 10px;font-size:.82rem;white-space:nowrap}
 @media(max-width:640px){.row-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.row-actions .btn{width:100%;min-width:0}.table-wrap{overflow-x:auto}}
+.presence-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.presence-panel{min-width:0;padding:15px;background:#fff;border:1px solid var(--line);border-radius:16px}
+.presence-panel.wide{grid-column:1/-1}
+.presence-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.presence-head h3{margin:0;font-size:1rem}
+.presence-count{display:inline-flex;align-items:center;justify-content:center;min-width:29px;height:27px;padding:0 8px;border-radius:999px;background:#e8f4ec;color:#176b49;font-weight:850;font-size:.86rem}
+.presence-list{display:grid;gap:7px}
+.presence-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:9px 10px;border:1px solid #edf1ed;border-radius:12px;background:#fbfcfb;min-width:0}
+.presence-copy{min-width:0}
+.presence-name{display:block;font-weight:800;overflow-wrap:anywhere}
+.presence-detail,.presence-time{display:block;color:var(--muted);font-size:.78rem;overflow-wrap:anywhere}
+.presence-time{text-align:left;white-space:nowrap;flex:0 0 auto}
+.presence-empty{padding:18px 10px;text-align:center;color:var(--muted);font-size:.88rem}
+.presence-live{display:inline-flex;align-items:center;gap:5px;color:#176b49;font-size:.76rem;font-weight:800;white-space:nowrap}
+.presence-dot{width:8px;height:8px;border-radius:50%;background:#2c9b61;box-shadow:0 0 0 3px #2c9b611c}
+@media(max-width:640px){.presence-grid{grid-template-columns:1fr}.presence-panel.wide{grid-column:auto}.presence-time{font-size:.72rem}}
+
 .empty{padding:30px 15px;text-align:center;color:var(--muted)}
 .search{width:min(100%,330px);padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;outline:none}.search:focus,input:focus,select:focus,textarea:focus{border-color:#72a58e;box-shadow:0 0 0 3px #176b5814;outline:none}
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
@@ -133,6 +150,8 @@ textarea{min-height:86px;resize:vertical}
   let questionTotal = 0;
   let questionSearchTimer = null;
   let menuItems = [];
+  let visitorRefreshTimer = null;
+  let visitorRefreshBusy = false;
 
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, (ch) => ({
@@ -239,6 +258,95 @@ textarea{min-height:86px;resize:vertical}
     return startPage('صيانة الموقع','إيقاف ظهور منصة إحسان للطلاب مؤقتًا، ثم إعادتها بنقرة واحدة.','تحديث الحالة','refreshMaintenance',false) +
       '<div class="panel maintenance-panel"><div class="maintenance-icon">🛠️</div><span class="status ' + (enabled ? 'warn' : '') + '">' + (enabled ? 'الموقع تحت الصيانة' : 'الموقع يعمل بشكل طبيعي') + '</span><h3>' + (enabled ? 'وضع الصيانة مفعّل' : 'المنصة متاحة للطلاب') + '</h3><p class="muted">هذا الإعداد يتحكم في ظهور صفحة الصيانة للزوار، ولا يحذف الأسئلة أو حسابات الطلاب أو نتائجهم.</p><div class="maintenance-state"><span>حالة الموقع</span><strong>' + (enabled ? '🔒 صيانة' : '🟢 يعمل') + '</strong></div><button class="btn ' + (enabled ? 'primary' : 'danger') + '" data-action="toggleMaintenance">' + (enabled ? '✓ إنهاء الصيانة وإظهار الموقع' : '🛠️ تفعيل وضع الصيانة') + '</button><p class="hint">يستطيع المدير الرئيسي فقط تغيير هذه الحالة.</p></div>';
   }
+  function adminDate(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('ar-YE');
+  }
+  function visitorName(row) {
+    return row.displayName || row.telegramName || row.accountUsername ||
+      (row.telegramUsername ? '@' + row.telegramUsername : 'مستخدم تيليجرام');
+  }
+  function visitorDetail(row) {
+    const parts = [];
+    if (row.accountUsername) parts.push('حساب المنصة: ' + row.accountUsername);
+    if (row.telegramUsername) parts.push('@' + row.telegramUsername);
+    return parts.join(' · ') || 'دخول عبر تيليجرام';
+  }
+  function presenceRow(name, detail, time, online = false) {
+    return '<div class="presence-row"><div class="presence-copy"><span class="presence-name">' +
+      escapeHtml(name) + '</span><span class="presence-detail">' + escapeHtml(detail) +
+      '</span></div><span class="presence-time">' +
+      (online ? '<span class="presence-live"><i class="presence-dot"></i>متصل الآن</span>' : escapeHtml(time)) +
+      '</span></div>';
+  }
+  function presenceList(rows, emptyText) {
+    return rows.length ? '<div class="presence-list">' + rows.join('') + '</div>' :
+      '<div class="presence-empty">' + escapeHtml(emptyText) + '</div>';
+  }
+  function renderVisitorPresence() {
+    if (!state?.user?.isOwner) return '';
+    const analytics = state.visitorAnalytics || {};
+    const visitors = Array.isArray(analytics.visitors) ? analytics.visitors : [];
+    const online = visitors.filter((row) => row.isOnline === true);
+    const recentActivity = visitors.slice(0, 8);
+    const latestStudents = (Array.isArray(state.students) ? state.students : [])
+      .slice().sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 8);
+
+    const onlineRows = online.slice(0, 12).map((row) =>
+      presenceRow(visitorName(row), visitorDetail(row), '', true));
+    const activityRows = recentActivity.map((row) =>
+      presenceRow(visitorName(row), visitorDetail(row), adminDate(row.lastSeen), row.isOnline === true));
+    const studentRows = latestStudents.map((row) => presenceRow(
+      row.displayName || row.username || 'طالب',
+      [row.username ? 'اسم الدخول: ' + row.username : '', row.levelName || 'لم يحدد المستوى',
+       row.telegramLinked ? 'مرتبط بتيليجرام' : 'حساب متصفح'].filter(Boolean).join(' · '),
+      adminDate(row.createdAt),
+      false
+    ));
+
+    return '<div class="presence-grid">' +
+      '<section class="presence-panel"><div class="presence-head"><h3>المستخدمون المتواجدون الآن</h3><span class="presence-count">' +
+      escapeHtml(analytics.currentUsers ?? state.stats?.currentUsers ?? online.length) +
+      '</span></div>' + presenceList(onlineRows, 'لا يوجد مستخدمون نشطون خلال آخر 90 ثانية.') +
+      (online.length > 12 ? '<p class="hint">يعرض آخر 12 مستخدمًا من المتواجدين حاليًا.</p>' : '') +
+      '<p class="hint">يُحدّث الحضور تلقائيًا كل 30 ثانية.</p></section>' +
+      '<section class="presence-panel"><div class="presence-head"><h3>أحدث الحسابات المسجلة</h3><span class="presence-count">' +
+      escapeHtml(latestStudents.length) + '</span></div>' +
+      presenceList(studentRows, 'لا توجد حسابات طلاب مسجلة بعد.') + '</section>' +
+      '<section class="presence-panel wide"><div class="presence-head"><h3>آخر نشاط للمستخدمين</h3><span class="presence-count">' +
+      escapeHtml(recentActivity.length) + '</span></div>' +
+      presenceList(activityRows, 'لا توجد زيارات مسجلة حتى الآن.') +
+      '<p class="hint">آخر ظهور بحسب نبضات تيليجرام الموثقة، وليس بحسب وقت تسجيل الحساب.</p></section>' +
+      '<div style="grid-column:1/-1;display:flex;justify-content:flex-start"><button class="btn secondary" data-action="refreshVisitors">↻ تحديث المستخدمين الآن</button></div>' +
+      '</div>';
+  }
+
+  async function refreshVisitorPresence(showFeedback = false, refreshStudents = true) {
+    if (!state?.user?.isOwner || visitorRefreshBusy) return;
+    visitorRefreshBusy = true;
+    try {
+      const [analytics, studentResult] = await Promise.all([
+        api('visitorList'),
+        refreshStudents ? api('listStudents') : Promise.resolve(null)
+      ]);
+      if (!state) return;
+      state.visitorAnalytics = analytics;
+      if (studentResult) state.students = Array.isArray(studentResult.students) ? studentResult.students : [];
+      state.stats = {
+        ...(state.stats || {}),
+        totalVisitors: analytics.totalVisitors ?? state.stats?.totalVisitors,
+        currentUsers: analytics.currentUsers ?? state.stats?.currentUsers
+      };
+      if (activePage === 'dashboard') render();
+      if (showFeedback) showNotice('تم تحديث قائمة المستخدمين.', true);
+    } catch (error) {
+      if (showFeedback) showNotice(error.message || 'تعذر تحديث قائمة المستخدمين.');
+    } finally {
+      visitorRefreshBusy = false;
+    }
+  }
+
   function renderDashboard() {
     const stats = state.stats || {};
     const statCards = [
@@ -258,7 +366,9 @@ textarea{min-height:86px;resize:vertical}
     } else {
       html += '<p class="hint">تُقيد العمليات بالمقررات والصلاحيات التي منحها لك المدير الرئيسي.</p>';
     }
-    html += '</div><div class="panel" style="margin-top:12px"><h3>سيناريوهات الإدارة</h3><p class="muted" style="margin:0">يمكنك إدارة الهيكل الأكاديمي، وإضافة أسئلة أو تعديلها أو أرشفتها، وتحديد ما يظهر للطلاب. صلاحية إدارة المشرفين وإسناد الصلاحيات مخصصة للمدير الرئيسي وحده.</p></div>';
+    html += '</div>';
+    html += renderVisitorPresence();
+    html += '<div class="panel" style="margin-top:12px"><h3>سيناريوهات الإدارة</h3><p class="muted" style="margin:0">يمكنك إدارة الهيكل الأكاديمي، وإضافة أسئلة أو تعديلها أو أرشفتها، وتحديد ما يظهر للطلاب. صلاحية إدارة المشرفين وإسناد الصلاحيات مخصصة للمدير الرئيسي وحده.</p></div>';
     return html;
   }
 
@@ -470,6 +580,11 @@ textarea{min-height:86px;resize:vertical}
   async function reload(keepPage = true) {
     const result = await api('dashboard');
     state = result;
+    if (state.user?.isOwner && !visitorRefreshTimer && window.Telegram?.WebApp?.Serverless?.call) {
+      visitorRefreshTimer = setInterval(() => {
+        if (activePage === 'dashboard' && !document.hidden) refreshVisitorPresence(false, false);
+      }, 30000);
+    }
     state.questions = [];
     state.models = Array.isArray(result.models) ? result.models : [];
     questionTotal = Number(result.questionCount) || 0;
@@ -496,7 +611,7 @@ textarea{min-height:86px;resize:vertical}
       state.menuItems = menuItems;
       if (activePage === 'botMenu') render();
       if (activePage === 'maintenance' && state.user?.isOwner) render();
-      if (activePage === 'students') render();
+      if (activePage === 'students' || (activePage === 'dashboard' && state.user?.isOwner)) render();
     }).catch(() => {});
     state.menuItems = menuItems;
     $('botMenuNav').hidden = !result.canManageModerators;
@@ -890,6 +1005,11 @@ textarea{min-height:86px;resize:vertical}
         showNotice(suspended ? 'تمت إعادة تفعيل الحساب.' : 'تم إيقاف الحساب.', true);
         await reload(true);
       } catch (error) { showNotice(error.message || 'تعذر تحديث حالة الحساب.'); }
+      return;
+    }
+    if (action === 'refreshVisitors') {
+      if (!state?.user?.isOwner) { showNotice('عرض بيانات الحضور مخصص للمدير الرئيسي.'); return; }
+      await refreshVisitorPresence(true);
       return;
     }
     if (action === 'refreshMaintenance') {

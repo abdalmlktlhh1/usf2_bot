@@ -68,3 +68,19 @@ test('كلمة مرور المتصفح اختيارية وتُضبط من الح
   assert.doesNotMatch(studentAuth, /حسابك غير معتمد حاليًا/);
   assert.match(studentAuth, /\["suspended","blocked"\]/);
 });
+
+
+test('تجديد الجلسة مرة واحدة عند انتهاء رمز الفهرس قبل إظهار فشل تحميل المستويات', () => {
+  assert.match(miniApp, /async function fetchCatalogWithSession\(url, cacheMode = ""\)/);
+  assert.match(miniApp, /response\.status === 401 && studentSession\?\.refreshToken && await refreshBrowserSession\(\)/);
+  assert.match(miniApp, /fetchCatalogWithSession\(SUPABASE_URL \+ "\/functions\/v1\/public-catalog"\)/);
+  assert.match(miniApp, /fetchCatalogWithSession\(url, "no-store"\)/);
+});
+
+test('فشل تهيئة Telegram يعرض زر إعادة محاولة بدلاً من ترك الواجهة مخفية', () => {
+  assert.match(miniApp, /function showTelegramStartupError\(error\)/);
+  assert.match(miniApp, /id = "telegramRetryBtn"/);
+  assert.match(miniApp, /waitForTelegramServerless\(150\)/);
+  assert.match(miniApp, /runTelegramAccountAuth\(\)/);
+  assert.match(miniApp, /\.catch\(\(error\) => showTelegramStartupError\(error\)\)/);
+});

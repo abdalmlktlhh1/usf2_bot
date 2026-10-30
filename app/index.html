@@ -1526,7 +1526,7 @@ function initBrowse() {
   $("drawerAccountBtn").addEventListener("click", () => openInfo("account"));
   $("drawerLeaderboardBtn").addEventListener("click", () => openInfo("leaderboard"));
   $("drawerAboutBtn").addEventListener("click", () => openInfo("about"));
-  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-telegram-auth-a"; });
+  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-student-management-a"; });
   const telegramWebApp = window.Telegram && window.Telegram.WebApp;
   if (telegramWebApp) telegramWebApp.ready();
   waitForTelegramServerless().then((readyApp) => {

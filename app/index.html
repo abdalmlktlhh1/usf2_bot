@@ -3,25 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#2347ad">
-<meta name="description" content="منصة الاختبارات التفاعلية للجنة العلمية: تصفح المستويات والمقررات والنماذج، اختبر نفسك بترتيب عشوائي، وتابع تقدمك ونتائجك عبر حسابك.">
+<meta name="theme-color" content="#075985">
+<meta name="application-name" content="إحسان — منصة العلم والإتقان">
+<meta name="description" content="منصة الاختبارات التفاعلية للجنة العلمية — إحسان، منصة العلم والإتقان، كلية الشريعة والقانون، جامعة صنعاء.">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<title>منصة الاختبارات | اللجنة العلمية</title>
+<title>إحسان — منصة العلم والإتقان</title>
 <style>
 :root{--ink:#17332e;--muted:#62766f;--green:#176b58;--deep:#123b34;--mint:#e9f4ee;--gold:#c69445;--paper:#f3f6f1;--line:#dce6df;--white:#fff;--red:#a6423c;--blue:#286ce5;--shadow:0 18px 48px rgba(21,57,48,.09);--radius:22px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 92% 0%,#e3efe7 0,transparent 35%),var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.7}button,select{font:inherit}.wrap{width:min(100%,900px);margin:auto;padding:22px 18px 48px}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:.9rem}.brand{display:inline-flex;align-items:center;gap:10px;font-weight:850;color:var(--green)}.brand-mark{width:38px;height:38px;border-radius:14px;background:var(--green);color:white;display:grid;place-items:center;font-weight:900;box-shadow:0 6px 14px #176b5830}.hero{margin:20px 0;padding:27px 30px;border-radius:26px;background:linear-gradient(125deg,#123b34,#1d6a57);color:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff24;border-radius:50%;left:-60px;top:-125px;box-shadow:0 0 0 26px #ffffff09,0 0 0 52px #ffffff07;pointer-events:none}.eyebrow{font-size:.84rem;color:#d2e8dd;margin:0 0 5px;font-weight:700}.hero h1{margin:0;font-size:clamp(1.7rem,4vw,2.45rem);line-height:1.35;position:relative;z-index:1}.hero p:not(.eyebrow){margin:8px 0 0;color:#e0eee8;max-width:720px;position:relative;z-index:1}.hero-credit{display:inline-block;margin-top:14px;padding:4px 11px;border:1px solid #ffffff38;border-radius:999px;color:#f4ead7;font-size:.84rem;font-weight:700}.panel{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:23px;box-shadow:0 6px 24px rgba(25,55,48,.045)}.start-panel{max-width:800px;margin:0 auto}.section-title{font-size:1.2rem;margin:0}.subtle{color:var(--muted)}.lead{margin:5px 0 18px;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:18px 0}.stat{border:1px solid var(--line);background:#fbfcfa;border-radius:15px;padding:12px 8px;text-align:center}.stat strong{display:block;color:var(--green);font-size:1.12rem;line-height:1.5}.stat span{font-size:.81rem;color:var(--muted)}.filters{display:grid;grid-template-columns:1.45fr .8fr .8fr;gap:12px;margin:20px 0 14px}.field label{display:block;margin:0 0 6px;font-size:.87rem;font-weight:750;color:#41594f}.field select{width:100%;min-height:46px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}select:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid #bf9653;outline-offset:2px}.check-row{display:flex;align-items:flex-start;gap:10px;padding:13px 14px;border:1px solid #ead8b7;border-radius:14px;background:#fff9ed;color:#624b2b}.check-row input{width:19px;height:19px;margin:3px 0 0;accent-color:var(--green);flex:0 0 auto}.check-row strong{display:block;color:#754f17}.check-row span{font-size:.87rem}.start-note{margin-top:13px;padding:12px 14px;border-radius:14px;background:#f3f7f4;color:var(--muted);font-size:.87rem}.start-note strong{color:var(--green)}.start-actions{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:19px}.btn{min-height:46px;border:1px solid transparent;border-radius:13px;padding:10px 19px;font-weight:800;cursor:pointer;transition:transform .16s ease,background .16s ease}.btn:hover:not(:disabled){transform:translateY(-1px)}.btn:disabled{opacity:.48;cursor:not-allowed;transform:none}.btn-primary{background:var(--green);color:#fff;box-shadow:0 5px 14px #176b5820}.btn-primary:hover:not(:disabled){background:#115a49}.btn-secondary{background:#edf4ef;color:var(--green);border-color:var(--line)}.btn-correct{background:#fff8d4;border:1.5px solid #e8c247;color:#a47711}.btn-quiet{background:#fff;color:var(--muted);border-color:var(--line)}.footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:22px}.hidden{display:none!important}
-body.quiz-active{min-height:100dvh;background:#edf2f5;color:#172c43;line-height:1.6}body.quiz-active .wrap{width:min(100%,780px);padding:12px 14px calc(100px + env(safe-area-inset-bottom))}body.quiz-active .topline,body.quiz-active .hero,body.quiz-active .footer{display:none}.exam-shell{position:sticky;top:0;z-index:11;margin:0 0 14px;padding:14px 15px 11px;background:#fff;border:1px solid #dce3ea;border-radius:20px;box-shadow:0 3px 12px #1d38500a}.exam-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:9px}.exam-title{grid-column:1;margin:0;color:#1b344d;font-size:clamp(1rem,4vw,1.25rem);line-height:1.4;font-weight:800}.timer-chip{grid-column:2;grid-row:1;display:flex;align-items:center;gap:7px;white-space:nowrap;padding:6px 10px;border:1px solid #dce3eb;border-radius:10px;background:#f3f6f9;color:#4b5d70;font-variant-numeric:tabular-nums;font-size:.9rem}.timer-chip svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.exam-close{grid-column:3;grid-row:1;width:40px;height:40px;border:0;border-radius:13px;background:#fff1f1;color:#d84c4c;font-size:1.75rem;line-height:1;cursor:pointer}.exam-close:hover{background:#ffe5e5}.progress-track{height:7px;margin:12px 0 9px;background:#e9eef3;border-radius:99px;overflow:hidden}.progress-fill{height:100%;width:0;background:#286ce5;border-radius:inherit;transition:width .25s ease}.exam-meta-row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding-top:8px;border-top:1px solid #e8edf1}.exam-tags,.exam-tools{display:flex;align-items:center;gap:7px}.exam-tags{flex-wrap:wrap;color:#354a60;font-size:.8rem;font-weight:700}.exam-tag{padding:4px 9px;border-radius:999px;background:#fbe8ed;color:#714b59;white-space:nowrap}.exam-tag.year{background:#f16e8a;color:#fff}.exam-tools{flex-shrink:0;direction:ltr}.exam-tool{width:33px;height:33px;display:grid;place-items:center;border:0;border-radius:9px;background:transparent;color:#69798a;cursor:pointer}.exam-tool:hover,.exam-tool[aria-pressed="true"]{background:#eff4fa;color:#286ce5}.exam-tool svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.exam-tool.saved{color:#b77c18;background:#fff6df}.question-card{min-height:calc(100dvh - 310px);padding:22px 23px;border:1px solid #dce3ea;border-radius:21px;background:#fff;box-shadow:0 3px 12px #1d38500a}.q-kicker{display:flex;justify-content:flex-start;gap:.3em;margin:0;color:#778493;font-size:.95rem;font-weight:750}.question-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;color:#64758a;font-size:.78rem}.question-meta span{padding:3px 8px;border-radius:8px;background:#f2f5f8}.question-text{margin:22px 0 20px;color:#172c43;font-size:clamp(1.3rem,4.5vw,1.72rem);line-height:1.72;font-weight:780;white-space:pre-line;overflow-wrap:anywhere}.choices{display:grid;gap:10px}.choice{width:100%;min-height:58px;display:flex;align-items:center;gap:13px;text-align:right;color:#1c3148;background:#f0f4f8;border:1.5px solid #dce4ec;border-radius:15px;padding:12px 14px;cursor:pointer;transition:border-color .16s,background .16s}.choice:hover:not(:disabled){border-color:#9bb7dc;background:#f4f7fb}.choice:disabled{cursor:default}.choice-index{position:relative;flex:0 0 27px;width:27px;height:27px;border:2px solid #707b87;border-radius:50%;color:transparent;font-size:0}.choice.selected{border-color:#4c83dc;background:#eef4ff}.choice.selected .choice-index{border-color:#286ce5}.choice.selected .choice-index:after{content:"";position:absolute;inset:5px;border-radius:50%;background:#286ce5}.choice.correct{border-color:#4caa7d;background:#edf8f1}.choice.wrong{border-color:#d97972;background:#fff1ef}.choice.empty-option{border-style:dashed;background:#f8f8f6;color:#879087}.choice.empty-option .choice-index{border-color:#c7cec9}.choice-text{flex:1;min-width:0;text-align:right;direction:rtl;font-size:1.04rem;line-height:1.6;overflow-wrap:anywhere}.choice-feedback{margin:13px 0 0;padding:11px 13px;border-radius:12px;background:#f2f7f3;color:#276348;font-size:.9rem}.choice-feedback.wrong-feedback{background:#fff1ef;color:#963d37}.quiz-actions{position:fixed;z-index:15;inset:auto 0 0;display:grid;grid-template-columns:1fr .8fr .72fr 1fr;align-items:center;gap:8px;margin:0;padding:10px max(14px,calc((100vw - 752px)/2)) calc(10px + env(safe-area-inset-bottom));border-top:1px solid #dce3eb;background:#fff;box-shadow:0 -4px 15px #20334b0a;direction:ltr}.quiz-actions .btn{width:100%;min-height:53px;padding:8px 7px;border-radius:13px;font-size:.95rem;direction:rtl}.quiz-active #nextBtn{grid-column:1;background:#10a34f;color:#fff}.quiz-active #nextBtn:hover:not(:disabled){background:#0d9146}.quiz-active #correctBtn{grid-column:2}.question-position{grid-column:3;display:flex;align-items:center;justify-content:center;gap:4px;min-height:43px;border:0;background:transparent;color:#273b51;font-weight:800;white-space:nowrap;cursor:pointer}.question-position svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}.quiz-active #prevBtn{grid-column:4;background:#fff;border:1px solid #e1e6eb;color:#667482}.qnav-panel{position:fixed;z-index:21;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));width:min(calc(100% - 24px),752px);max-height:48dvh;overflow:auto;transform:translateX(-50%);margin:0;padding:16px;border:1px solid #dce3eb;border-radius:19px;background:#fff;box-shadow:0 15px 50px #102b4540}.qnav-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.qnav-heading h2{font-size:1rem;margin:0}.legend{display:flex;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:.75rem}.legend-item{display:inline-flex;align-items:center;gap:5px}.legend-dot{width:9px;height:9px;border:1px solid #ccd8d0;border-radius:50%;background:#fff}.legend-dot.answered-dot{background:#82b19b;border-color:#82b19b}.legend-dot.current-dot{background:#286ce5;border-color:#286ce5}.q-nav{display:grid;grid-template-columns:repeat(10,minmax(27px,1fr));gap:6px}.qnav{min-width:0;aspect-ratio:1;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--muted);font:inherit;font-size:.75rem;font-weight:700;cursor:pointer}.qnav.answered{background:#edf6f0;border-color:#c9e0d2;color:#176b58}.qnav.current{background:#286ce5;border-color:#286ce5;color:#fff}.qnav.bookmarked{box-shadow:inset 0 -3px 0 #c69445}.last-warning strong{color:#754f17}.dialog-backdrop{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:18px;background:#1028208a;backdrop-filter:blur(3px)}.dialog{width:min(100%,460px);max-height:88dvh;display:flex;flex-direction:column;overflow:hidden;padding:18px 20px 14px;background:#fff;border-radius:20px;box-shadow:0 24px 70px #061d1740}.dialog #infoTitle{flex:0 0 auto;padding:2px 0 12px;margin:0;border-bottom:1px solid #e7edf3}.dialog #infoBody{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 2px 6px}.dialog .dialog-actions{flex:0 0 auto;margin-top:8px;padding-top:10px;border-top:1px solid #e7edf3;background:#fff}.dialog .dialog-actions .btn{min-height:46px;border-radius:13px;font-weight:800}.dialog h2{font-size:1.2rem;margin:0 0 8px}.dialog p{margin:0;color:var(--muted)}.dialog-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.dialog-actions .btn{flex:1}.result-screen{padding:7px 0 24px}.result-page-card{max-width:760px;margin:0 auto;padding:clamp(20px,4vw,32px);border:1px solid #dce3ea;border-radius:24px;background:#fff;box-shadow:0 14px 38px rgba(24,45,68,.09)}.result-page-head{text-align:center;margin-bottom:19px}.result-page-head h1{margin:0;color:#172c43;font-size:clamp(1.7rem,5vw,2.3rem);line-height:1.35}.result-page-head p{margin:7px 0 0;color:#69798a}.result-score{text-align:center;max-width:560px;margin:0 auto 22px}.score-ring{--score:0deg;width:164px;aspect-ratio:1;border-radius:50%;margin:auto;display:grid;place-items:center;background:conic-gradient(#263a53 var(--score),#e8edf2 var(--score));position:relative}.score-ring:before{content:"";position:absolute;inset:12px;border-radius:50%;background:#fff}.score-center{position:relative;text-align:center;line-height:1.35}.score-center strong{display:block;font-size:2.3rem;color:#c8323a;font-variant-numeric:tabular-nums}.score-center span{font-size:.82rem;color:var(--muted)}.result-sentence{margin:14px 0 0;color:#5e6d7d}.result-meta{display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:5px 11px;border:1px solid #e1e7ed;border-radius:999px;background:#f6f8fa;color:#607184;font-size:.84rem}.result-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.result-stat{padding:10px 7px;border:1px solid #e1e7ed;border-radius:12px;background:#f8fafb;text-align:center}.result-stat strong{display:block;color:#1b344d;font-size:1.05rem}.result-stat span{font-size:.76rem;color:#68798b}.result-accordions{display:grid;gap:9px;margin-top:20px}.result-accordion{overflow:hidden;border:1px solid #dce3eb;border-radius:14px;background:#fff}.result-accordion summary{display:flex;align-items:center;gap:10px;min-height:60px;padding:11px 13px;list-style:none;cursor:pointer;background:#f2f5f9;color:#1b344d;font-weight:800}.result-accordion summary::-webkit-details-marker{display:none}.result-accordion[open] summary{border-bottom:1px solid #dce3eb}.result-accordion-icon{flex:0 0 26px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#e4f3eb;color:#16804e;font-weight:900}.result-accordion.wrong-group .result-accordion-icon{background:#fdeceb;color:#c64242}.result-accordion.blank-group .result-accordion-icon{background:#fff3de;color:#a76a11}.result-accordion.void-group .result-accordion-icon{border-radius:8px;background:#fff3de;color:#a76a11}.result-accordion.model-group .result-accordion-icon{border-radius:8px;background:#e6efff;color:#286ce5}.result-accordion-title{flex:1;min-width:0}.result-accordion-count{min-width:34px;padding:3px 9px;border-radius:999px;background:#fff;color:#344b63;text-align:center;font-variant-numeric:tabular-nums}.result-accordion-chevron{color:#53677d;font-size:1.25rem;transition:transform .18s}.result-accordion[open] .result-accordion-chevron{transform:rotate(180deg)}.result-entries{display:grid;gap:8px;padding:11px}.result-entry{padding:12px 13px;border:1px solid #e4e9ee;border-radius:12px;background:#fff}.result-entry h3{margin:0 0 7px;color:#1c3148;font-size:.94rem;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}.result-entry p{margin:5px 0;color:#637284;line-height:1.65;overflow-wrap:anywhere}.entry-correct{color:#14704f!important;font-weight:750}.entry-wrong{color:#ad3737!important;font-weight:750}.entry-note{font-size:.82rem}.result-empty{margin:0;padding:14px;color:#69798a;text-align:center}.result-page-footer{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:20px}.result-home-btn{min-width:min(100%,260px);background:#286ce5;color:#fff}.result-credit{margin:10px 0 0;color:#7a8795;font-size:.82rem;text-align:center}.quiz-area.finished .quiz-actions{display:none}.question-card.large-text .question-text,.question-card.large-text .choice-text{font-size:1.12em}
+body.quiz-active{min-height:100dvh;background:#edf2f5;color:#172c43;line-height:1.6}body.quiz-active .wrap{width:min(100%,780px);padding:12px 14px calc(100px + env(safe-area-inset-bottom))}body.quiz-active .topline,body.quiz-active .hero,body.quiz-active .footer{display:none}.exam-shell{position:sticky;top:0;z-index:11;margin:0 0 14px;padding:14px 15px 11px;background:#fff;border:1px solid #dce3ea;border-radius:20px;box-shadow:0 3px 12px #1d38500a}.exam-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:9px}.exam-title{grid-column:1;margin:0;color:#1b344d;font-size:clamp(1rem,4vw,1.25rem);line-height:1.4;font-weight:800}.timer-chip{grid-column:2;grid-row:1;display:flex;align-items:center;gap:7px;white-space:nowrap;padding:6px 10px;border:1px solid #dce3eb;border-radius:10px;background:#f3f6f9;color:#4b5d70;font-variant-numeric:tabular-nums;font-size:.9rem}.timer-chip svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.exam-close{grid-column:3;grid-row:1;width:40px;height:40px;border:0;border-radius:13px;background:#fff1f1;color:#d84c4c;font-size:1.75rem;line-height:1;cursor:pointer}.exam-close:hover{background:#ffe5e5}.progress-track{height:7px;margin:12px 0 9px;background:#e9eef3;border-radius:99px;overflow:hidden}.progress-fill{height:100%;width:0;background:#286ce5;border-radius:inherit;transition:width .25s ease}.exam-meta-row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding-top:8px;border-top:1px solid #e8edf1}.exam-tags,.exam-tools{display:flex;align-items:center;gap:7px}.exam-tags{flex-wrap:wrap;color:#354a60;font-size:.8rem;font-weight:700}.exam-tag{padding:4px 9px;border-radius:999px;background:#fbe8ed;color:#714b59;white-space:nowrap}.exam-tag.year{background:#f16e8a;color:#fff}.exam-tools{flex-shrink:0;direction:ltr}.exam-tool{width:33px;height:33px;display:grid;place-items:center;border:0;border-radius:9px;background:transparent;color:#69798a;cursor:pointer}.exam-tool:hover,.exam-tool[aria-pressed="true"]{background:#eff4fa;color:#286ce5}.exam-tool svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.exam-tool.saved{color:#b77c18;background:#fff6df}.question-card{min-height:calc(100dvh - 310px);padding:22px 23px;border:1px solid #dce3ea;border-radius:21px;background:#fff;box-shadow:0 3px 12px #1d38500a}.q-kicker{display:flex;justify-content:flex-start;gap:.3em;margin:0;color:#778493;font-size:.95rem;font-weight:750}.question-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;color:#64758a;font-size:.78rem}.question-meta span{padding:3px 8px;border-radius:8px;background:#f2f5f8}.question-text{margin:22px 0 20px;color:#172c43;font-size:clamp(1.3rem,4.5vw,1.72rem);line-height:1.72;font-weight:780;white-space:pre-line;overflow-wrap:anywhere}.choices{display:grid;gap:10px}.choice{width:100%;min-height:58px;display:flex;align-items:center;gap:13px;text-align:right;color:#1c3148;background:#f0f4f8;border:1.5px solid #dce4ec;border-radius:15px;padding:12px 14px;cursor:pointer;transition:border-color .16s,background .16s}.choice:hover:not(:disabled){border-color:#9bb7dc;background:#f4f7fb}.choice:disabled{cursor:default}.choice-index{position:relative;flex:0 0 27px;width:27px;height:27px;border:2px solid #707b87;border-radius:50%;color:transparent;font-size:0}.choice.selected{border-color:#4c83dc;background:#eef4ff}.choice.selected .choice-index{border-color:#286ce5}.choice.selected .choice-index:after{content:"";position:absolute;inset:5px;border-radius:50%;background:#286ce5}.choice.correct{border-color:#4caa7d;background:#edf8f1}.choice.wrong{border-color:#d97972;background:#fff1ef}.choice.empty-option{border-style:dashed;background:#f8f8f6;color:#879087}.choice.empty-option .choice-index{border-color:#c7cec9}.choice-text{flex:1;min-width:0;text-align:right;direction:rtl;font-size:1.04rem;line-height:1.6;overflow-wrap:anywhere}.choice-feedback{margin:13px 0 0;padding:11px 13px;border-radius:12px;background:#f2f7f3;color:#276348;font-size:.9rem}.choice-feedback.wrong-feedback{background:#fff1ef;color:#963d37}.quiz-actions{position:fixed;z-index:15;inset:auto 0 0;display:grid;grid-template-columns:1fr .8fr .72fr 1fr;align-items:center;gap:8px;margin:0;padding:10px max(14px,calc((100vw - 752px)/2)) calc(10px + env(safe-area-inset-bottom));border-top:1px solid #dce3eb;background:#fff;box-shadow:0 -4px 15px #20334b0a;direction:ltr}.quiz-actions .btn{width:100%;min-height:53px;padding:8px 7px;border-radius:13px;font-size:.95rem;direction:rtl}.quiz-active #nextBtn{grid-column:1;background:#10a34f;color:#fff}.quiz-active #nextBtn:hover:not(:disabled){background:#0d9146}.quiz-active #correctBtn{grid-column:2}.question-position{grid-column:3;display:flex;align-items:center;justify-content:center;gap:4px;min-height:43px;border:0;background:transparent;color:#273b51;font-weight:800;white-space:nowrap;cursor:pointer}.question-position svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}.quiz-active #prevBtn{grid-column:4;background:#fff;border:1px solid #e1e6eb;color:#667482}.qnav-panel{position:fixed;z-index:21;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));width:min(calc(100% - 24px),752px);max-height:48dvh;overflow:auto;transform:translateX(-50%);margin:0;padding:16px;border:1px solid #dce3eb;border-radius:19px;background:#fff;box-shadow:0 15px 50px #102b4540}.qnav-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.qnav-heading h2{font-size:1rem;margin:0}.legend{display:flex;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:.75rem}.legend-item{display:inline-flex;align-items:center;gap:5px}.legend-dot{width:9px;height:9px;border:1px solid #ccd8d0;border-radius:50%;background:#fff}.legend-dot.answered-dot{background:#82b19b;border-color:#82b19b}.legend-dot.current-dot{background:#286ce5;border-color:#286ce5}.q-nav{display:grid;grid-template-columns:repeat(10,minmax(27px,1fr));gap:6px}.qnav{min-width:0;aspect-ratio:1;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--muted);font:inherit;font-size:.75rem;font-weight:700;cursor:pointer}.qnav.answered{background:#edf6f0;border-color:#c9e0d2;color:#176b58}.qnav.current{background:#286ce5;border-color:#286ce5;color:#fff}.qnav.bookmarked{box-shadow:inset 0 -3px 0 #c69445}.last-warning strong{color:#754f17}.dialog-backdrop{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:18px;background:#1028208a;backdrop-filter:blur(3px)}.dialog{width:min(100%,460px);max-height:88dvh;display:flex;flex-direction:column;overflow:hidden;padding:18px 20px 14px;background:#fff;border-radius:20px;box-shadow:0 24px 70px #061d1740}.dialog #infoTitle{flex:0 0 auto;padding:2px 0 12px;margin:0;border-bottom:1px solid #e7edf3}.dialog #infoBody{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 2px 6px}.dialog .dialog-actions{flex:0 0 auto;margin-top:8px;padding-top:10px;border-top:1px solid #e7edf3;background:#fff}.dialog .dialog-actions .btn{min-height:46px;border-radius:13px;font-weight:800}.dialog h2{font-size:1.2rem;margin:0 0 8px}.dialog p{margin:0;color:var(--muted)}.dialog-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.dialog-actions .btn{flex:1}.result-screen{padding:7px 0 24px}.result-page-card{max-width:760px;margin:0 auto;padding:clamp(20px,4vw,32px);border:1px solid #dce3ea;border-radius:24px;background:#fff;box-shadow:0 14px 38px rgba(24,45,68,.09)}.result-page-head{text-align:center;margin-bottom:19px}.result-page-head h1{margin:0;color:#172c43;font-size:clamp(1.7rem,5vw,2.3rem);line-height:1.35}.result-page-head p{margin:7px 0 0;color:#69798a}.result-score{text-align:center;max-width:560px;margin:0 auto 22px}.score-ring{--score:0deg;width:164px;aspect-ratio:1;border-radius:50%;margin:auto;display:grid;place-items:center;background:conic-gradient(#263a53 var(--score),#e8edf2 var(--score));position:relative}.score-ring:before{content:"";position:absolute;inset:12px;border-radius:50%;background:#fff}.score-center{position:relative;text-align:center;line-height:1.35}.score-center strong{display:block;font-size:2.3rem;color:#c8323a;font-variant-numeric:tabular-nums}.score-center span{font-size:.82rem;color:var(--muted)}.result-sentence{margin:14px 0 0;color:#5e6d7d}.result-meta{display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:5px 11px;border:1px solid #e1e7ed;border-radius:999px;background:#f6f8fa;color:#607184;font-size:.84rem}.result-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.result-stat{padding:10px 7px;border:1px solid #e1e7ed;border-radius:12px;background:#f8fafb;text-align:center}.result-stat strong{display:block;color:#1b344d;font-size:1.05rem}.result-stat span{font-size:.76rem;color:#68798b}.result-accordions{display:grid;gap:9px;margin-top:20px}.result-accordion{overflow:hidden;border:1px solid #dce3eb;border-radius:14px;background:#fff}.result-accordion summary{display:flex;align-items:center;gap:10px;min-height:60px;padding:11px 13px;list-style:none;cursor:pointer;background:#f2f5f9;color:#1b344d;font-weight:800}.result-accordion summary::-webkit-details-marker{display:none}.result-accordion[open] summary{border-bottom:1px solid #dce3eb}.result-accordion-icon{flex:0 0 26px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#e4f3eb;color:#16804e;font-weight:900}.result-accordion.wrong-group .result-accordion-icon{background:#fdeceb;color:#c64242}.result-accordion.blank-group .result-accordion-icon{background:#fff3de;color:#a76a11}.result-accordion.void-group .result-accordion-icon{border-radius:8px;background:#fff3de;color:#a76a11}.result-accordion.model-group .result-accordion-icon{border-radius:8px;background:#e6efff;color:#286ce5}.result-accordion-title{flex:1;min-width:0}.result-accordion-count{min-width:34px;padding:3px 9px;border-radius:999px;background:#fff;color:#344b63;text-align:center;font-variant-numeric:tabular-nums}.result-accordion-chevron{color:#53677d;font-size:1.25rem;transition:transform .18s}.result-accordion[open] .result-accordion-chevron{transform:rotate(180deg)}.result-entries{display:grid;gap:8px;padding:11px}.result-entry{padding:12px 13px;border:1px solid #e4e9ee;border-radius:12px;background:#fff}.result-entry h3{margin:0 0 7px;color:#1c3148;font-size:.94rem;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}.result-entry p{margin:5px 0;color:#637284;line-height:1.65;overflow-wrap:anywhere}.entry-correct{color:#14704f!important;font-weight:750}.entry-wrong{color:#ad3737!important;font-weight:750}.entry-note{font-size:.82rem}.result-empty{margin:0;padding:14px;color:#69798a;text-align:center}.result-page-footer{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:20px}
+.student-achievements{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 18px}.student-achievement{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #dfe7e4;border-radius:12px;background:#f6faf7;min-width:0}.student-achievement>span{font-size:1.35rem;flex:0 0 auto}.student-achievement>div{display:grid;gap:2px;min-width:0}.student-achievement b{font-size:.87rem}.student-achievement small{font-size:.76rem;line-height:1.5;color:#65756f}.student-achievement.locked{background:#f7f8f7;filter:saturate(.25);opacity:.76}.mistake-course-card{display:grid;gap:8px;margin:10px 0}.mistake-course-card h3{margin:0}.mistake-course-card .btn{width:100%}@media(max-width:480px){.student-achievements{grid-template-columns:1fr}}.result-home-btn{min-width:min(100%,260px);background:#286ce5;color:#fff}.result-credit{margin:10px 0 0;color:#7a8795;font-size:.82rem;text-align:center}.quiz-area.finished .quiz-actions{display:none}.question-card.large-text .question-text,.question-card.large-text .choice-text{font-size:1.12em}
 @media(max-width:700px){.q-nav{grid-template-columns:repeat(8,minmax(26px,1fr))}.qnav-heading{align-items:flex-start;flex-direction:column}.filters{grid-template-columns:1fr 1fr}.filters .field:first-child{grid-column:1/-1}}
 @media(max-width:520px){.wrap{padding:14px 12px 32px}.topline{font-size:.78rem}.brand-mark{width:34px;height:34px}.hero{padding:22px 18px;border-radius:21px;margin-top:15px}.panel{padding:17px}.stats{gap:6px}.stat{padding:10px 4px}.stat span{font-size:.72rem}.filters{gap:8px}.field select{font-size:.88rem;padding:8px}.start-actions{align-items:stretch}.start-actions .btn{width:100%}.quiz-active .wrap{padding:9px 11px calc(90px + env(safe-area-inset-bottom))}.exam-shell{padding:12px 12px 9px;margin-bottom:11px;border-radius:18px}.exam-toolbar{gap:6px}.exam-close{width:36px;height:36px}.timer-chip{padding:5px 7px;font-size:.82rem}.exam-meta-row{gap:4px}.exam-tags{gap:4px;font-size:.72rem}.exam-tag{padding:4px 7px}.exam-tools{gap:0}.exam-tool{width:30px;height:30px}.question-card{min-height:calc(100dvh - 320px);padding:19px 15px}.question-text{margin:20px 0 18px;font-size:1.25rem}.choice{min-height:55px;padding:11px 12px;border-radius:14px}.choice-text{font-size:.98rem}.quiz-actions{grid-template-columns:1fr .78fr .64fr 1fr;gap:5px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}.quiz-actions .btn{min-height:49px;padding:6px 3px;font-size:.84rem}.question-position{font-size:.79rem}.qnav-panel{bottom:calc(78px + env(safe-area-inset-bottom));padding:13px}.q-nav{grid-template-columns:repeat(7,minmax(25px,1fr));gap:5px}.qnav{font-size:.69rem}.dialog{padding:20px 17px}.dialog-actions{flex-direction:column}.dialog-actions .btn{width:100%}.result-page-card{padding:20px 14px;border-radius:20px}.score-ring{width:150px}.result-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.result-accordion summary{min-height:58px;padding:10px;gap:8px;font-size:.9rem}.result-entries{padding:8px}.result-entry{padding:10px}.result-sentence{font-size:.94rem}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 /* واجهة بنك النماذج: ملف واحد مستقل بلا موارد خارجية */
-:root{--ink:#26364a;--muted:#697585;--green:#2347ad;--deep:#203b88;--mint:#edf4ff;--paper:#f1f3f7;--line:#e5e9f0;--blue:#2863df;--shadow:0 8px 28px #273b6410;--radius:22px}
+:root{--ink:#123b58;--muted:#697585;--green:#075985;--deep:#06456b;--mint:#edf7fb;--paper:#f4f8fb;--line:#e1e9ee;--blue:#0875a8;--shadow:0 8px 28px #273b6410;--radius:22px}
 body{background:var(--paper);color:var(--ink)}
 .wrap{width:min(100%,860px);padding:0 18px 32px}
 .app-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0;border-bottom:1px solid #e1e5ec}
 .app-brand{display:flex;align-items:center;gap:10px;color:#203b88;font-size:1.25rem;font-weight:850}
-.app-logo{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:#e9efff;color:#2347ad}
-.app-logo svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.app-logo{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;border-radius:15px;background:linear-gradient(145deg,#0875a8 0%,#06456b 100%);color:#f5c94f;box-shadow:inset 0 0 0 1px #f5d66d,0 5px 14px #06456b35;font-size:25px;line-height:1}
+.app-logo svg{display:none}
 .icon-button{display:grid;place-items:center;width:44px;height:44px;border:1px solid #e2e7ef;border-radius:12px;background:#fff;color:#263d68;font-size:1.5rem;cursor:pointer}
 .offline-tag{display:inline-flex;gap:6px;align-items:center;font-size:.73rem;font-weight:750;color:#187157;background:#e4f5ee;padding:5px 9px;border-radius:99px}
 .offline-tag:before{content:'';width:6px;height:6px;border-radius:50%;background:#1c8d68}
@@ -39,10 +41,12 @@ body{background:var(--paper);color:var(--ink)}
 .course-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}.course-button{display:flex;align-items:center;gap:11px;width:100%;min-height:83px;padding:13px;text-align:right;border:1px solid #e3e8f2;border-radius:15px;background:#fff;color:var(--ink);cursor:pointer}.course-button:hover,.model-button:hover{border-color:#99b1e9;background:#f8faff}.course-symbol{display:grid;place-items:center;flex:0 0 34px;height:39px;border-radius:10px;background:#eaf1ff;color:#3b6ed1}.course-symbol svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}.course-copy{flex:1;min-width:0}.course-copy strong{display:block;font-size:.9rem;line-height:1.65}.course-copy small{font-size:.74rem;color:#7c8797}.course-button .row-arrow{font-size:1.15rem}
 .year-group+.year-group{margin-top:24px}.year-heading{display:flex;gap:9px;align-items:center;margin:0 0 12px;color:#2347ad;font-size:1.08rem}.year-heading:after{content:'';flex:1;height:1px;background:#e5eaf3}.year-heading small{font-size:.73rem;font-weight:500;color:#7d8798}.model-list{display:grid;gap:9px}.model-button{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border:1px solid #e2e8f4;border-radius:14px;background:#f9fbff;color:var(--ink);text-align:right;cursor:pointer}.model-number{display:grid;place-items:center;flex:0 0 37px;height:42px;border-radius:10px;color:#3268cc;background:#e9f1ff;font-weight:800;font-size:.91rem}.model-copy{flex:1;min-width:0}.model-copy strong{display:block;color:#2d4164;font-size:.92rem}.model-copy small{display:block;color:#748198;font-size:.75rem}.model-source{display:block;font-size:.73rem;color:#718097;overflow-wrap:anywhere;line-height:1.6;margin-top:4px}.selected-summary{display:flex;gap:10px;align-items:flex-start;padding:13px 14px;border-radius:13px;background:#edf4ff;color:#2347ad;margin:14px 0}.selected-summary svg{flex:0 0 21px;width:21px;height:25px;fill:none;stroke:currentColor;stroke-width:1.7}.selected-summary strong{display:block;font-size:.92rem}.selected-summary small{display:block;font-size:.77rem;color:#667fa9}.stats{margin:14px 0}.stat{background:#f9fbff;border-color:#e6ebf3}.stat strong{color:#2347ad}.stat span{font-size:.74rem}.filters{grid-template-columns:1fr;margin:16px 0}.field label{color:#405477}.field select{min-height:50px;border-color:#e0e5ee}.check-row{font-size:.88rem}.start-note{background:#f4f7fc;font-size:.79rem}.start-note strong{color:#345488}.start-actions .btn{width:100%}.btn-primary{background:#2347ad;box-shadow:none}.btn-primary:hover:not(:disabled){background:#1c3b95}.btn-secondary{background:#edf3ff}.start-actions{margin-top:18px}.footer{font-size:.73rem;color:#7f8998}
 .drawer-backdrop{position:fixed;inset:0;background:#13254644;z-index:49;backdrop-filter:blur(2px)}.drawer{position:fixed;right:0;top:0;bottom:0;width:min(84vw,340px);z-index:50;display:flex;flex-direction:column;padding:26px 23px calc(20px + env(safe-area-inset-bottom));background:#fff;box-shadow:-12px 0 40px #1b31551c;overflow:auto}.drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.drawer .app-brand{font-size:1.4rem}.drawer-close{border:0;background:none;color:#718096;font-size:1.7rem;cursor:pointer;min-width:38px;min-height:44px}.drawer-caption{color:#9a9fa9;font-size:.8rem;margin:26px 4px 12px}.drawer-nav{display:grid;gap:9px}.drawer-nav button{display:flex;align-items:center;gap:12px;min-height:54px;padding:12px;border:0;background:#fff;color:#3d4655;text-align:right;font-size:1rem;border-radius:12px;cursor:pointer}.drawer-nav button.active{background:#eef5ff;color:#2347ad;border-left:5px solid #2347ad;font-weight:800}.drawer-nav button.admin-entry{background:#eef3ff;border:1px solid #dbe6ff;color:#2347ad;font-weight:850}.drawer-nav button.admin-entry:hover{background:#e4ecff}.drawer-nav svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;flex:0 0 23px}.drawer-nav button:disabled{opacity:.45;cursor:default}.drawer-divider{height:1px;background:#e6e9ee;margin:20px 0}.drawer-bottom{margin-top:auto;padding-top:30px;color:#798596;font-size:.77rem}.drawer-bottom p{margin:7px 0}.drawer-bottom .offline-tag{font-size:.77rem}.profile-hero{display:flex;align-items:center;gap:12px;padding:13px;margin:0 0 12px;border:1px solid #dbe6f4;border-radius:17px;background:linear-gradient(135deg,#f3f7ff,#eef8f4)}.profile-avatar{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center;border-radius:17px;background:#284781;color:#fff;font-size:1.5rem;font-weight:850}.profile-identity{min-width:0}.profile-identity h3{margin:0;color:#203b65;font-size:1.12rem}.profile-identity p{margin:3px 0 0!important;color:#69798a;font-size:.83rem;overflow-wrap:anywhere}.profile-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0 14px}.profile-metric{padding:9px 5px;border:1px solid #e1e8f0;border-radius:13px;background:#f8fafc;text-align:center}.profile-metric strong{display:block;color:#284781;font-size:1.25rem}.profile-metric span{font-size:.73rem;color:#718096}.profile-section-title{display:flex;align-items:center;gap:8px;margin:14px 0 7px!important;padding-bottom:8px;border-bottom:1px solid #e7edf3;color:#263f63!important;font-size:1rem!important}.profile-badge{display:inline-flex;margin-top:7px;padding:3px 8px;border-radius:999px;background:#e5f5eb;color:#19724d;font-size:.74rem;font-weight:800}
+.achievement-notice{position:fixed;z-index:1200;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(440px,calc(100% - 24px));display:flex;align-items:center;gap:12px;padding:14px;border:1px solid #c9dfca;border-radius:20px;background:linear-gradient(135deg,#fffdf5,#eff9f0);box-shadow:0 16px 50px #163a2a30;animation:achievementNoticeIn .38s cubic-bezier(.2,.8,.2,1)}.achievement-notice.hidden{display:none}.achievement-notice-icon{display:grid;place-items:center;flex:0 0 48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#f2d78d,#fff4cf);color:#765113;font-size:1.65rem}.achievement-notice-copy{display:grid;gap:4px;flex:1;min-width:0}.achievement-notice-copy strong{font-size:.98rem;color:#18553c}.achievement-notice-copy span{font-size:.82rem;line-height:1.6;color:#4f6858}.achievement-notice button{border:0;background:transparent;color:#738074;font-size:1.4rem;align-self:flex-start;padding:0 4px}@keyframes achievementNoticeIn{from{opacity:0;transform:translate(-50%,-16px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}.badge-card{position:relative;overflow:hidden;border-radius:20px;padding:15px;background:radial-gradient(circle at 100% 0,#e6f4e8 0,transparent 44%),linear-gradient(145deg,#fffdf7,#f5faf6);border-color:#d9e5d6;box-shadow:0 7px 20px #1c46300c}.badge-card.earned:before{content:"";position:absolute;top:0;right:0;width:100%;height:3px;background:linear-gradient(90deg,#d6ad50,#24835a,#d6ad50)}.badge-art{width:58px;height:58px;border-radius:19px;background:linear-gradient(145deg,#f4dfa6,#fff7de 62%,#e4f4e5);box-shadow:inset 0 0 0 1px #e8d7a7,0 5px 12px #7e63251c;font-size:2rem}.badge-card.earned .badge-art{animation:badgeGlow 2.8s ease-in-out infinite alternate}.badge-card h3{font-size:1rem;letter-spacing:-.01em}.badge-card.locked .badge-art{background:linear-gradient(145deg,#e9ebe7,#f6f7f4);box-shadow:inset 0 0 0 1px #dfe3dc}.badge-card.locked .badge-state{background:#ecefea;color:#758075}@keyframes badgeGlow{from{transform:translateY(0);box-shadow:inset 0 0 0 1px #e8d7a7,0 4px 10px #7e632514}to{transform:translateY(-2px);box-shadow:inset 0 0 0 1px #e8d7a7,0 8px 17px #7e63252b}}@media(prefers-reduced-motion:reduce){.achievement-notice,.badge-card.earned .badge-art{animation:none}}
+.achievement-overview{display:flex;align-items:center;gap:13px;padding:15px;margin:3px 0 12px;border:1px solid #e8d8ac;border-radius:18px;background:linear-gradient(125deg,#fffaf0,#fffdf8)}.achievement-overview-icon{display:grid;place-items:center;width:54px;height:54px;flex:0 0 54px;border-radius:17px;background:linear-gradient(145deg,#f7e6b9,#fff5d9);font-size:1.9rem}.achievement-overview-copy{flex:1;min-width:0;display:grid;gap:5px}.achievement-overview-copy strong{color:#6e4b0e;font-size:1.02rem}.achievement-overview-copy>span{font-size:.8rem;color:#7b715d;line-height:1.6}.achievement-overview-track,.badge-progress{height:6px;overflow:hidden;border-radius:99px;background:#e9e9e3}.achievement-overview-track span,.badge-progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#c28b2c,#19785b);transition:width .35s ease}.badge-intro{color:#647166;font-size:.86rem;line-height:1.8}.badge-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 4px}.badge-card{min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:13px;border:1px solid #dfe9e1;border-radius:17px;background:linear-gradient(145deg,#fff,#f8fbf8);box-shadow:0 5px 15px #1b45340a}.badge-card.earned{border-color:#badfca;background:linear-gradient(145deg,#fff,#f0faf3)}.badge-card.locked{background:linear-gradient(145deg,#fbfbfa,#f4f5f3)}.badge-card-top{display:flex;align-items:center;justify-content:space-between;gap:5px}.badge-art{display:grid;place-items:center;width:49px;height:49px;border-radius:15px;background:linear-gradient(145deg,#f8e7bd,#fff6df);font-size:1.7rem}.badge-card.locked .badge-art{filter:grayscale(.65);opacity:.7}.badge-state{font-size:.68rem;font-weight:800;white-space:nowrap;padding:4px 7px;border-radius:999px;background:#ecefea;color:#69766b}.badge-card.earned .badge-state{background:#dcf3e5;color:#176c48}.badge-card h3{margin:0;color:#284b3c;font-size:.97rem}.badge-card p{margin:0;min-height:43px;color:#6e7b71;font-size:.79rem;line-height:1.7}.badge-progress-text{margin-top:auto;color:#68766c;font-size:.73rem;font-weight:750}.badge-card.earned .badge-progress span{background:linear-gradient(90deg,#299b6d,#176b50)}@media(max-width:460px){.badge-gallery{grid-template-columns:1fr}.badge-card p{min-height:0}}
 .info-text{color:#617185;font-size:.91rem}.info-text p{margin:0 0 13px}.info-text strong{color:#284781}body.drawer-open{overflow:hidden}
 button:focus-visible{outline:3px solid #8aaafa;outline-offset:3px}button:disabled{transform:none}
 @media(min-width:1000px){.wrap{padding-top:12px}.app-header{padding:15px 0}.hero{margin-top:27px}.start-panel{padding:28px}}
-@media(max-width:520px){.wrap{padding:0 16px 28px}.app-header{padding:14px 0}.app-brand{font-size:1.1rem;gap:8px}.app-logo{width:35px;height:35px;border-radius:11px}.app-header .offline-tag{font-size:.65rem;padding:5px 7px}.hero{margin:22px 0 18px;padding:0 1px}.hero h1{font-size:1.6rem}.hero p:not(.eyebrow){font-size:.84rem;line-height:1.9}.start-panel{padding:20px 16px;border-radius:22px}.journey{gap:1px;margin-bottom:20px}.journey button{font-size:.68rem}.course-list{grid-template-columns:1fr;gap:9px}.course-button{min-height:77px;padding:13px}.course-copy strong{font-size:.94rem}.level-card{padding:18px 13px;gap:12px}.level-copy small{font-size:.73rem}.level-symbol{width:46px;height:55px}.model-button{padding:13px 11px;gap:10px}.stat span{font-size:.65rem}.stat strong{font-size:1.03rem}.check-row{padding:11px}.check-row span{font-size:.79rem}.drawer{padding:25px 22px}.drawer-nav{gap:12px}.drawer-nav button{min-height:59px}.drawer-caption{margin-top:30px}}
+@media(max-width:520px){.wrap{padding:0 16px 28px}.app-header{padding:14px 0}.app-brand{font-size:1.1rem;gap:8px}.app-logo{width:36px;height:36px;flex-basis:36px;border-radius:12px;font-size:21px}.app-header .offline-tag{font-size:.65rem;padding:5px 7px}.hero{margin:22px 0 18px;padding:0 1px}.hero h1{font-size:1.6rem}.hero p:not(.eyebrow){font-size:.84rem;line-height:1.9}.start-panel{padding:20px 16px;border-radius:22px}.journey{gap:1px;margin-bottom:20px}.journey button{font-size:.68rem}.course-list{grid-template-columns:1fr;gap:9px}.course-button{min-height:77px;padding:13px}.course-copy strong{font-size:.94rem}.level-card{padding:18px 13px;gap:12px}.level-copy small{font-size:.73rem}.level-symbol{width:46px;height:55px}.model-button{padding:13px 11px;gap:10px}.stat span{font-size:.65rem}.stat strong{font-size:1.03rem}.check-row{padding:11px}.check-row span{font-size:.79rem}.drawer{padding:25px 22px}.drawer-nav{gap:12px}.drawer-nav button{min-height:59px}.drawer-caption{margin-top:30px}}
 
 body.quiz-active .app-header{display:none}
 
@@ -74,7 +78,7 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
 .wrap{width:min(100%,980px);padding-bottom:44px}
 .app-header{position:relative;border-bottom:1px solid rgba(215,224,239,.9);padding:17px 0 19px}
 .app-header:after{content:"";position:absolute;bottom:-1px;right:0;width:90px;height:2px;border-radius:9px;background:linear-gradient(90deg,#8da9f4,#2448b8)}
-.app-brand{letter-spacing:-.025em}.app-logo{width:44px;height:44px;border-radius:15px;background:linear-gradient(145deg,#eaf0ff,#dce7ff);box-shadow:inset 0 0 0 1px #d4e0ff,0 7px 18px #2347ad12;color:#2348b8}.icon-button{width:45px;height:45px;border-color:#e0e6f0;box-shadow:0 4px 12px #20375e08;transition:transform .18s,box-shadow .18s,border-color .18s}.icon-button:hover{transform:translateY(-2px);border-color:#c3d2f5;box-shadow:0 8px 18px #2347ad12}
+.app-brand{letter-spacing:-.025em}.app-logo{width:44px;height:44px;border-radius:15px;background:linear-gradient(145deg,#0875a8 0%,#06456b 100%);box-shadow:inset 0 0 0 1px #f5d66d,0 7px 18px #06456b24;color:#f5c94f}.icon-button{width:45px;height:45px;border-color:#e0e6f0;box-shadow:0 4px 12px #20375e08;transition:transform .18s,box-shadow .18s,border-color .18s}.icon-button:hover{transform:translateY(-2px);border-color:#c3d2f5;box-shadow:0 8px 18px #2347ad12}
 .hero{position:relative;margin:27px 0 22px;padding:24px 24px 23px;border:1px solid #e0e7f6;border-radius:25px;background:linear-gradient(120deg,#fff 0%,#f9fbff 60%,#eef3ff 100%);box-shadow:0 12px 32px #243f7610;overflow:hidden}
 .hero:before{content:"";position:absolute;left:-30px;top:-74px;width:210px;height:210px;border-radius:50%;border:1px solid #b9caf6;box-shadow:0 0 0 18px #e8eeff80,0 0 0 38px #edf2ff80;pointer-events:none}
 .hero h1{position:relative;z-index:1;color:#172f70;font-size:clamp(1.7rem,5vw,2.25rem);letter-spacing:-.035em}
@@ -102,6 +106,26 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
 @media(min-width:760px){.hero{padding:30px 32px}.start-panel{padding:32px}.level-card{padding:24px 25px}.course-list{gap:14px}}
 @media(max-width:520px){.wrap{padding:0 13px 30px}.app-header{padding:13px 0 15px}.hero{margin:20px 0 17px;padding:20px 17px;border-radius:21px}.hero:before{left:-76px;top:-78px;width:170px;height:170px}.hero h1{font-size:1.55rem}.hero h1:before{margin-left:9px}.hero p:not(.eyebrow){font-size:.84rem}.start-panel{padding:19px 14px;border-radius:23px}.journey{gap:3px;padding-bottom:18px;margin-bottom:21px}.journey button{font-size:.67rem}.journey button span{width:30px;height:30px;border-radius:11px}.level-card{min-height:108px;padding:17px 14px;border-radius:19px}.level-symbol{width:49px;height:53px;border-radius:16px}.level-copy strong{font-size:1.05rem}.level-copy small{font-size:.76rem}.row-arrow{width:30px;height:30px;border-radius:10px}.course-list{gap:9px}.course-button{min-height:80px;padding:12px;border-radius:15px}.course-symbol{flex-basis:35px;height:37px;border-radius:11px}.course-copy strong{font-size:.88rem}.year-group{padding:12px;border-radius:17px}.model-button{padding:12px 10px;border-radius:14px}.model-number{flex-basis:34px;height:38px}.stat{padding:12px 5px}}
 @media(prefers-reduced-motion:reduce){.level-card,.course-button,.model-button,.icon-button,.btn,.drawer-nav button{transition:none!important}}
+
+.admin-panel-overlay{position:fixed;inset:0;z-index:100;background:#10251ed9;backdrop-filter:blur(7px);padding:clamp(8px,2vw,22px);display:grid;place-items:center}.admin-panel-overlay.hidden{display:none!important}.admin-panel-shell{width:min(1200px,100%);height:min(94dvh,100%);display:flex;flex-direction:column;overflow:hidden;border:1px solid #dce8e0;border-radius:20px;background:#f4f7f4;box-shadow:0 24px 90px #061c184d}.admin-panel-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:#123f35;color:white}.admin-panel-bar button{border:1px solid #ffffff50;border-radius:10px;background:#ffffff18;color:white;padding:8px 12px;font:inherit;font-weight:750}.admin-panel-shell iframe{width:100%;flex:1;min-height:0;border:0;background:#f4f7f4}@media(max-width:520px){.admin-panel-overlay{padding:0}.admin-panel-shell{height:100dvh;border-radius:0}.admin-panel-bar{padding:9px 12px}}
+
+
+/* Premium interactive result experience */
+.result-screen{padding:clamp(10px,3vw,24px) 0 34px;animation:resultReveal .55s cubic-bezier(.2,.75,.25,1) both}
+.result-page-card{position:relative;isolation:isolate;overflow:hidden;max-width:790px;padding:clamp(18px,4.5vw,36px);border:1px solid #dbe6f5;border-radius:30px;background:linear-gradient(155deg,#fff 0%,#fbfcff 58%,#f1f7ff 100%);box-shadow:0 22px 65px #203e6818}
+.result-page-card:before{content:"";position:absolute;z-index:-1;width:260px;height:260px;top:-150px;left:-100px;border-radius:50%;background:radial-gradient(circle,#a8c7ff66,transparent 70%);pointer-events:none}
+.result-page-head{margin-bottom:24px}.result-page-head h1{letter-spacing:-.035em;font-size:clamp(1.8rem,6vw,2.6rem);background:linear-gradient(110deg,#173a7a,#477ce1 58%,#18a17b);-webkit-background-clip:text;background-clip:text;color:transparent}.result-page-head p{font-size:.96rem}
+.result-score{position:relative;margin:0 auto 26px;padding:21px 14px 19px;border:1px solid #e4ebf7;border-radius:25px;background:#ffffffc9;box-shadow:0 10px 30px #244b8010;backdrop-filter:blur(8px)}
+.score-ring{width:clamp(158px,45vw,190px);background:conic-gradient(from -90deg,#10a579 var(--score),#e8eef7 var(--score));box-shadow:0 12px 30px #1b8b6b22;animation:ringPop .85s .12s cubic-bezier(.2,.8,.2,1) both}
+.score-ring:before{inset:11px;background:linear-gradient(145deg,#fff,#f7faff)}.score-center strong{font-size:clamp(2.4rem,9vw,3.1rem);letter-spacing:-.05em;color:#174b8e}.score-center span{display:block;margin-top:4px;font-weight:750;color:#6a7890}
+.result-sentence{font-weight:750;color:#334b6b;font-size:1rem;line-height:1.8;margin:18px 0 8px}.result-meta{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;padding:7px 12px;border-radius:999px;background:#eef4ff;color:#536988;font-size:.78rem}
+.result-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 25px}.result-stat{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:100px;padding:12px 5px;border:1px solid #e3eaf5;border-radius:19px;background:#fff;box-shadow:0 6px 18px #1e3e6608;transition:transform .2s,border-color .2s,box-shadow .2s;animation:statRise .45s both}.result-stat:nth-child(2){animation-delay:.06s}.result-stat:nth-child(3){animation-delay:.12s}.result-stat:nth-child(4){animation-delay:.18s}.result-stat:hover{transform:translateY(-4px);border-color:#b8cef3;box-shadow:0 12px 24px #1e3e6614}.result-stat strong{font-size:clamp(1.45rem,5vw,2rem);line-height:1.2;color:#234c92;font-variant-numeric:tabular-nums}.result-stat:nth-child(1) strong{color:#0d9a70}.result-stat:nth-child(2) strong{color:#dc5c62}.result-stat:nth-child(3) strong{color:#c18725}.result-stat:nth-child(4) strong{color:#78869a}.result-stat span{font-size:.76rem;font-weight:750;color:#697991}
+.result-accordions{display:grid;gap:11px}.result-accordions details,.result-accordions .result-group{border:1px solid #e1e8f2;border-radius:17px;background:#fff;overflow:hidden;transition:border-color .2s,box-shadow .2s}.result-accordions details[open]{border-color:#c6d7f4;box-shadow:0 8px 24px #254b7b0d}.result-accordions summary{min-height:58px;padding:15px 16px;font-weight:800;color:#2c4264;cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px}.result-accordions summary::-webkit-details-marker{display:none}.result-accordions summary:after{content:'⌄';margin-right:auto;color:#6281b9;font-size:1.3rem;transition:transform .2s}.result-accordions details[open] summary:after{transform:rotate(180deg)}.result-accordions summary:hover{background:#f8faff}.result-accordions .group-count{display:inline-grid;place-items:center;min-width:30px;height:30px;padding:0 7px;border-radius:10px;background:#eef3fb;color:#315b9d;font-size:.82rem}.result-accordions .correct-group summary .group-count{background:#e5f7ef;color:#13835f}.result-accordions .wrong-group summary .group-count{background:#fff0ef;color:#c74b52}
+.result-page-footer{display:grid;gap:14px;margin-top:26px}.result-home-btn{min-height:56px;border:0!important;border-radius:16px!important;background:linear-gradient(105deg,#214ba4,#3676df)!important;color:#fff!important;font-weight:850;box-shadow:0 10px 23px #2859b72c;transition:transform .2s,box-shadow .2s}.result-home-btn:hover{transform:translateY(-2px);box-shadow:0 14px 28px #2859b73d}.result-credit{text-align:center;color:#8794a8;font-size:.75rem;margin:0}
+@keyframes resultReveal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes ringPop{from{transform:scale(.82) rotate(-20deg);opacity:.5}to{transform:scale(1) rotate(0);opacity:1}}@keyframes statRise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:420px){.result-page-card{border-radius:23px;padding:16px 13px}.result-score{padding:17px 9px;border-radius:20px}.result-stats{gap:6px}.result-stat{min-height:86px;border-radius:14px}.result-stat span{font-size:.69rem}.result-accordions summary{padding:13px 12px}}
+@media(prefers-reduced-motion:reduce){.result-screen,.score-ring,.result-stat{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
 </style>
 <style>
 .maintenance-screen{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 10% 10%,#dbe7ff 0,transparent 34%),linear-gradient(145deg,#f6f8fc,#e9eef8);color:#20345b}
@@ -110,11 +134,30 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
 .maintenance-card h1{margin:0;font-size:clamp(1.6rem,5vw,2.2rem);color:#203b88}.maintenance-card p{margin:12px 0 0;color:#65728a;line-height:1.9}.maintenance-progress{width:120px;height:4px;margin:25px auto 0;overflow:hidden;border-radius:99px;background:#e4e9f3}.maintenance-progress:after{content:'';display:block;width:45%;height:100%;border-radius:inherit;background:#315ed1;animation:maintainPulse 1.5s ease-in-out infinite alternate}
 @keyframes maintainIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes maintainPulse{from{transform:translateX(0)}to{transform:translateX(125%)}}
 </style>
+<style>
+.developer-credit{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;width:min(100%,360px);margin:28px auto 0;padding:14px 20px;border:1px solid #d5e6dc;border-radius:20px;background:linear-gradient(135deg,#fff 0%,#f1f8f3 58%,#fff8e9 100%);box-shadow:0 9px 26px #174d3710, inset 0 1px 0 #ffffff; color:#65786d;letter-spacing:.01em;transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,border-color .28s ease;animation:developerEnter .55s ease-out both}
+.developer-credit::before{content:"";position:absolute;inset:-30% auto -30% -65%;z-index:-1;width:42%;transform:skewX(-20deg);background:linear-gradient(90deg,transparent,#ffffffb5,transparent);pointer-events:none;animation:developerShimmer 7s ease-in-out infinite}
+.developer-credit:hover{transform:translateY(-4px);border-color:#a9cbb8;box-shadow:0 16px 34px #174d371c,0 0 0 4px #176b5808,inset 0 1px 0 #fff}
+.developer-credit:active{transform:translateY(-1px) scale(.99);box-shadow:0 5px 14px #174d3715}
+.developer-mark{position:relative;display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border:1px solid #ffffff48;border-radius:11px;background:linear-gradient(145deg,#207861,#104a3d);color:#f5d99c;font-size:1.05rem;box-shadow:0 5px 12px #176b5825;transition:transform .3s ease,box-shadow .3s ease}
+.developer-credit:hover .developer-mark{transform:rotate(-10deg) scale(1.07);box-shadow:0 7px 15px #176b5835}
+.developer-label{font-size:.8rem;font-weight:700;color:#65786d}
+.developer-name{color:#174c3d;font-size:.98rem;font-weight:900;letter-spacing:.005em}
+.developer-rule{flex-basis:100%;width:58px;max-width:58px;height:3px;margin:2px auto 0;border-radius:99px;background:linear-gradient(90deg,#176b58,#c69445,#176b58);background-size:200% 100%;transition:width .28s ease;animation:developerRuleFlow 4s ease-in-out infinite}
+.developer-credit:hover .developer-rule{width:100%;max-width:100%}
+.developer-credit--compact{margin:0 auto;padding:11px 16px}
+.developer-credit--compact .developer-mark{width:29px;height:29px;flex-basis:29px;border-radius:10px}
+@keyframes developerEnter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes developerShimmer{0%,68%,100%{transform:translateX(0) skewX(-20deg);opacity:0}76%{opacity:.8}90%{transform:translateX(430%) skewX(-20deg);opacity:0}}
+@keyframes developerRuleFlow{0%,100%{background-position:0 0}50%{background-position:100% 0}}
+@media(max-width:420px){.developer-credit{gap:7px;padding:12px 13px;border-radius:17px}.developer-label{font-size:.76rem}.developer-name{font-size:.9rem}.developer-credit--compact{padding:10px 12px}}
+@media(prefers-reduced-motion:reduce){.developer-credit,.developer-credit::before,.developer-rule{animation:none!important;transition:none!important}.developer-credit:hover,.developer-credit:active{transform:none}}
+</style>
 </head>
 <body>
 <div class="wrap">
-  <header class="app-header"><button id="menuBtn" class="icon-button hidden" type="button" aria-label="فتح القائمة الجانبية" aria-controls="drawer" aria-expanded="false">☰</button><div class="app-brand"><span class="app-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Zm0 14h15M8 7h7M8 11h5"/></svg></span><span class="brand-name">منصة الاختبارات <small>| اللجنة العلمية</small></span></div><span id="connectionStatus" class="offline-tag" role="status" aria-live="polite"></span></header>
-  <header class="hero"><h1>بنك نماذج الاختبارات</h1></header>
+  <header class="app-header"><button id="menuBtn" class="icon-button hidden" type="button" aria-label="فتح القائمة الجانبية" aria-controls="drawer" aria-expanded="false">☰</button><div class="app-brand"><span class="app-logo" aria-hidden="true">⚖️</span><span class="brand-name">إحسان <small>منصة العلم والإتقان</small></span></div><span id="connectionStatus" class="offline-tag" role="status" aria-live="polite"></span></header>
+  <header class="hero"><h1>إحسان — منصة العلم والإتقان</h1><p>اللجنة العلمية — كلية الشريعة والقانون، جامعة صنعاء</p></header>
   <section id="authPanel" class="auth-panel hidden" aria-labelledby="authTitle" aria-hidden="true">
     <h2 id="authTitle">دخول المنصة</h2><p id="authIntro">أدخل اسم المستخدم وكلمة المرور اللذين أعددتهما في حسابك. من داخل تيليجرام يتم الدخول تلقائيًا دون بيانات دخول.</p>
     <div id="telegramSetup" class="auth-grid hidden">
@@ -141,7 +184,7 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
         <div class="field hidden"><label for="courseSelect">المقرر</label><select id="courseSelect"><option value="all">كل المقررات</option></select></div>
         <div class="field hidden"><label for="yearSelect">سنة الاختبار</label><select id="yearSelect"><option value="all">كل السنوات</option></select></div>
       </div>
-      <div id="resultsStorageNote" class="start-note">تُحفظ نتائجك على هذا الجهاز فقط.</div>
+      <div class="start-note">تُحفظ نتائجك على هذا الجهاز فقط.</div>
       <div class="start-actions"><button id="startBtn" class="btn btn-primary" type="button">ابدأ الاختبار</button></div>
 
       </section>
@@ -151,8 +194,8 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
         <div class="exam-toolbar"><h1 id="examTitle" class="exam-title">اختبار المستوى الأول</h1><div class="timer-chip" aria-label="الوقت المنقضي"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span id="timer">00:00</span></div><button id="exitBtn" class="exam-close" type="button" aria-label="مغادرة الاختبار" title="مغادرة الاختبار">×</button></div>
         <div class="progress-track" role="progressbar" aria-label="التقدم في الاختبار" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1"><div id="progress" class="progress-fill"></div></div>
         <div class="exam-meta-row"><div class="exam-tags"><span id="yearTag" class="exam-tag year">كل السنوات</span><span id="courseTag" class="exam-tag">كل المقررات</span><span id="metaQuestion">السؤال: 1</span></div><div class="exam-tools" aria-label="أدوات الاختبار">
-          <button id="shareBtn" class="exam-tool" type="button" aria-label="مشاركة الاختبار" title="مشاركة الاختبار"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"></path></svg></button>
           <button id="bookmarkBtn" class="exam-tool" type="button" aria-label="حفظ السؤال" aria-pressed="false" title="حفظ السؤال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-4-6 4z"></path></svg></button>
+          <button id="reportQuestionBtn" class="exam-tool" type="button" aria-label="الإبلاغ عن خطأ في السؤال" title="الإبلاغ عن خطأ في السؤال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4m0 1h12l-2 4 2 4H5"></path><path d="M10 7v3m0 2v.1"></path></svg></button>
           <button id="fontBtn" class="exam-tool" type="button" aria-label="تكبير الخط" aria-pressed="false" title="تكبير الخط"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 10 4l6 16M6.5 14h7M15 8h6M18 5v6"></path></svg></button>
         </div></div>
       </header>
@@ -163,11 +206,13 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
     </section>
     <section id="resultScreen" class="result-screen hidden" aria-labelledby="resultHeading" aria-live="polite"></section>
   </main>
-  <div class="footer">برمجة وتطوير/عبدالملك الدعيس</div>
+  <footer class="footer developer-credit" aria-label="برمجة وتطوير عبدالملك الدعيس"><span class="developer-mark" aria-hidden="true">✦</span><span class="developer-label">برمجة وتطوير</span><strong class="developer-name">عبدالملك الدعيس</strong><span class="developer-rule" aria-hidden="true"></span></footer>
 </div>
-<section id="maintenanceScreen" class="maintenance-screen hidden" role="status" aria-live="polite"><div class="maintenance-card"><div class="maintenance-symbol" aria-hidden="true">🛠️</div><p class="eyebrow" style="color:#315ed1;font-weight:800">منصة الاختبارات · اللجنة العلمية</p><h1>الموقع تحت الصيانة</h1><p id="maintenanceMessage">نعمل على تحسين المنصة وتطوير تجربتكم. سنعود إليكم قريبًا.</p><div class="maintenance-progress" aria-hidden="true"></div></div></section>
+<section id="maintenanceScreen" class="maintenance-screen hidden" role="status" aria-live="polite"><div class="maintenance-card"><div class="maintenance-symbol" aria-hidden="true">🛠️</div><p class="eyebrow" style="color:#315ed1;font-weight:800">إحسان · منصة العلم والإتقان</p><h1>الموقع تحت الصيانة</h1><p id="maintenanceMessage">نعمل على تحسين المنصة وتطوير تجربتكم. سنعود إليكم قريبًا.</p><div class="maintenance-progress" aria-hidden="true"></div></div></section>
 <div id="drawerBackdrop" class="drawer-backdrop hidden"></div>
-<aside id="drawer" class="drawer hidden" role="dialog" aria-modal="true" aria-label="القائمة الجانبية"><div class="drawer-head"><div class="app-brand"><span class="app-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Zm0 14h15M8 7h7M8 11h5"/></svg></span><span class="brand-name">منصة الاختبارات <small>| اللجنة العلمية</small></span></div><button id="drawerCloseBtn" class="drawer-close" type="button" aria-label="إغلاق القائمة">×</button></div><nav class="drawer-nav" aria-label="أقسام المنصة"><button id="drawerBankBtn" class="active" type="button"><span style="color:#3e80e1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Zm0 14h15M8 7h7M8 11h5"/></svg></span>بنك النماذج</button><button id="drawerSetupBtn" type="button" disabled><span style="color:#6858db"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H5v17h14V4h-4M9 3h6v4H9zM8 12h8M8 16h6"/></svg></span>إعداد الاختبار</button><button id="drawerResultsBtn" type="button"><span style="color:#25b968"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 16v-4M12 16V7M17 16v-6"/></svg></span>المراجعة والنتائج</button></nav><div class="drawer-divider"></div><nav class="drawer-nav" aria-label="معلومات"><button id="drawerLeaderboardBtn" type="button"><span style="color:#d69a24;font-size:1.15rem" aria-hidden="true">🏆</span>لوحة الصدارة</button><button id="drawerAccountBtn" type="button"><span style="color:#168a68;font-size:1.15rem" aria-hidden="true">♙</span>حسابي وتقدمي</button><button id="drawerAboutBtn" type="button"><span style="color:#12a4bb"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v7M12 7v1"/></svg></span>عن بنك الأسئلة</button><button id="drawerAdminBtn" class="admin-entry hidden" type="button" hidden><span style="color:#2347ad;font-size:1.25rem" aria-hidden="true">⚙</span>لوحة الإدارة</button></nav><div class="drawer-bottom"><p id="catalogSummary"></p></div></aside>
+<aside id="drawer" class="drawer hidden" role="dialog" aria-modal="true" aria-label="القائمة الجانبية"><div class="drawer-head"><div class="app-brand"><span class="app-logo" aria-hidden="true">⚖️</span><span class="brand-name">إحسان <small>منصة العلم والإتقان</small></span></div><button id="drawerCloseBtn" class="drawer-close" type="button" aria-label="إغلاق القائمة">×</button></div><nav class="drawer-nav" aria-label="أقسام المنصة"><button id="drawerBankBtn" class="active" type="button"><span style="color:#3e80e1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Zm0 14h15M8 7h7M8 11h5"/></svg></span>بنك النماذج</button><button id="drawerSetupBtn" type="button" disabled><span style="color:#6858db"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H5v17h14V4h-4M9 3h6v4H9zM8 12h8M8 16h6"/></svg></span>إعداد الاختبار</button><button id="drawerSavedBtn" type="button"><span style="color:#b77c18;font-size:1.15rem" aria-hidden="true">🔖</span>محفوظاتي</button><button id="drawerMistakesBtn" type="button"><span style="color:#c9534e;font-size:1.15rem" aria-hidden="true">↻</span>اختبر أخطائي</button><button id="drawerResultsBtn" type="button"><span style="color:#25b968"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 16v-4M12 16V7M17 16v-6"/></svg></span>المراجعة والنتائج</button></nav><div class="drawer-divider"></div><nav class="drawer-nav" aria-label="معلومات"><button id="drawerLeaderboardBtn" type="button"><span style="color:#d69a24;font-size:1.15rem" aria-hidden="true">🏆</span>لوحة الصدارة</button><button id="drawerAccountBtn" type="button"><span style="color:#168a68;font-size:1.15rem" aria-hidden="true">♙</span>حسابي وتقدمي</button><button id="drawerBadgesBtn" type="button"><span style="color:#c58a22;font-size:1.15rem" aria-hidden="true">✦</span>أوسمة إحسان</button><button id="drawerAboutBtn" type="button"><span style="color:#12a4bb"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v7M12 7v1"/></svg></span>عن بنك الأسئلة</button><button id="drawerAdminBtn" class="admin-entry hidden" type="button" hidden><span style="color:#2347ad;font-size:1.25rem" aria-hidden="true">⚙</span>لوحة الإدارة</button></nav><div class="drawer-bottom"><p id="catalogSummary"></p></div></aside>
+<div id="adminPanelOverlay" class="admin-panel-overlay hidden" role="dialog" aria-modal="true" aria-label="لوحة إدارة الاختبارات"><div class="admin-panel-shell"><div class="admin-panel-bar"><strong>لوحة الإدارة</strong><button id="adminPanelClose" type="button" aria-label="إغلاق لوحة الإدارة">إغلاق ✕</button></div><iframe id="adminPanelFrame" title="لوحة إدارة الاختبارات" src="about:blank" loading="lazy"></iframe></div></div>
+<div id="achievementNotice" class="achievement-notice hidden" role="status" aria-live="polite"><span class="achievement-notice-icon" aria-hidden="true">✦</span><div class="achievement-notice-copy"><strong id="achievementNoticeTitle">إنجاز جديد</strong><span id="achievementNoticeText"></span></div><button id="achievementNoticeClose" type="button" aria-label="إغلاق التنبيه">×</button></div>
 <div id="infoDialog" class="dialog-backdrop hidden" role="presentation"><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="infoTitle"><h2 id="infoTitle"></h2><div id="infoBody" class="info-text"></div><div class="dialog-actions"><button id="infoCloseBtn" class="btn btn-primary" type="button">حسنًا</button></div></section></div>
 <script>
 /*
@@ -204,7 +249,14 @@ async function reportVisitorPresence() {
       visitorId = (crypto.randomUUID ? crypto.randomUUID() : 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2)) .replace(/-/g, '');
       localStorage.setItem('usf2_visitor_id', visitorId);
     }
-    const payload = { visitorId };
+    let accountSession = null;
+    try { accountSession = JSON.parse(sessionStorage.getItem('usf2_student_session_v1') || 'null'); } catch (_) {}
+    const accountProfile = accountSession?.profile || {};
+    const payload = {
+      visitorId,
+      accountUsername: String(accountProfile.username || accountSession?.loginUsername || ''),
+      displayName: String(accountProfile.displayName || ''),
+    };
     const webApp = window.Telegram?.WebApp;
     if (webApp?.Serverless?.call) {
       await new Promise((resolve) => webApp.Serverless.call('visitorStats', payload, () => resolve()));
@@ -242,11 +294,36 @@ let courses = [...new Set(CATALOG.levels.flatMap(l => l.courses.map(c => c.name)
 let years = [...new Set(DATA.map((q) => q.source_year).filter(Boolean))].sort(
   (a, b) => a - b,
 );
+function savedQuestionsStorageKey() {
+  const telegramId = Number(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 0);
+  return telegramId > 0 ? "ihsan-saved-questions-v1:tg:" + telegramId : "ihsan-saved-questions-v1:device";
+}
+function readSavedQuestionIds() {
+  try {
+    const key = savedQuestionsStorageKey();
+    let raw = localStorage.getItem(key);
+    // Migrate saved questions from the first device-wide version into the current user's key.
+    if (raw === null) {
+      const legacy = localStorage.getItem("ihsan-saved-questions-v1");
+      if (legacy !== null) {
+        raw = legacy;
+        localStorage.setItem(key, legacy);
+        localStorage.removeItem("ihsan-saved-questions-v1");
+      }
+    }
+    const parsed = JSON.parse(raw || "[]");
+    return Array.isArray(parsed) ? parsed.filter(id => typeof id === "string" || Number.isSafeInteger(id)) : [];
+  } catch (_) { return []; }
+}
+function persistSavedQuestionIds() {
+  try { localStorage.setItem(savedQuestionsStorageKey(), JSON.stringify([...bookmarks])); }
+  catch (error) { console.warn("تعذر حفظ المحفوظات على هذا الجهاز.", error); }
+}
 let session = [],
   current = 0,
   answers = Object.create(null),
   checked = new Set(),
-  bookmarks = new Set(),
+  bookmarks = new Set(readSavedQuestionIds()),
   finished = false,
   startedAt = 0,
   timerInterval = null,
@@ -271,7 +348,13 @@ function waitForTelegramServerless(maxAttempts = 15) {
 }
 
 const BROWSER_STUDENT_DATA_URL = "https://jrrsnpijbizbwxopyvam.supabase.co/functions/v1/browser-student-data";
-async function studentApi(action, payload = {}) {
+async function studentApi(action, payload = {}, allowBrowserRefresh = true) {
+  if (action === "leaderboard") {
+    const response = await fetch(SUPABASE_URL + "/functions/v1/public-leaderboard", { method: "GET", headers: { "Accept": "application/json" } });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !Array.isArray(result.leaderboard)) throw new Error(result.error || "تعذر تحميل بيانات لوحة الصدارة.");
+    return { leaders: result.leaderboard, totalStudents: result.totalStudents || 0 };
+  }
   const webApp = window.Telegram?.WebApp;
   if (webApp?.Serverless?.call || (typeof webApp?.initData === "string" && webApp.initData.trim())) {
     const app = await waitForTelegramServerless();
@@ -287,7 +370,6 @@ async function studentApi(action, payload = {}) {
       });
     });
   }
-
   const token = studentSession?.accessToken;
   if (!token) throw new Error("سجّل الدخول من المتصفح أولًا لعرض بيانات حسابك وحفظ تقدمك.");
   const response = await fetch(BROWSER_STUDENT_DATA_URL, {
@@ -296,6 +378,7 @@ async function studentApi(action, payload = {}) {
     body: JSON.stringify({ action, payload })
   });
   const result = await response.json().catch(() => ({}));
+  if (response.status === 401 && allowBrowserRefresh && await refreshBrowserSession()) return studentApi(action, payload, false);
   if (!response.ok) throw new Error(result.error || "تعذر تحميل بيانات حسابك.");
   return result;
 }
@@ -319,9 +402,106 @@ function queueStudentProgressSave() {
   }, 350);
 }
 
+let achievementNoticeTimer = null;
+function showAchievementNotice(title, message, icon = "✦") {
+  const box = $("achievementNotice");
+  if (!box) return;
+  $("achievementNoticeTitle").textContent = title;
+  $("achievementNoticeText").textContent = message;
+  $("achievementNotice").querySelector(".achievement-notice-icon").textContent = icon;
+  box.classList.remove("hidden");
+  clearTimeout(achievementNoticeTimer);
+  achievementNoticeTimer = setTimeout(() => box.classList.add("hidden"), 8500);
+}
+$("achievementNoticeClose")?.addEventListener("click", () => { $("achievementNotice").classList.add("hidden"); clearTimeout(achievementNoticeTimer); });
+function achievementSnapshot(data) {
+  const attempts = Array.isArray(data?.attempts) ? data.attempts.filter(a => a.status === "completed") : [];
+  const models = new Set(attempts.map(a => String(a.course_id) + "|" + String(a.source_year || 0) + "|" + String(a.source_file || "")));
+  return { count: attempts.length, models: models.size, first: attempts.length >= 1, five: attempts.length >= 5, ten: attempts.length >= 10, twentyFive: attempts.length >= 25, fifty: attempts.length >= 50, hundred: attempts.length >= 100, twoFifty: attempts.length >= 250, rank: attempts.length >= 250 ? 6 : attempts.length >= 100 ? 5 : attempts.length >= 50 ? 4 : attempts.length >= 25 ? 3 : attempts.length >= 10 ? 2 : attempts.length >= 5 ? 1 : attempts.length >= 1 ? 0 : -1, highScore: attempts.some(a => Number(a.score_percent) >= 90), perfect: attempts.some(a => Number(a.score_percent) === 100), variety: models.size >= 5 };
+}
+function achievementBroadcastCall(payload) {
+  const app = window.Telegram?.WebApp;
+  if (!app?.Serverless?.call) return;
+  app.Serverless.call('achievementEvents', payload, (err) => {
+    if (err) console.debug('تعذر إرسال إعلان الإنجاز لبقية المستخدمين.', err);
+  });
+}
+
+let achievementFeedCursor = null;
+let achievementFeedBusy = false;
+function startAchievementBroadcast() {
+  const poll = async () => {
+    if (document.visibilityState === 'hidden' || achievementFeedBusy) return;
+    const app = await waitForTelegramServerless(5);
+    if (!app?.Serverless?.call) return;
+    achievementFeedBusy = true;
+    const action = achievementFeedCursor === null ? 'latest' : 'feed';
+    const payload = action === 'feed' ? { action, afterId: achievementFeedCursor } : { action };
+    try {
+      const result = await new Promise((resolve, reject) => {
+        app.Serverless.call('achievementEvents', payload, (err, value) => err ? reject(err) : resolve(value || {}));
+      });
+      if (action === 'latest') {
+        achievementFeedCursor = Math.max(0, Number(result.cursor) || 0);
+        return;
+      }
+      achievementFeedCursor = Math.max(achievementFeedCursor || 0, Number(result.cursor) || 0);
+      const myTelegramId = Number(app.initDataUnsafe?.user?.id || 0);
+      const recentEvents = Array.isArray(result.events) ? result.events : [];
+      for (const event of recentEvents) {
+        if (Number(event.id) > achievementFeedCursor) achievementFeedCursor = Number(event.id);
+        if (Number(event.telegramId) === myTelegramId) continue;
+        if (!Number(event.createdAt) || Date.now() - Number(event.createdAt) > 90000) continue;
+        const achiever = String(event.displayName || (event.username ? '@' + event.username : 'أحد طلاب إحسان'));
+        showAchievementNotice(event.title || 'إنجاز جديد في إحسان', 'حقق ' + achiever + ' هذا الإنجاز. ' + String(event.message || ''), event.icon || '🏅');
+      }
+    } catch (error) {
+      console.debug('تعذر تحديث إعلانات الإنجازات المشتركة.', error);
+    } finally {
+      achievementFeedBusy = false;
+    }
+  };
+  poll();
+  setInterval(poll, 20000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') poll(); });
+}
+
+function notifyNewAchievements(before, after, pct) {
+  const earned = [];
+  const ranks = [
+    ['rank_bronze', '🛡️', 'درع إحسان البرونزي', 'بدأت مسيرتك في إحسان وأحرزت أول إنجاز محفوظ.'],
+    ['rank_copper', '🛡️', 'درع إحسان النحاسي', 'أكملت خمسة اختبارات وانتقلت إلى المرتبة النحاسية.'],
+    ['rank_iron', '🛡️', 'درع إحسان الحديدي', 'أكملت عشرة اختبارات وبلغت المرتبة الحديدية.'],
+    ['rank_silver', '🛡️', 'درع إحسان الفضي', 'أكملت ٢٥ اختبارًا وارتقيت إلى المرتبة الفضية.'],
+    ['rank_gold', '🛡️', 'درع إحسان الذهبي', 'أكملت ٥٠ اختبارًا وبلغت المرتبة الذهبية.'],
+    ['rank_platinum', '🛡️', 'درع إحسان البلاتيني', 'أكملت ١٠٠ اختبار وبلغت مرتبة النخبة البلاتينية.'],
+    ['rank_diamond', '💠', 'درع إحسان الماسي', 'أكملت ٢٥٠ اختبارًا وبلغت أعلى مراتب دروع إحسان.']
+  ];
+  if (after.rank > before.rank && after.rank >= 0) {
+    const [key, icon, title, message] = ranks[after.rank] || [];
+    if (key) earned.push({ key, icon, title, message });
+  }
+  if (!before.first && after.first) earned.push({ key: 'badge_first_light', icon: '🌟', title: 'وسام خطوة النور', message: 'أنهيت أول اختبار لك. هذه بداية طريق العلم!' });
+  if (!before.five && after.five) earned.push({ key: 'badge_knowledge_companion', icon: '📖', title: 'وسام رفيق المعرفة', message: 'أكملت خمسة اختبارات؛ استمر في التقدم.' });
+  if (!before.highScore && after.highScore) earned.push({ key: 'badge_mastery_gem', icon: '💎', title: 'وسام جوهرة الإتقان', message: 'حققت ٩٠٪ أو أكثر في أحد اختباراتك.' });
+  if (!before.variety && after.variety) earned.push({ key: 'badge_science_traveler', icon: '🧭', title: 'وسام رحّالة العلم', message: 'أكملت خمسة نماذج مختلفة.' });
+  if (!before.ten && after.ten) earned.push({ key: 'milestone_level_two', icon: '🔥', title: 'ارتقيت إلى المستوى الثاني', message: 'أكملت عشرة اختبارات محفوظة.' });
+  if (!before.twentyFive && after.twentyFive) earned.push({ key: 'milestone_level_three', icon: '🚀', title: 'ارتقيت إلى المستوى الثالث', message: 'أكملت ٢٥ اختبارًا محفوظًا.' });
+  if (!before.fifty && after.fifty) earned.push({ key: 'milestone_level_four', icon: '👑', title: 'بلغت المستوى الرابع', message: 'أكملت ٥٠ اختبارًا محفوظًا؛ إنجاز يستحق التقدير.' });
+  if (!before.perfect && after.perfect && pct === 100) earned.push({ key: 'badge_perfect_score', icon: '✨', title: 'وسام العلامة الكاملة', message: 'أجبت عن جميع الأسئلة المحتسبة إجابة صحيحة.' });
+
+  // Keep announcements readable: show and broadcast at most three achievements per completed test.
+  const announced = earned.slice(0, 3);
+  announced.forEach((item, i) => setTimeout(() => showAchievementNotice(item.title, item.message, item.icon), i * 900));
+  if (announced.length) achievementBroadcastCall({ action: 'publish', achievementKeys: announced.map(item => item.key) });
+}
+startAchievementBroadcast();
+
 function completeStudentAttempt(result) {
   if (!studentAttemptPromise) return;
   clearTimeout(studentSaveTimer);
+  const previousAchievementState = achievementSnapshot(studentCloudData);
+  const finalPercent = result.graded ? Math.round((result.correct / result.graded) * 100) : 0;
   studentAttemptPromise.then((attemptId) => {
     if (!attemptId) return null;
     return studentApi("completeAttempt", {
@@ -332,10 +512,15 @@ function completeStudentAttempt(result) {
       correctCount: result.correct,
       wrongCount: result.wrong,
       blankCount: result.blank,
+      mistakeQuestionIds: Array.isArray(result.mistakeQuestionIds) ? result.mistakeQuestionIds : [],
+      correctQuestionIds: Array.isArray(result.correctQuestionIds) ? result.correctQuestionIds : [],
       durationSeconds: Math.floor(Math.max(0, Date.now() - startedAt) / 1000),
     });
   }).then(() => studentApi("me"))
-    .then((data) => { studentCloudData = data; })
+    .then((data) => {
+      studentCloudData = data;
+      notifyNewAchievements(previousAchievementState, achievementSnapshot(data), finalPercent);
+    })
     .catch((error) => console.warn("تعذر مزامنة نتيجة الطالب.", error));
 }
 
@@ -380,7 +565,7 @@ function sourceNumber(q) {
     : `ترتيب المصدر: ${q.source_index}`;
 }
 async function start() {
-  if (!selectedModel || browseStep !== 3) return;
+  if (!selectedModel || (browseStep !== 3 && !selectedModel.mistakeReview)) return;
   const pool = getFilterPool();
   if (!pool.length) return;
 
@@ -389,7 +574,7 @@ async function start() {
   let previousQuestionIds = null;
   studentAttemptPromise = null;
   const sourceYear = selectedModel.aggregate ? 0 : Number(selectedModel.year) || 0;
-  const sourceFile = selectedModel.aggregate ? "النموذج الجامع" : String(selectedModel.file || "");
+  const sourceFile = selectedModel.mistakeReview ? "مراجعة الأخطاء" : selectedModel.aggregate ? "النموذج الجامع" : String(selectedModel.file || "");
   if (selectedModel.courseId) {
     try {
       studentCloudData = await studentApi("me");
@@ -442,7 +627,7 @@ async function start() {
       });
   }
 
-  bookmarks = new Set();
+  // Keep saved questions across attempts; bookmark state is persistent per Telegram user.
   finished = false;
   startedAt = Date.now();
   $("start").classList.add("hidden");
@@ -816,13 +1001,29 @@ function finish() {
   home.textContent = "إعداد اختبار جديد";
   home.addEventListener("click", returnHome);
   const credit = document.createElement("p");
-  credit.className = "result-credit";
-  credit.textContent = "برمجة وتطوير/عبدالملك الدعيس";
+  credit.className = "result-credit developer-credit developer-credit--compact";
+  credit.setAttribute("aria-label", "برمجة وتطوير عبدالملك الدعيس");
+  const creditMark = document.createElement("span");
+  creditMark.className = "developer-mark";
+  creditMark.setAttribute("aria-hidden", "true");
+  creditMark.textContent = "✦";
+  const creditLabel = document.createElement("span");
+  creditLabel.className = "developer-label";
+  creditLabel.textContent = "برمجة وتطوير";
+  const creditName = document.createElement("strong");
+  creditName.className = "developer-name";
+  creditName.textContent = "عبدالملك الدعيس";
+  const creditRule = document.createElement("span");
+  creditRule.className = "developer-rule";
+  creditRule.setAttribute("aria-hidden", "true");
+  credit.append(creditMark, creditLabel, creditName, creditRule);
   footer.append(home, credit);
   card.append(head, score, stats, acc, footer);
   screen.append(card);
   completeStudentAttempt({
     total: session.length, graded: gradeable.length, correct, wrong, blank,
+    mistakeQuestionIds: entries.filter((e) => isGradeable(e.q) && e.user !== undefined && e.user !== answerIndex(e.q)).map((e) => String(e.q.question_id)),
+    correctQuestionIds: entries.filter((e) => isGradeable(e.q) && e.user !== undefined && e.user === answerIndex(e.q)).map((e) => String(e.q.question_id)),
   });
   saveResult({
     id: Date.now().toString(36),
@@ -861,8 +1062,7 @@ function returnHome() {
   $("quiz").classList.remove("finished");
   $("resultScreen").classList.add("hidden");
   $("resultScreen").replaceChildren();
-  if (studentSession?.profile?.role === "admin") { $("drawerAdminBtn").hidden = false; $("drawerAdminBtn").classList.remove("hidden"); }
- $("start").classList.remove("hidden");
+  $("start").classList.remove("hidden");
   document.body.classList.remove("quiz-active");
   window.scrollTo({ top: 0, behavior: "smooth" });
   refreshSetup();
@@ -897,6 +1097,7 @@ $("bookmarkBtn").addEventListener("click", () => {
   if (!id) return;
   if (bookmarks.has(id)) bookmarks.delete(id);
   else bookmarks.add(id);
+  persistSavedQuestionIds();
   renderQuestion();
   renderNav();
 });
@@ -913,25 +1114,6 @@ $("fontBtn").addEventListener("click", () => {
     "aria-label",
     largeText ? "تصغير الخط" : "تكبير الخط",
   );
-});
-$("shareBtn").addEventListener("click", async () => {
-  const payload = {
-    title: document.title,
-    text: document.title,
-    url: location.href,
-  };
-  if (navigator.share) {
-    try {
-      await navigator.share(payload);
-    } catch (_) {}
-  } else if (navigator.clipboard) {
-    try {
-      await navigator.clipboard.writeText(location.href);
-      alert("تم نسخ رابط الاختبار");
-    } catch (_) {
-      window.prompt("انسخ رابط الملف:", location.href);
-    }
-  } else window.prompt("انسخ رابط الملف:", location.href);
 });
 $("exitBtn").addEventListener("click", () => {
   const msg = answeredCount()
@@ -1200,10 +1382,7 @@ function modelButton(model, index, title) {
   if (!model.aggregate) {
     const source = document.createElement("span");
     source.className = "model-source";
-    source.textContent = model.file
-      .replace(/\.json$/i, "")
-      .replace(/__/g, " — ")
-      .replace(/-/g, " ");
+    source.textContent = cleanModelLabel(model.file).replace(/__/g, " — ");
     copy.append(source);
   }
   const arrow = document.createElement("span");
@@ -1260,10 +1439,7 @@ function chooseModel(model) {
     : `${model.year.toLocaleString("en-US", { useGrouping: false })} · نموذج ${arabicNum(siblings.indexOf(model) + 1)}`;
   $("selectedSourceName").textContent = model.aggregate
     ? "جميع نماذج المقرر المختار"
-    : model.file
-        .replace(/\.json$/i, "")
-        .replace(/__/g, " — ")
-        .replace(/-/g, " ");
+    : cleanModelLabel(model.file).replace(/__/g, " — ");
   refreshSetup();
   setBrowseStep(3);
 }
@@ -1322,12 +1498,74 @@ function saveResult(record) {
   }
 }
 function cleanModelLabel(value) {
-  return String(value || "نموذج").replace(/\.json$/i, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim() || "نموذج";
+  let raw = String(value || "نموذج");
+  let system = "";
+  let audience = "";
+  for (let i = 0; i < 3; i++) {
+    const tagged = /^⟦(نظام|الفئة):([^⟧]+)⟧\s*/.exec(raw);
+    if (!tagged) break;
+    if (tagged[1] === "نظام") system = tagged[2].trim();
+    if (tagged[1] === "الفئة") audience = tagged[2].trim();
+    raw = raw.slice(tagged[0].length);
+  }
+  const name = (raw.replace(/\.json$/i, "").replace(/الاختبار\s+النهائي/gi, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim() || "نموذج") +
+    (audience ? "_" + audience : "");
+  return system ? "النظام " + system + " - " + name : name;
+}
+function openSavedQuestions() {
+  closeDrawer();
+  $("infoTitle").textContent = "محفوظاتي";
+  $("infoCloseBtn").textContent = "إغلاق";
+  const body = $("infoBody");
+  body.replaceChildren();
+  const saved = DATA.filter(q => bookmarks.has(q.question_id));
+  if (!saved.length) {
+    const p = document.createElement("p");
+    p.textContent = "لم تحفظ أي سؤال بعد. استخدم علامة الحفظ 🔖 أثناء الاختبار لإضافته هنا.";
+    body.append(p);
+  }
+  saved.forEach(q => {
+    const card = document.createElement("article"); card.className = "history-entry";
+    const title = document.createElement("h3"); title.textContent = q.question || "سؤال محفوظ";
+    const meta = document.createElement("p"); meta.textContent = [q.course, q.source_year].filter(Boolean).join(" · ");
+    card.append(title, meta);
+    if (Array.isArray(q.options) && q.options.length) {
+      const choices = document.createElement("ol"); choices.dir = "rtl"; choices.style.paddingInlineStart = "24px";
+      q.options.forEach((option, index) => {
+        const item = document.createElement("li");
+        const correct = isGradeable(q) && index === answerIndex(q);
+        item.textContent = String(option ?? "") + (correct ? " ✓ الإجابة الصحيحة" : "");
+        if (correct) { item.style.color = "#14704f"; item.style.fontWeight = "800"; }
+        choices.append(item);
+      });
+      card.append(choices);
+    }
+    if (q.explanation) { const explanation = document.createElement("p"); explanation.textContent = "التوضيح: " + q.explanation; card.append(explanation); }
+    const remove = document.createElement("button"); remove.className = "btn btn-secondary"; remove.type = "button"; remove.textContent = "إزالة من محفوظاتي";
+    remove.addEventListener("click", () => { bookmarks.delete(q.question_id); persistSavedQuestionIds(); openSavedQuestions(); });
+    card.append(remove); body.append(card);
+  });
+  $("infoDialog").classList.remove("hidden");
+}
+function reportCurrentQuestion() {
+  const q=session[current]; if(!q) return;
+  const body=$("infoBody"); body.replaceChildren();
+  $("infoTitle").textContent="الإبلاغ عن مشكلة في السؤال"; $("infoCloseBtn").textContent="إغلاق";
+  const form=document.createElement("form"); form.className="auth-grid";
+  const intro=document.createElement("p"); intro.textContent="اختر نوع المشكلة وأضف توضيحًا إن لزم. سيصل البلاغ إلى لوحة المشرفين."; form.append(intro);
+  const label=document.createElement("label"); label.textContent="نوع المشكلة"; label.htmlFor="questionReportType"; form.append(label);
+  const select=document.createElement("select"); select.id="questionReportType"; select.required=true;
+  [["wrong_answer","الإجابة الصحيحة غير دقيقة"],["question_error","خطأ في نص السؤال"],["choices_error","خطأ في الخيارات"],["duplicate","السؤال مكرر"],["formatting","مشكلة في التنسيق"],["other","مشكلة أخرى"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;select.append(o)});form.append(select);
+  const detail=document.createElement("textarea"); detail.maxLength=1000; detail.placeholder="تفاصيل إضافية (اختياري)"; detail.rows=3; form.append(detail);
+  const submit=document.createElement("button"); submit.type="submit"; submit.className="btn btn-primary"; submit.textContent="إرسال البلاغ"; form.append(submit);
+  const status=document.createElement("p"); status.setAttribute("role","status"); form.append(status);
+  form.addEventListener("submit",async e=>{e.preventDefault();submit.disabled=true;status.textContent="جارٍ إرسال البلاغ…";try{await new Promise((resolve,reject)=>{const tg=window.Telegram?.WebApp;if(!tg?.Serverless?.call)return reject(new Error("افتح المنصة من داخل Telegram لإرسال البلاغ."));tg.Serverless.call("questionReports",{questionId:String(q.question_id),questionText:String(q.question||"").slice(0,1500),course:String(q.course||""),courseId:Number(q.course_id||q.courseId||0),sourceYear:Number(q.source_year||0),sourceFile:String(q.source_file||""),reportType:select.value,details:detail.value.trim()},(err,result)=>err?reject(new Error(err.description||err.message||"تعذر إرسال البلاغ")):resolve(result));});status.textContent="تم إرسال البلاغ للمشرفين بنجاح.";submit.textContent="تم الإرسال";}catch(err){status.textContent=err.message||"تعذر إرسال البلاغ. افتح المنصة من Telegram ثم حاول مجددًا.";submit.disabled=false;}});
+  body.append(form); $("infoDialog").classList.remove("hidden");
 }
 function openInfo(kind) {
   closeDrawer();
   $("infoTitle").textContent = kind === "results" ? "المراجعة والنتائج" :
-    kind === "account" ? "حسابي وتقدمي" : kind === "leaderboard" ? "لوحة الصدارة" : "عن بنك الأسئلة";
+    kind === "account" ? "حسابي وتقدمي" : kind === "badges" ? "أوسمة إحسان" : kind === "leaderboard" ? "لوحة الصدارة" : kind === "mistakes" ? "اختبر أخطائي" : "عن بنك الأسئلة";
   $("infoCloseBtn").textContent = kind === "account" ? "إغلاق النافذة" : "حسنًا";
   const body = $("infoBody");
   body.replaceChildren();
@@ -1336,25 +1574,119 @@ function openInfo(kind) {
   if (kind === "leaderboard") {
     p.textContent = "جارٍ تحميل ترتيب الطلاب حسب عدد النماذج المكتملة…";
     body.append(p);
-    const leaderboardRequest = telegramLaunch
-      ? studentApi("leaderboard")
-      : fetch(SUPABASE_URL + "/functions/v1/public-leaderboard", {
-          method: "GET",
-          headers: { "Accept": "application/json" },
-        }).then(async response => {
-          const result = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(result.error || "تعذر تحميل لوحة الصدارة.");
-          return { leaders: result.leaderboard || [], totalStudents: result.totalStudents || 0 };
-        });
-    leaderboardRequest.then((data) => {
+    studentApi("leaderboard").then((data) => {
       body.replaceChildren();
       const rows = Array.isArray(data.leaders) ? data.leaders : Array.isArray(data.leaderboard) ? data.leaderboard : [];
       if (!rows.length) { const empty=document.createElement("p"); empty.textContent="لا توجد اختبارات مكتملة كافية لعرض لوحة الصدارة بعد."; body.append(empty); return; }
       const intro=document.createElement("p");intro.textContent="الترتيب حسب عدد النماذج المختلفة التي أكملها كل طالب، وليس عدد مرات إعادة النموذج.";body.append(intro);
       const list=document.createElement("div");list.className="leaderboard-list";
-      rows.forEach((item,index)=>{const row=document.createElement("article");row.className="history-entry leaderboard-row";const rank=document.createElement("strong");rank.className="leaderboard-rank";rank.textContent=index===0?"🥇":index===1?"🥈":index===2?"🥉":String(index+1);const info=document.createElement("div");info.className="leaderboard-info";const name=document.createElement("h4");name.textContent=item.displayName||"طالب";const username=document.createElement("p");username.textContent=item.username?"@"+item.username:"طالب";const count=document.createElement("span");count.className="profile-badge";count.textContent=arabicNum(item.completedModels||0)+" نموذج مكتمل";info.append(name,username,count);row.append(rank,info);list.append(row);});body.append(list);
-    }).catch(() => { body.replaceChildren(); const error=document.createElement("p");error.textContent="تعذر تحميل لوحة الصدارة الآن. تحقق من الاتصال ثم أعد المحاولة.";body.append(error); });
+      rows.forEach((item,index)=>{const row=document.createElement("article");row.className="history-entry leaderboard-row";const rank=document.createElement("strong");rank.className="leaderboard-rank";rank.textContent=index===0?"🥇":index===1?"🥈":index===2?"🥉":String(index+1);const info=document.createElement("div");info.className="leaderboard-info";const name=document.createElement("h4");name.textContent=item.displayName||"طالب";const count=document.createElement("span");count.className="profile-badge";count.textContent=arabicNum(item.completedModels||0)+" نموذج مكتمل";info.append(name,count);row.append(rank,info);list.append(row);});body.append(list);
+    }).catch(() => { body.replaceChildren(); const error=document.createElement("p");error.textContent="تعذر تحميل لوحة الصدارة الآن. افتح المنصة من Telegram ثم أعد المحاولة.";body.append(error); });
     $("infoDialog").classList.remove("hidden");return;
+  }
+
+  if (kind === "mistakes") {
+    p.textContent = "جارٍ تحميل الأسئلة التي أخطأت فيها في اختباراتك السابقة…";
+    body.append(p);
+    studentApi("mistakes").then((data) => {
+      body.replaceChildren();
+      const all = Array.isArray(data.mistakes) ? data.mistakes.filter((row) => row.is_active !== false) : [];
+      const heading = document.createElement("p");
+      heading.textContent = all.length ? "لديك " + arabicNum(all.length) + " سؤالًا يحتاج إلى مراجعة. اختر المقرر لبدء اختبار عشوائي من أخطائك." : "لا توجد أسئلة غير متقنة مسجلة حاليًا. أكمل اختباراتك وسيُضاف السؤال إلى هذه القائمة عند الإجابة عنه بشكل خاطئ.";
+      body.append(heading);
+      if (!all.length) { $("infoDialog").classList.remove("hidden"); return; }
+      const courseGroups = new Map();
+      for (const item of all) {
+        const key = String(item.course_id);
+        if (!courseGroups.has(key)) courseGroups.set(key, []);
+        courseGroups.get(key).push(item);
+      }
+      for (const [courseKeyId, mistakeRows] of courseGroups) {
+        const courseId = Number(courseKeyId);
+        const level = CATALOG.levels.find((x) => (x.courses || []).some((course) => Number(course.id) === courseId));
+        const course = level && level.courses.find((x) => Number(x.id) === courseId);
+        const wanted = new Set(mistakeRows.map((row) => String(row.question_id)));
+        const available = DATA.filter((question) => Number(question.course_id || question.courseId) === courseId && wanted.has(String(question.question_id)));
+        const card = document.createElement("article"); card.className = "history-entry mistake-course-card";
+        const title = document.createElement("h3"); title.textContent = course?.name || mistakeRows[0]?.course_name || ("المقرر " + courseId);
+        const detail = document.createElement("p"); detail.textContent = arabicNum(available.length) + " سؤال متاح للمراجعة" + (available.length < mistakeRows.length ? " · بعض الأسئلة لم تعد ضمن المحتوى المنشور" : "") + " · سجّلت أخطاء سابقة حتى " + new Date(Math.max(...mistakeRows.map((row) => new Date(row.last_wrong_at || 0).getTime()))).toLocaleDateString("ar-YE");
+        const button = document.createElement("button"); button.type = "button"; button.className = "btn btn-primary"; button.textContent = "ابدأ اختبار الأخطاء"; button.disabled = !available.length;
+        button.addEventListener("click", () => {
+          if (!course || !level || !available.length) return;
+          selectedLevel = level;
+          selectedModel = { id:"mistakes:"+courseId, level:level.id, courseId, course:course.name, year:0, file:"مراجعة الأخطاء", aggregate:true, mistakeReview:true, questions:available };
+          browseStep = 3;
+          const select = $("courseSelect");
+          if (![...select.options].some((option) => option.value === course.name)) select.add(new Option(course.name, course.name));
+          select.value = course.name;
+          $("selectedCourseName").textContent = course.name;
+          $("selectedModelName").textContent = "مراجعة الأخطاء · " + course.name;
+          $("selectedSourceName").textContent = arabicNum(available.length) + " سؤالًا من إجاباتك السابقة";
+          $("infoDialog").classList.add("hidden"); document.querySelector(".wrap").inert = false;
+          start();
+        });
+        card.append(title, detail, button); body.append(card);
+      }
+    }).catch((error) => {
+      body.replaceChildren(); const message = document.createElement("p");
+      message.textContent = error.message || "تعذر تحميل سجل الأخطاء. افتح المنصة من Telegram ثم أعد المحاولة."; body.append(message);
+    });
+    $("infoDialog").classList.remove("hidden"); return;
+  }
+
+  if (kind === "badges") {
+    p.textContent = "جارٍ تحميل شاراتك من نتائج الاختبارات المحفوظة…";
+    body.append(p);
+    Promise.all([studentApi("me"), studentApi("mistakes", { includeMastered: true })]).then(([data, mistakeData]) => {
+      body.replaceChildren();
+      const attempts = Array.isArray(data.attempts) ? data.attempts.filter((attempt) => attempt.status === "completed") : [];
+      const uniqueModels = new Set(attempts.map((attempt) => String(attempt.course_id) + "|" + String(attempt.source_year || 0) + "|" + String(attempt.source_file || "")));
+      const mistakes = Array.isArray(mistakeData.mistakes) ? mistakeData.mistakes : [];
+      const mastered = mistakes.filter((row) => row.is_active === false && Number(row.mastered_count) > 0).length;
+      const badgeRows = [
+        { icon: "🛡️", title: "درع إحسان البرونزي", desc: "أكمل أول اختبار محفوظ", unlocked: attempts.length >= 1, progress: Math.min(attempts.length, 1), target: 1, unit: "اختبار" },
+        { icon: "🛡️", title: "درع إحسان النحاسي", desc: "أكمل خمسة اختبارات محفوظة", unlocked: attempts.length >= 5, progress: Math.min(attempts.length, 5), target: 5, unit: "اختبارات" },
+        { icon: "🛡️", title: "درع إحسان الحديدي", desc: "أكمل عشرة اختبارات محفوظة", unlocked: attempts.length >= 10, progress: Math.min(attempts.length, 10), target: 10, unit: "اختبارات" },
+        { icon: "🛡️", title: "درع إحسان الفضي", desc: "أكمل 25 اختبارًا محفوظًا", unlocked: attempts.length >= 25, progress: Math.min(attempts.length, 25), target: 25, unit: "اختبارات" },
+        { icon: "🛡️", title: "درع إحسان الذهبي", desc: "أكمل 50 اختبارًا محفوظًا", unlocked: attempts.length >= 50, progress: Math.min(attempts.length, 50), target: 50, unit: "اختبارات" },
+        { icon: "🛡️", title: "درع إحسان البلاتيني", desc: "أكمل 100 اختبار محفوظ", unlocked: attempts.length >= 100, progress: Math.min(attempts.length, 100), target: 100, unit: "اختبارات" },
+        { icon: "💠", title: "درع إحسان الماسي", desc: "أكمل 250 اختبارًا محفوظًا", unlocked: attempts.length >= 250, progress: Math.min(attempts.length, 250), target: 250, unit: "اختبارات" },
+        { icon: "📖", title: "رفيق المعرفة", desc: "أكمل خمسة اختبارات", unlocked: attempts.length >= 5, progress: Math.min(attempts.length, 5), target: 5, unit: "اختبارات" },
+        { icon: "💎", title: "جوهرة الإتقان", desc: "حقق 90٪ أو أكثر في اختبار", unlocked: attempts.some((attempt) => Number(attempt.score_percent) >= 90), progress: attempts.some((attempt) => Number(attempt.score_percent) >= 90) ? 1 : 0, target: 1, unit: "نتيجة 90٪+" },
+        { icon: "🧭", title: "رحّالة العلم", desc: "أكمل خمسة نماذج مختلفة", unlocked: uniqueModels.size >= 5, progress: Math.min(uniqueModels.size, 5), target: 5, unit: "نماذج" },
+        { icon: "🛠️", title: "مهندس التعلّم", desc: "أتقن خمسة أسئلة سبق أن أخطأ فيها", unlocked: mastered >= 5, progress: Math.min(mastered, 5), target: 5, unit: "أسئلة متقنة" },
+      ];
+      const earned = badgeRows.filter((item) => item.unlocked).length;
+      const overview = document.createElement("section"); overview.className = "achievement-overview";
+      const emblem = document.createElement("span"); emblem.className = "achievement-overview-icon"; emblem.textContent = "🏅";
+      const summary = document.createElement("div"); summary.className = "achievement-overview-copy";
+      const heading = document.createElement("strong"); heading.textContent = arabicNum(earned) + " من " + arabicNum(badgeRows.length) + " دروع وأوسمة مكتسبة";
+      const caption = document.createElement("span"); caption.textContent = "ترتقي دروع إحسان مع الاختبارات المكتملة، وتبقى أوسمة الإنجاز الخاصة مستقلة.";
+      const track = document.createElement("div"); track.className = "achievement-overview-track"; track.setAttribute("role", "progressbar"); track.setAttribute("aria-label", "نسبة الشارات المكتسبة"); track.setAttribute("aria-valuemin", "0"); track.setAttribute("aria-valuemax", String(badgeRows.length)); track.setAttribute("aria-valuenow", String(earned));
+      const fill = document.createElement("span"); fill.style.width = (earned / badgeRows.length * 100) + "%"; track.append(fill);
+      summary.append(heading, caption, track); overview.append(emblem, summary); body.append(overview);
+      const intro = document.createElement("p"); intro.className = "badge-intro"; intro.textContent = "الشارات غير المكتسبة تبقى مقفلة حتى تكمل شروطها. تقدمك يُحسب من النتائج المحفوظة، ولا تُمنح الشارات بمجرد فتح الصفحة."; body.append(intro);
+      const gallery = document.createElement("div"); gallery.className = "badge-gallery";
+      badgeRows.forEach((item) => {
+        const card = document.createElement("article"); card.className = "badge-card" + (item.unlocked ? " earned" : " locked");
+        const top = document.createElement("div"); top.className = "badge-card-top";
+        const icon = document.createElement("span"); icon.className = "badge-art"; icon.setAttribute("aria-hidden", "true"); icon.textContent = item.icon;
+        const status = document.createElement("span"); status.className = "badge-state"; status.textContent = item.unlocked ? "مكتسبة ✓" : "مقفلة";
+        top.append(icon, status);
+        const title = document.createElement("h3"); title.textContent = item.title;
+        const desc = document.createElement("p"); desc.textContent = item.desc;
+        const progressText = document.createElement("span"); progressText.className = "badge-progress-text";
+        progressText.textContent = item.title === "إتقان" ? (item.unlocked ? "تم تحقيق الشرط" : "بانتظار نتيجة 90٪ أو أكثر") : arabicNum(item.progress) + " / " + arabicNum(item.target) + " " + item.unit;
+        const progress = document.createElement("div"); progress.className = "badge-progress"; progress.setAttribute("role", "progressbar"); progress.setAttribute("aria-valuemin", "0"); progress.setAttribute("aria-valuemax", String(item.target)); progress.setAttribute("aria-valuenow", String(item.progress)); progress.setAttribute("aria-label", "تقدم شارة " + item.title);
+        const progressFill = document.createElement("span"); progressFill.style.width = (item.progress / item.target * 100) + "%"; progress.append(progressFill);
+        card.append(top, title, desc, progressText, progress); gallery.append(card);
+      });
+      body.append(gallery);
+    }).catch((error) => {
+      body.replaceChildren();
+      const message = document.createElement("p"); message.textContent = error.message || "تعذر تحميل الشارات الآن. افتح المنصة من Telegram ثم أعد المحاولة."; body.append(message);
+    });
+    $("infoDialog").classList.remove("hidden"); return;
   }
 
   if (kind === "account") {
@@ -1444,43 +1776,33 @@ function openInfo(kind) {
       body.append(message);
     });
   } else if (kind === "results") {
-    p.textContent = "جار تحميل نتائج اختباراتك المحفوظة…";
+    const history = readResults();
+    p.textContent = "هذه النتائج المحلية على هذا الجهاز. لعرض تقدمك المتزامن بين الأجهزة افتح «حسابي وتقدمي».";
     body.append(p);
-    studentApi("me").then((data) => {
-      studentCloudData = data;
-      const attempts = Array.isArray(data.attempts) ? data.attempts.filter((item) => item.status === "completed") : [];
-      body.replaceChildren();
-      if (!attempts.length) {
-        const empty = document.createElement("p");
-        empty.textContent = "لا توجد نتائج مكتملة محفوظة في حسابك بعد.";
-        body.append(empty);
-      }
-      for (const attempt of attempts) {
-        const item = document.createElement("article");
-        item.className = "history-entry";
-        const title = document.createElement("h3");
-        title.textContent = cleanModelLabel(attempt.model_label || attempt.source_file || ("اختبار المقرر " + attempt.course_id));
-        const meta = document.createElement("p");
-        meta.textContent = new Date(attempt.completed_at || attempt.started_at).toLocaleString("ar-YE");
-        const score = document.createElement("p");
-        score.textContent = (attempt.score_percent == null ? "—" : arabicNum(Number(attempt.score_percent)) + "٪") +
-          " · صحيحة " + arabicNum(attempt.correct_count || 0) + " من " + arabicNum(attempt.graded_questions || 0);
-        item.append(title, meta, score);
-        body.append(item);
-      }
-    }).catch((error) => {
-      body.replaceChildren();
-      const message = document.createElement("p");
-      message.textContent = error.message || "تعذر تحميل النتائج المحفوظة.";
-      body.append(message);
-    });
-
+    if (!history.length) {
+      const empty = document.createElement("p");
+      empty.textContent = "لا توجد نتائج محفوظة بعد.";
+      body.append(empty);
+    }
+    for (const result of history) {
+      const item = document.createElement("article");
+      item.className = "history-entry";
+      const title = document.createElement("h3");
+      title.textContent = result.levelLabel ? result.levelLabel + " · " + result.course : result.course;
+      const meta = document.createElement("p");
+      meta.textContent = result.model + " · " + new Date(result.date).toLocaleString("en-GB");
+      const score = document.createElement("p");
+      score.textContent = (result.percent === null ? "—" : arabicNum(result.percent) + "٪") +
+        " · " + arabicNum(result.correct) + " / " + arabicNum(result.graded) + " · " + result.duration;
+      item.append(title, meta, score);
+      body.append(item);
+    }
   } else {
     p.textContent = arabicNum(DATA.length) + " سؤالًا في " +
       arabicNum(CATALOG.levels.reduce((n, l) => n + l.courses.length, 0)) +
       " مقررًا. كل نموذج يحتوي على أسئلة مصدره، وآخر خيار يجمع جميع أسئلة المقرر المختار.";
     const p2 = document.createElement("p");
-    p2.textContent = "حساب الطالب والتقدم والنتائج المتزامنة متاحة بعد تسجيل الدخول، سواء من المتصفح أو Telegram.";
+    p2.textContent = "حساب الطالب والتقدم والنتائج المتزامنة متاحة عند فتح المنصة من داخل Telegram.";
     body.append(p, p2);
   }
   $("infoDialog").classList.remove("hidden");
@@ -1524,26 +1846,48 @@ function initBrowse() {
     if (selectedModel) setBrowseStep(3);
   });
   $("drawerResultsBtn").addEventListener("click", () => openInfo("results"));
+  $("drawerSavedBtn").addEventListener("click", openSavedQuestions);
+  $("drawerMistakesBtn").addEventListener("click", () => openInfo("mistakes"));
+  $("reportQuestionBtn").addEventListener("click", reportCurrentQuestion);
   $("drawerAccountBtn").addEventListener("click", () => openInfo("account"));
+  $("drawerBadgesBtn").addEventListener("click", () => openInfo("badges"));
   $("drawerLeaderboardBtn").addEventListener("click", () => openInfo("leaderboard"));
   $("drawerAboutBtn").addEventListener("click", () => openInfo("about"));
+  function openAdminPanel() {
+    closeDrawer();
+    const overlay = $("adminPanelOverlay");
+    const frame = $("adminPanelFrame");
+    const browserAdmin = studentSession?.profile?.role === "admin" || String(studentSession?.profile?.role || "").toLowerCase() === "admin";
+    const target = browserAdmin ? "admin-students.html?v=20261030b" : "admin.html?v=20261028c";
+    if (frame.dataset.panelTarget !== target) {
+      frame.src = target;
+      frame.dataset.panelTarget = target;
+    }
+    overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+  function closeAdminPanel() {
+    $("adminPanelOverlay").classList.add("hidden");
+    document.body.style.overflow = "";
+  }
+  $("adminPanelClose").addEventListener("click", closeAdminPanel);
+  $("adminPanelOverlay").addEventListener("click", (event) => { if (event.target === $("adminPanelOverlay")) closeAdminPanel(); });
   $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-student-management-a"; });
   const telegramWebApp = window.Telegram && window.Telegram.WebApp;
   if (telegramWebApp) telegramWebApp.ready();
-  if (telegramWebApp?.Serverless?.call || (typeof telegramWebApp?.initData === "string" && telegramWebApp.initData.trim())) {
-    waitForTelegramServerless().then((readyApp) => {
-      if (!readyApp?.Serverless?.call) return;
-      readyApp.Serverless.call('adminApi', { action: 'checkAccess' }, (err, result) => {
-        if (!err && result?.allowed === true) {
-          const adminButton = $("drawerAdminBtn");
-          adminButton.hidden = false;
-          adminButton.classList.remove("hidden");
-        }
-      });
-    }).catch(() => {});
-  }  $("infoCloseBtn").addEventListener("click", closeInfo);
+  waitForTelegramServerless().then((readyApp) => {
+    if (!readyApp?.Serverless?.call) return;
+    readyApp.Serverless.call('adminApi', { action: 'checkAccess' }, (err, result) => {
+      if (!err && result?.allowed === true) {
+        telegramAdminAccess = true;
+        updateAdminEntry();
+      }
+    });
+  });
+  $("infoCloseBtn").addEventListener("click", closeInfo);
   document.addEventListener("keydown", (e) => {
     let owner = null;
+    if (!$("adminPanelOverlay").classList.contains("hidden")) { if (e.key === "Escape") closeAdminPanel(); return; }
     if (!$("drawer").classList.contains("hidden")) owner = $("drawer");
     else if (!$("infoDialog").classList.contains("hidden"))
       owner = $("infoDialog");
@@ -1600,15 +1944,119 @@ const SUPABASE_URL = "https://jrrsnpijbizbwxopyvam.supabase.co";
 const AUTH_URL = SUPABASE_URL + "/functions/v1/student-auth";
 let studentSession = null;
 const AUTH_SESSION_KEY = "usf2_student_session_v1";
+let telegramAdminAccess = false;
+let browserRefreshPromise = null;
+
+function persistStudentSession() {
+ if (!studentSession) return;
+ try {
+  if (studentSession.telegramAuth === true) {
+   sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(studentSession));
+   localStorage.removeItem(AUTH_SESSION_KEY);
+  } else {
+   localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(studentSession));
+   sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(studentSession));
+  }
+ } catch (error) {
+  console.warn("تعذر حفظ جلسة الدخول على هذا الجهاز.", error);
+ }
+}
+
+function clearStudentSession(showLogin = false) {
+ studentSession = null;
+ try {
+  localStorage.removeItem(AUTH_SESSION_KEY);
+  sessionStorage.removeItem(AUTH_SESSION_KEY);
+ } catch (_) {}
+ if (showLogin && $("authPanel")) {
+  $("authPanel").classList.remove("hidden");
+  $("authPanel").setAttribute("aria-hidden", "false");
+  $("authUserbar")?.classList.add("hidden");
+  $("menuBtn")?.classList.add("hidden");
+  $("start")?.classList.add("hidden");
+  switchAuthTab(false);
+  showAuthMessage("انتهت جلسة الدخول. سجّل الدخول مجددًا للمتابعة.", "error");
+ }
+}
+
+async function refreshBrowserSession() {
+ if (!studentSession?.refreshToken) return false;
+ if (browserRefreshPromise) return browserRefreshPromise;
+ browserRefreshPromise = (async () => {
+  let response;
+  try {
+   response = await fetch(AUTH_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "refresh", payload: { refreshToken: studentSession.refreshToken } })
+   });
+  } catch (_) {
+   return false;
+  }
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.accessToken) {
+   if ([400, 401, 403].includes(response.status)) clearStudentSession(true);
+   return false;
+  }
+  studentSession = {
+   ...studentSession,
+   accessToken: result.accessToken,
+   refreshToken: result.refreshToken || studentSession.refreshToken,
+   expiresAt: result.expiresAt,
+   profile: { ...(studentSession.profile || {}), ...(result.profile || {}) }
+  };
+  persistStudentSession();
+  return true;
+ })();
+ try {
+  return await browserRefreshPromise;
+ } finally {
+  browserRefreshPromise = null;
+ }
+}
+function updateAdminEntry() {
+ const button = $("drawerAdminBtn");
+ if (!button) return;
+ const browserAdmin = studentSession?.profile?.role === "admin" || String(studentSession?.profile?.role || "").toLowerCase() === "admin";
+ const visible = browserAdmin || telegramAdminAccess;
+ button.hidden = !visible;
+ button.classList.toggle("hidden", !visible);
+}
+async function refreshStudentProfile() {
+ if (!studentSession?.accessToken) throw new Error("سجّل الدخول أولًا.");
+ try {
+  const result = await authRequest("me");
+  if (!result?.profile) throw new Error("تعذر التحقق من ملف الحساب.");
+  // اعتماد الحساب والمستوى يتم التحقق منهما في الخادم؛ لا توجد موافقة إدارية.
+  studentSession.profile = { ...(studentSession.profile || {}), ...result.profile };
+  persistStudentSession();
+ } catch (error) {
+  if ([401,403].includes(error?.status)) clearStudentSession(true);
+  throw error;
+ }
+ updateAdminEntry();
+}
+
 function showAuthMessage(text,kind="") { const el=$("authMessage"); el.textContent=text; el.className="auth-message"+(kind?" "+kind:""); el.classList.remove("hidden"); }
-async function authRequest(action,payload={}) {
+async function authRequest(action,payload={},allowRefresh=true) {
  const headers={"Content-Type":"application/json"};
  if(studentSession?.accessToken) headers.Authorization="Bearer "+studentSession.accessToken;
- const response=await fetch(AUTH_URL,{method:"POST",headers,body:JSON.stringify({action,payload})});
+ let response;
+ try {
+  response=await fetch(AUTH_URL,{method:"POST",headers,body:JSON.stringify({action,payload})});
+ } catch (_) {
+  throw new Error("تعذر الاتصال بخدمة الحساب. تحقق من الإنترنت ثم أعد المحاولة.");
+ }
  const result=await response.json().catch(()=>({}));
- if(!response.ok) throw new Error(result.error||"تعذر تنفيذ العملية.");
+ if(response.status===401&&allowRefresh&&action!=="refresh"&&await refreshBrowserSession()) return authRequest(action,payload,false);
+ if(!response.ok) {
+  const error=new Error(result.error||"تعذر تنفيذ العملية.");
+  error.status=response.status;
+  throw error;
+ }
  return result;
 }
+
 function switchAuthTab() {
  $("loginForm").classList.remove("hidden");
  $("loginTab").classList.add("active");
@@ -1622,7 +2070,6 @@ function showTelegramLevelSetup(result) {
  $("authIntro").textContent="تم التعرّف على حساب تيليجرام. اختر مستواك الدراسي مرة واحدة للبدء.";
  document.querySelector(".auth-tabs")?.classList.add("hidden");
  $("loginForm").classList.add("hidden");
-
  $("telegramSetup").classList.remove("hidden");
  $("telegramProfileName").textContent="الحساب: "+(result.telegramProfile?.displayName||"حساب تيليجرام");
  const select=$("telegramLevel");
@@ -1641,9 +2088,10 @@ function saveTelegramAuthSession(result) {
   accessToken:result.accessToken,
   refreshToken:result.refreshToken,
   expiresAt:result.expiresAt,
-  profile:result.profile
+  profile:result.profile,
+  telegramAuth:true
  };
- sessionStorage.setItem(AUTH_SESSION_KEY,JSON.stringify(studentSession));
+ persistStudentSession();
 }
 async function runTelegramAccountAuth(levelId=null) {
  const result=await studentApi("appAuth",levelId?{levelId}:{});
@@ -1652,11 +2100,8 @@ async function runTelegramAccountAuth(levelId=null) {
   return false;
  }
  saveTelegramAuthSession(result);
- try {
-  studentCloudData=await studentApi("me");
- } catch(error) {
-  console.warn("تعذر تحميل سجل الطالب القديم:",error);
- }
+ try { studentCloudData=await studentApi("me"); }
+ catch(error) { console.warn("تعذر تحميل سجل الطالب القديم:",error); }
  await activateStudent();
  return true;
 }
@@ -1668,101 +2113,234 @@ $("telegramContinueBtn").addEventListener("click",async()=>{
   return;
  }
  button.disabled=true;
- try {
-  await runTelegramAccountAuth(levelId);
- } catch(error) {
-  showAuthMessage(error.message||"تعذر إنشاء حسابك. حاول مرة أخرى.","error");
- } finally {
-  button.disabled=false;
- }
+ try { await runTelegramAccountAuth(levelId); }
+ catch(error) { showAuthMessage(error.message||"تعذر إنشاء حسابك. حاول مرة أخرى.","error"); }
+ finally { button.disabled=false; }
 });
-
 $("loginTab").addEventListener("click",()=>switchAuthTab());
 $("loginForm").addEventListener("submit",async(e)=>{
- e.preventDefault();const btn=$("loginForm").querySelector('button[type="submit"]');btn.disabled=true;
- try{const r=await authRequest("login",{username:$("loginIdentifier").value.trim(),password:$("loginPassword").value});
- if(r.suspended){showAuthMessage(r.message||"هذا الحساب موقوف حاليًا.");return;}
- studentSession={accessToken:r.accessToken,refreshToken:r.refreshToken,profile:r.profile,loginUsername:$("loginIdentifier").value.trim()};sessionStorage.setItem(AUTH_SESSION_KEY,JSON.stringify(studentSession));await ensureSiteAvailable();await activateStudent();}
- catch(err){showAuthMessage(err.message,"error");}finally{btn.disabled=false;}
+ e.preventDefault();
+ const btn=$("loginForm").querySelector('button[type="submit"]');
+ btn.disabled=true;
+ try {
+  const r=await authRequest("login",{username:$("loginIdentifier").value.trim(),password:$("loginPassword").value});
+  if(r.suspended||r.pending) { showAuthMessage(r.message||"هذا الحساب غير متاح حاليًا.","error"); return; }
+  studentSession={accessToken:r.accessToken,refreshToken:r.refreshToken,expiresAt:r.expiresAt,profile:r.profile,loginUsername:$("loginIdentifier").value.trim()};
+  persistStudentSession();
+  reportVisitorPresence();
+  await activateStudent();
+ } catch(err) { showAuthMessage(err.message,"error"); }
+ finally { btn.disabled=false; }
 });
-async function activateStudent(){
- if (isMaintenanceExemptUser()) showMaintenanceScreen({enabled:false});
- else if (window.Telegram?.WebApp?.Serverless?.call) {
-   const available = await ensureSiteAvailable();
-   if (!available) return;
+async function activateStudent() {
+ await refreshStudentProfile();
+ await ensureSiteAvailable();
+ reportVisitorPresence();
+ $("authPanel").classList.add("hidden");
+ $("authPanel").setAttribute("aria-hidden","true");
+ document.querySelector(".auth-tabs")?.classList.remove("hidden");
+ $("telegramSetup").classList.add("hidden");
+ $("menuBtn").classList.remove("hidden");
+ $("authUserbar").classList.remove("hidden");
+ const roleLabel=String(studentSession.profile.role||"").toLowerCase()==="admin"?"المدير الرئيسي":(studentSession.profile.levelName||"مستواك الدراسي");
+ $("authWelcome").textContent="مرحبًا "+(studentSession.profile.displayName||studentSession.profile.username)+" — "+roleLabel;
+ $("start").classList.remove("hidden");
+ $("resultsStorageNote").textContent="تُحفظ نتائجك وتقدمك في حسابك، وتظهر عند الدخول من تيليجرام أو المتصفح.";
+ updateAdminEntry();
+ try {
+  try { studentCloudData=await studentApi("me"); } catch(error) { console.warn("تعذر تحميل سجل الحساب:",error); }
+  await loadCatalogFromSupabase();
+  $("connectionStatus").textContent="متصل";
+ } catch(error) {
+  $("start").classList.add("hidden");
+  $("authPanel").classList.remove("hidden");
+  $("authPanel").setAttribute("aria-hidden","false");
+  $("menuBtn").classList.add("hidden");
+  showAuthMessage(error.message||"تعذر تحميل محتوى المنصة.","error");
+  throw error;
  }
- $("authPanel").classList.add("hidden");$("authPanel").setAttribute("aria-hidden","true");$("menuBtn").classList.remove("hidden");$("authUserbar").classList.remove("hidden");$("authWelcome").textContent="مرحبًا "+(studentSession.profile.displayName||studentSession.profile.username)+" — "+(studentSession.profile.levelName||"مستواك الدراسي");
- $("start").classList.remove("hidden");$("resultsStorageNote").textContent="تُحفظ نتائجك وتقدمك في حسابك، وتظهر عند الدخول من تيليجرام أو المتصفح.";
- try{studentCloudData=await studentApi("me");await loadCatalogFromSupabase();$("connectionStatus").textContent="متصل";}
- catch(e){$("start").classList.add("hidden");$("authPanel").classList.remove("hidden");$("authPanel").setAttribute("aria-hidden","false");showAuthMessage(e.message,"error");}
 }
-$("logoutBtn").addEventListener("click",()=>{studentSession=null;sessionStorage.removeItem(AUTH_SESSION_KEY);location.reload();});
-// Start with the maintenance overlay cleared; the live status check below may re-enable it.
-showMaintenanceScreen({ enabled: false });
-async function fetchMaintenanceStatus() {
-  const app = window.Telegram?.WebApp;
-  if (!app?.Serverless?.call) {
-    const response = await fetch('/api/siteStatus', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: '{}' });
-    if (!response.ok) throw new Error('تعذر قراءة حالة الصيانة.');
-    const payload = await response.json();
-    return payload?.result || payload;
-  }
-  return await new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('انتهت مهلة التحقق من حالة الموقع.')), 5000);
-    app.Serverless.call('siteStatus', {}, (err, result) => {
-      clearTimeout(timer);
-      if (err) reject(new Error(err.description || err.message || 'تعذر التحقق من حالة الموقع.'));
-      else resolve(result || { enabled: false });
-    });
-  });
+$("logoutBtn").addEventListener("click",()=>{clearStudentSession(false);location.reload();});
+
+// تعطيل حجب المتصفح بشاشة الصيانة؛ يبقى الموقع متاحًا حتى عند تعذّر قراءة حالة الخادم.
+function showMaintenanceScreen() {
+ const screen=$("maintenanceScreen");
+ if(screen) screen.classList.add("hidden");
+ document.body.style.overflow="";
+ document.querySelectorAll("body > *").forEach(node=>{node.inert=false;});
 }
-function showMaintenanceScreen(status) {
-  const screen = $('maintenanceScreen');
-  if (!screen) return;
-  $('maintenanceMessage').textContent = status?.message || 'نعمل على تحسين المنصة وتطوير تجربتكم. سنعود إليكم قريبًا.';
-  screen.classList.toggle('hidden', status?.enabled !== true);
-  if (status?.enabled === true) {
-    document.body.style.overflow = 'hidden';
-    document.querySelectorAll('body > *:not(#maintenanceScreen)').forEach((node) => { node.inert = true; });
-  } else {
-    document.body.style.overflow = '';
-    document.querySelectorAll('body > *:not(#maintenanceScreen)').forEach((node) => { node.inert = false; });
-  }
-}
-function isMaintenanceExemptUser() {
-  // Match the authenticated app account, tolerating @ prefixes and case differences.
-  const profile = studentSession?.profile || {};
-  const candidates = [studentSession?.loginUsername, profile.username, profile.userName, profile.login, profile.loginIdentifier, profile.email, profile.telegramUsername, profile.displayName, profile.fullName, profile.name];
-  const normalize = value => String(value || '').trim().replace(/^@+|@+$/g, '').toLowerCase();
-  return candidates.some(value => normalize(value) === 'abud2m' || normalize(value) === 'عبدالملك عبدالجليل الدعيس') || [profile.telegramId, profile.telegram_id, profile.userId, profile.id, studentSession?.telegramId].some(value => String(value || '').trim() === '5187563344');
-}
+function isMaintenanceExemptUser() { return true; }
 async function ensureSiteAvailable() {
+ showMaintenanceScreen();
+ return true;
+}
+// Persistent device cache with a change-log cursor. Each page refresh requests only
+// records changed since the last saved cursor, rather than downloading the full bank.
+const CATALOG_CACHE_DB = "usf2_device_cache_v1";
+const CATALOG_CACHE_STORE = "catalog";
+const CATALOG_CACHE_KEY = "public_catalog_v2";
+let catalogCacheDbPromise = null;
+let catalogSyncPromise = null;
+
+function catalogCacheKeyForSession() {
+  const profile = studentSession?.profile || {};
+  if (!studentSession) return CATALOG_CACHE_KEY + ":guest";
+  const identity = profile.userId || profile.user_id || profile.id || profile.username || studentSession.loginUsername || "account";
+  const role = String(profile.role || "student").toLowerCase();
+  const level = profile.levelId ?? profile.level_id ?? "";
+  return CATALOG_CACHE_KEY + ":" + role + ":" + String(identity).toLowerCase() + ":" + String(level);
+}
+
+function openCatalogCacheDB() {
+  if (!('indexedDB' in window)) return Promise.reject(new Error('IndexedDB unavailable'));
+  if (!catalogCacheDbPromise) {
+    catalogCacheDbPromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(CATALOG_CACHE_DB, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(CATALOG_CACHE_STORE)) db.createObjectStore(CATALOG_CACHE_STORE);
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error('Unable to open catalog cache'));
+      request.onblocked = () => reject(new Error('Catalog cache is blocked'));
+    }).catch((error) => {
+      catalogCacheDbPromise = null;
+      throw error;
+    });
+  }
+  return catalogCacheDbPromise;
+}
+
+async function readCatalogCache() {
   try {
-    const status = await fetchMaintenanceStatus();
-    if (status?.enabled === true && !isMaintenanceExemptUser()) {
-      showMaintenanceScreen(status);
-      return false;
-    }
-    if (status?.enabled === true && isMaintenanceExemptUser()) {
-      showMaintenanceScreen({ enabled: false });
-    }
+    const db = await openCatalogCacheDB();
+    const key = catalogCacheKeyForSession();
+    return await new Promise((resolve, reject) => {
+      const request = db.transaction(CATALOG_CACHE_STORE, 'readonly').objectStore(CATALOG_CACHE_STORE).get(key);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error || new Error('Unable to read catalog cache'));
+    });
+  } catch (error) {
+    console.warn('تعذر قراءة النسخة المحلية من الفهرس:', error);
+    return null;
+  }
+}
+
+async function writeCatalogCache(record, key = catalogCacheKeyForSession()) {
+  try {
+    const db = await openCatalogCacheDB();
+    await new Promise((resolve, reject) => {
+      const transaction = db.transaction(CATALOG_CACHE_STORE, 'readwrite');
+      transaction.objectStore(CATALOG_CACHE_STORE).put(record, key);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error || new Error('Unable to save catalog cache'));
+      transaction.onabort = () => reject(transaction.error || new Error('Catalog cache save aborted'));
+    });
     return true;
   } catch (error) {
-    console.warn('تعذر التحقق من حالة الصيانة:', error);
-    // The TGCloud endpoint requires verified Telegram initData; a regular browser has none.
-    // Do not permanently lock browser visitors behind a stale maintenance screen when status cannot be fetched.
-    if (!window.Telegram?.WebApp?.Serverless?.call) {
-      showMaintenanceScreen({ enabled: false });
-      return true;
-    }
-    if (isMaintenanceExemptUser()) {
-      showMaintenanceScreen({ enabled: false });
-      return true;
-    }
-    showMaintenanceScreen({ enabled: true, message: 'المنصة تحت الصيانة حاليًا. يرجى العودة لاحقًا.' });
+    console.warn('تعذر حفظ الفهرس على الهاتف:', error);
     return false;
   }
 }
+
+function mergeCatalogChanges(payload, changes) {
+  const next = {
+    ...payload,
+    levels: [...(payload.levels || [])],
+    subjects: [...(payload.subjects || [])],
+    courses: [...(payload.courses || [])],
+    questions: [...(payload.questions || [])],
+  };
+  const keyByEntity = { levels: 'levels', subjects: 'subjects', courses: 'courses', questions: 'questions' };
+  for (const change of changes || []) {
+    const listName = keyByEntity[change.entity];
+    if (!listName || !Number.isFinite(Number(change.id))) continue;
+    const id = Number(change.id);
+    const rows = next[listName];
+    const index = rows.findIndex((row) => Number(row.id) === id);
+    if (change.operation === 'delete' || !change.row) {
+      if (index !== -1) rows.splice(index, 1);
+      continue;
+    }
+    if (index === -1) rows.push(change.row);
+    else rows[index] = change.row;
+  }
+  return next;
+}
+
+async function syncCatalogChanges(cached) {
+  if (catalogSyncPromise) return catalogSyncPromise;
+  const cacheKey = catalogCacheKeyForSession();
+  catalogSyncPromise = (async () => {
+    let payload = cached.payload;
+    let cursor = String(cached.cursor ?? cached.payload?.syncCursor ?? '');
+    if (!/^\d+$/.test(cursor)) throw new Error('النسخة المحلية لا تحتوي مؤشر مزامنة صالحًا.');
+    let changed = false;
+    for (let page = 0; page < 100; page += 1) {
+      const delta = await fetchSupabaseCatalogDelta(cursor);
+      const changes = Array.isArray(delta.changes) ? delta.changes : [];
+      if (changes.length) {
+        payload = mergeCatalogChanges(payload, changes);
+        changed = true;
+      }
+      const nextCursor = String(delta.cursor ?? cursor);
+      if (!/^\d+$/.test(nextCursor)) throw new Error('استجابة تحديثات الفهرس غير صالحة.');
+      const progressed = nextCursor !== cursor;
+      cursor = nextCursor;
+      await writeCatalogCache({ payload, cursor, savedAt: Date.now() }, cacheKey);
+      if (!delta.hasMore) break;
+      if (!progressed || page === 99) throw new Error('المزامنة لم تكتمل؛ ستُستأنف عند تحديث الصفحة.');
+    }
+    return { payload, cursor, changed };
+  })().finally(() => { catalogSyncPromise = null; });
+  return catalogSyncPromise;
+}
+
+async function loadCatalogFromSupabase({ forceRefresh = false } = {}) {
+  catalogLoadState = 'loading';
+  if (!studentSession?.accessToken) {
+    catalogLoadState = "error";
+    throw new Error("سجّل الدخول لعرض محتوى مستواك الدراسي.");
+  }
+  if (!(await ensureSiteAvailable())) return;
+
+  const cached = await readCatalogCache();
+  const cachedCursor = String(cached?.cursor ?? cached?.payload?.syncCursor ?? '');
+  const cachedIsValid = cached && cached.payload &&
+    Array.isArray(cached.payload.levels) && Array.isArray(cached.payload.subjects) &&
+    Array.isArray(cached.payload.courses) && Array.isArray(cached.payload.questions) &&
+    /^\d+$/.test(cachedCursor);
+
+  if (!forceRefresh && cachedIsValid) {
+    // Render saved rows immediately, then query the compact change log on every reload.
+    applyCatalogResult(cached.payload);
+    try {
+      const synced = await syncCatalogChanges({ ...cached, cursor: cachedCursor });
+      if (synced.changed) applyCatalogResult(synced.payload);
+    } catch (error) {
+      // Keep usable local data when offline; the next page refresh retries the delta.
+      console.warn('تعذر مزامنة تغييرات الفهرس؛ استُبقيت النسخة المحلية:', error);
+    }
+    return;
+  }
+
+  try {
+    const result = await fetchSupabaseCatalog();
+    const cursor = String(result.syncCursor ?? '');
+    if (!/^\d+$/.test(cursor)) throw new Error('استجابة الفهرس لا تحتوي مؤشر مزامنة صالحًا.');
+    await writeCatalogCache({ payload: result, cursor, savedAt: Date.now() });
+    applyCatalogResult(result);
+  } catch (error) {
+    if (cached?.payload && Array.isArray(cached.payload.questions)) {
+      // Legacy cache remains a fallback if the initial migration download fails.
+      applyCatalogResult(cached.payload);
+      return;
+    }
+    catalogLoadState = 'error';
+    throw error;
+  }
+}
+
 async function fetchSupabaseCatalog() {
   let response;
   try {
@@ -1776,19 +2354,37 @@ async function fetchSupabaseCatalog() {
   let result;
   try { result = await response.json(); } catch { result = {}; }
   if (!response.ok) throw new Error(result?.error || "تعذر تحميل فهرس Supabase.");
-  if (!Array.isArray(result.levels) || !Array.isArray(result.courses) || !Array.isArray(result.questions)) {
+  if (!Array.isArray(result.levels) || !Array.isArray(result.subjects) ||
+      !Array.isArray(result.courses) || !Array.isArray(result.questions) ||
+      !/^\d+$/.test(String(result.syncCursor ?? ""))) {
     throw new Error("استجابة فهرس Supabase غير مكتملة.");
   }
   return result;
 }
-async function loadCatalogFromSupabase() {
-  catalogLoadState = 'loading';
-  if (!(await ensureSiteAvailable())) return;
-  const result = await fetchSupabaseCatalog();
-  const levelRows = result.levels || [];
-  const subjectRows = result.subjects || [];
-  const courseRows = result.courses || [];
-  const questionRows = result.questions || [];
+async function fetchSupabaseCatalogDelta(cursor) {
+  let response;
+  try {
+    const url = SUPABASE_URL + "/functions/v1/public-catalog?since=" + encodeURIComponent(String(cursor));
+    response = await fetch(url, {
+      method: "GET",
+      cache: "no-store",
+      headers: { "Accept": "application/json", "Authorization": "Bearer " + (studentSession?.accessToken || "") },
+    });
+  } catch {
+    throw new Error("تعذر الاتصال بمزامنة تغييرات المحتوى.");
+  }
+  let result;
+  try { result = await response.json(); } catch { result = {}; }
+  if (!response.ok || result.delta !== true || !Array.isArray(result.changes)) {
+    throw new Error(result?.error || "تعذر تحميل تحديثات المحتوى.");
+  }
+  return result;
+}
+function applyCatalogResult(result) {
+  const levelRows = (result.levels || []).filter((row) => row.isActive !== false);
+  const subjectRows = (result.subjects || []).filter((row) => row.isActive !== false);
+  const courseRows = (result.courses || []).filter((row) => row.isActive !== false);
+  const questionRows = (result.questions || []).filter((row) => row.isActive !== false);
 
   const catalog = {
     levels: levelRows
@@ -1845,6 +2441,8 @@ async function loadCatalogFromSupabase() {
       level: parent.level.id,
       level_label: parent.level.label,
       course: parent.course.name,
+      course_id: Number(row.courseId || parent.course.id || 0),
+      courseId: Number(row.courseId || parent.course.id || 0),
       source_year: yearNumber,
       source_file: file,
       source_index: Number(row.sourceIndex) || model.questions.length + 1,
@@ -1929,12 +2527,17 @@ async function loadCatalogFromSupabase() {
   }
 }
 try {
-  const savedSession = JSON.parse(sessionStorage.getItem(AUTH_SESSION_KEY) || "null");
+  const browserSession = JSON.parse(localStorage.getItem(AUTH_SESSION_KEY) || "null");
+  const tabSession = JSON.parse(sessionStorage.getItem(AUTH_SESSION_KEY) || "null");
+  const savedSession = browserSession || (tabSession?.telegramAuth !== true ? tabSession : null);
   studentSession = savedSession && typeof savedSession.accessToken === "string" &&
-    savedSession.accessToken.length > 0 && savedSession.profile &&
+    savedSession.accessToken.length > 0 && typeof savedSession.refreshToken === "string" &&
+    savedSession.refreshToken.length > 0 && savedSession.profile &&
     typeof savedSession.profile === "object" ? savedSession : null;
+  if (studentSession) persistStudentSession();
 } catch {
   studentSession = null;
+  localStorage.removeItem(AUTH_SESSION_KEY);
   sessionStorage.removeItem(AUTH_SESSION_KEY);
 }
 const telegramAppAtStartup = window.Telegram?.WebApp || null;
@@ -1944,7 +2547,7 @@ const telegramLaunch = Boolean(
 );
 
 if (telegramLaunch) {
-  // TGCloud supplies server-verified Telegram initData to studentApi.
+  // داخل Telegram تتم المصادقة تلقائيًا بهوية initData التي يتحقق منها الخادم.
   studentSession = null;
   $("authPanel").classList.add("hidden");
   $("authPanel").setAttribute("aria-hidden", "true");
@@ -1953,62 +2556,54 @@ if (telegramLaunch) {
   $("start").classList.add("hidden");
   $("resultsStorageNote").textContent = "يُربط حسابك ونتائجك تلقائيًا بهوية تيليجرام.";
 
-  ensureSiteAvailable().then(async available => {
-    if (!available) return;
+  ensureSiteAvailable().then(async () => {
     const telegramReady = await waitForTelegramServerless();
     if (!telegramReady?.Serverless?.call) {
       throw new Error("تعذر تشغيل خدمة التحقق الآمن. أغلق الصفحة وافتحها من زر المنصة داخل البوت.");
     }
     await runTelegramAccountAuth();
+    return true;
   }).then((signedIn) => {
     if (signedIn === false) {
       $("connectionStatus").textContent = "اختر المستوى الدراسي";
       return;
     }
-    $("connectionStatus").textContent = catalogLoadState === "loaded"
-      ? "مرتبط بتيليجرام" : "تعذر تحميل المحتوى";
+    $("connectionStatus").textContent = catalogLoadState === "loaded" ? "مرتبط بتيليجرام" : "تعذر تحميل المحتوى";
   }).catch((error) => {
-    catalogLoadState = 'error';
+    catalogLoadState = "error";
     $("authPanel").classList.remove("hidden");
     $("authPanel").setAttribute("aria-hidden", "false");
     $("authTitle").textContent = "تعذّر تسجيل الدخول";
     document.querySelector(".auth-tabs")?.classList.add("hidden");
     $("loginForm").classList.add("hidden");
-
     showAuthMessage(error.message || "تعذر التحقق من حساب تيليجرام.", "error");
     $("connectionStatus").textContent = navigator.onLine ? "تعذر التحقق من الحساب" : "بدون اتصال";
     console.error("تعذر تهيئة حساب Telegram:", error);
   });
 } else if (studentSession) {
-  // Direct browser access requires username/password; Telegram access uses verified initData.
-  ensureSiteAvailable().then(available => {
-    if (available) return activateStudent();
-  }).then(() => {
-    $("connectionStatus").textContent = catalogLoadState === "loaded"
-      ? "متصل" : "تعذر تحميل المحتوى";
+  ensureSiteAvailable().then(() => activateStudent()).then(() => {
+    $("connectionStatus").textContent = catalogLoadState === "loaded" ? "متصل" : "تعذر تحميل المحتوى";
   }).catch((error) => {
     $("connectionStatus").textContent = "تعذر تحميل المحتوى";
-    console.error(error);
+    console.error("تعذر تهيئة جلسة المتصفح:", error);
   });
 } else {
-  // Browser login is retained only for existing legacy accounts; new accounts register through verified Telegram.
+  // المتصفح مخصص للحسابات السابقة؛ لا يوجد إنشاء حساب جديد من نموذج المتصفح.
   $("authPanel").classList.remove("hidden");
   $("authPanel").setAttribute("aria-hidden", "false");
   $("authUserbar").classList.add("hidden");
   $("menuBtn").classList.add("hidden");
   $("start").classList.add("hidden");
-
   $("authIntro").textContent = "للحسابات السابقة، سجّل الدخول ببيانات حسابك. إنشاء الحسابات الجديدة يتم عبر فتح المنصة من داخل تيليجرام.";
   switchAuthTab();
-
-  ensureSiteAvailable().then(available => {
-    if (!available) return;
+  ensureSiteAvailable().then(() => {
     $("connectionStatus").textContent = navigator.onLine ? "دخول المتصفح" : "بدون اتصال";
   }).catch((error) => {
     $("connectionStatus").textContent = navigator.onLine ? "تعذر الاتصال" : "بدون اتصال";
-    console.error("تعذر التحقق من حالة الموقع:", error);
+    console.error("تعذر تهيئة الموقع:", error);
   });
 }
+
 </script>
 </body>
 </html>

@@ -113,3 +113,18 @@ test('إدارة الطلاب متاحة للمدير وتدعم الإيقاف 
   assert.match(contentAdmin, /\["approved","suspended"\]/);
   assert.doesNotMatch(contentAdmin, /deleteUser|delete\(\).*app_student_profiles/);
 });
+
+
+test('تسجيل دخول المدير من المتصفح يتحقق من دور admin في الخادم ولا يثق بصلاحيات العميل', () => {
+  const app = fs.readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
+  const adminPage = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
+  assert.match(app, /studentSession\?\.profile\?\.role === "admin"/);
+  assert.match(adminPage, /BROWSER_ADMIN_API_URL/);
+  assert.match(adminPage, /sessionStorage\.getItem\("usf2_student_session_v1"\)/);
+  assert.match(adminPage, /Authorization: "Bearer " \+ session\.accessToken/);
+  assert.match(contentAdmin, /supabase\.auth\.getUser\(token\)/);
+  assert.match(contentAdmin, /profile\.role!=="admin"/);
+  assert.match(contentAdmin, /result\.browserAdmin=true/);
+  assert.doesNotMatch(contentAdmin, /auth=body\.auth\|\|\{\}/);
+});

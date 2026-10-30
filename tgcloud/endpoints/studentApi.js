@@ -3,6 +3,8 @@ import { supabaseStudentRequest } from '../lib/supabase-students.js';
 import { fetch } from 'sdk/fetch';
 
 const ALLOWED_ACTIONS = new Set(['appAuth', 'me', 'leaderboard', 'startAttempt', 'saveProgress', 'completeAttempt', 'abandonAttempt']);
+const SHARED_ACCOUNT_ACTIONS = new Set(['me', 'startAttempt', 'saveProgress', 'completeAttempt', 'abandonAttempt']);
+const BROWSER_STUDENT_DATA_URL = 'https://jrrsnpijbizbwxopyvam.supabase.co/functions/v1/browser-student-data';
 
 export default async function (input = {}, ctx) {
   const user = ctx?.initData?.user;
@@ -37,5 +39,31 @@ export default async function (input = {}, ctx) {
     if (!response.ok || !Array.isArray(result.leaderboard)) throw new EndpointError('تعذر تحميل بيانات لوحة الصدارة.', { code: 'LEADERBOARD_ERROR' });
     return { leaders: result.leaderboard, totalStudents: result.totalStudents || 0 };
   }
+  if (SHARED_ACCOUNT_ACTIONS.has(action)) {
+    const accessToken = typeof input.accessToken === 'string' ? input.accessToken.trim() : '';
+    if (!accessToken || accessToken.length > 5000) {
+      throw new EndpointError('انتهت جلسة الحساب. أغلق المنصة وافتحها مجددًا من Telegram.', { code: 'AUTH_REQUIRED' });
+    }
+    let response;
+    try {
+      response = await fetch(BROWSER_STUDENT_DATA_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + accessToken,
+        },
+        body: JSON.stringify({ action, payload: input.payload || {}, telegramId }),
+      });
+    } catch {
+      throw new EndpointError('تعذر الاتصال بخدمة حفظ تقدم الطالب. حاول مرة أخرى.', { code: 'STUDENT_DATA_UNAVAILABLE' });
+    }
+    let result;
+    try { result = await response.json(); } catch { result = {}; }
+    if (!response.ok) {
+      throw new EndpointError(result.error || 'تعذر تحميل بيانات حساب الطالب.', { code: 'STUDENT_DATA_ERROR' });
+    }
+    return result;
+  }
+
   return await supabaseStudentRequest(action, input.payload || {}, auth);
 }

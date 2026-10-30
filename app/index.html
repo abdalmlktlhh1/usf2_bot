@@ -116,13 +116,13 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
   <header class="app-header"><button id="menuBtn" class="icon-button hidden" type="button" aria-label="فتح القائمة الجانبية" aria-controls="drawer" aria-expanded="false">☰</button><div class="app-brand"><span class="app-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h12a3 3 0 0 1 3 3v15H7a3 3 0 0 1-3-3V3Zm0 14h15M8 7h7M8 11h5"/></svg></span><span class="brand-name">منصة الاختبارات <small>| اللجنة العلمية</small></span></div><span id="connectionStatus" class="offline-tag" role="status" aria-live="polite"></span></header>
   <header class="hero"><h1>بنك نماذج الاختبارات</h1></header>
   <section id="authPanel" class="auth-panel hidden" aria-labelledby="authTitle" aria-hidden="true">
-    <h2 id="authTitle">دخول المنصة</h2><p id="authIntro">للتسجيل الجديد، افتح المنصة من داخل تيليجرام. الحساب يرتبط بهويتك الموثّقة ويُفعّل مباشرة بعد اختيار المستوى الدراسي.</p>
+    <h2 id="authTitle">دخول المنصة</h2><p id="authIntro">أدخل اسم المستخدم وكلمة المرور اللذين أعددتهما في حسابك. من داخل تيليجرام يتم الدخول تلقائيًا دون بيانات دخول.</p>
     <div id="telegramSetup" class="auth-grid hidden">
       <p id="telegramProfileName" class="subtle"></p>
       <div class="auth-field"><label for="telegramLevel">المستوى الدراسي</label><select id="telegramLevel" required><option value="">اختر المستوى الدراسي</option></select></div>
       <button id="telegramContinueBtn" class="btn btn-primary" type="button">متابعة إلى المنصة</button>
     </div>
-    <div class="auth-tabs"><button id="loginTab" class="active" type="button">دخول الحسابات السابقة</button></div>
+    <div class="auth-tabs"><button id="loginTab" class="active" type="button">تسجيل الدخول</button></div>
     <form id="loginForm" class="auth-grid"><div class="auth-field"><label for="loginIdentifier">اسم المستخدم</label><input id="loginIdentifier" autocomplete="username" required maxlength="64"></div><div class="auth-field"><label for="loginPassword">كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" required minlength="8"></div><button class="btn btn-primary" type="submit">دخول</button></form><div id="authMessage" class="auth-message hidden" role="status" aria-live="polite"></div>
   </section>
 
@@ -1443,33 +1443,43 @@ function openInfo(kind) {
       body.append(message);
     });
   } else if (kind === "results") {
-    const history = readResults();
-    p.textContent = "هذه النتائج المحلية على هذا الجهاز. لعرض تقدمك المتزامن بين الأجهزة افتح «حسابي وتقدمي».";
+    p.textContent = "جار تحميل نتائج اختباراتك المحفوظة…";
     body.append(p);
-    if (!history.length) {
-      const empty = document.createElement("p");
-      empty.textContent = "لا توجد نتائج محفوظة بعد.";
-      body.append(empty);
-    }
-    for (const result of history) {
-      const item = document.createElement("article");
-      item.className = "history-entry";
-      const title = document.createElement("h3");
-      title.textContent = result.levelLabel ? result.levelLabel + " · " + result.course : result.course;
-      const meta = document.createElement("p");
-      meta.textContent = result.model + " · " + new Date(result.date).toLocaleString("en-GB");
-      const score = document.createElement("p");
-      score.textContent = (result.percent === null ? "—" : arabicNum(result.percent) + "٪") +
-        " · " + arabicNum(result.correct) + " / " + arabicNum(result.graded) + " · " + result.duration;
-      item.append(title, meta, score);
-      body.append(item);
-    }
+    studentApi("me").then((data) => {
+      studentCloudData = data;
+      const attempts = Array.isArray(data.attempts) ? data.attempts.filter((item) => item.status === "completed") : [];
+      body.replaceChildren();
+      if (!attempts.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "لا توجد نتائج مكتملة محفوظة في حسابك بعد.";
+        body.append(empty);
+      }
+      for (const attempt of attempts) {
+        const item = document.createElement("article");
+        item.className = "history-entry";
+        const title = document.createElement("h3");
+        title.textContent = cleanModelLabel(attempt.model_label || attempt.source_file || ("اختبار المقرر " + attempt.course_id));
+        const meta = document.createElement("p");
+        meta.textContent = new Date(attempt.completed_at || attempt.started_at).toLocaleString("ar-YE");
+        const score = document.createElement("p");
+        score.textContent = (attempt.score_percent == null ? "—" : arabicNum(Number(attempt.score_percent)) + "٪") +
+          " · صحيحة " + arabicNum(attempt.correct_count || 0) + " من " + arabicNum(attempt.graded_questions || 0);
+        item.append(title, meta, score);
+        body.append(item);
+      }
+    }).catch((error) => {
+      body.replaceChildren();
+      const message = document.createElement("p");
+      message.textContent = error.message || "تعذر تحميل النتائج المحفوظة.";
+      body.append(message);
+    });
+
   } else {
     p.textContent = arabicNum(DATA.length) + " سؤالًا في " +
       arabicNum(CATALOG.levels.reduce((n, l) => n + l.courses.length, 0)) +
       " مقررًا. كل نموذج يحتوي على أسئلة مصدره، وآخر خيار يجمع جميع أسئلة المقرر المختار.";
     const p2 = document.createElement("p");
-    p2.textContent = "حساب الطالب والتقدم والنتائج المتزامنة متاحة عند فتح المنصة من داخل Telegram.";
+    p2.textContent = "حساب الطالب والتقدم والنتائج المتزامنة متاحة بعد تسجيل الدخول، سواء من المتصفح أو Telegram.";
     body.append(p, p2);
   }
   $("infoDialog").classList.remove("hidden");
@@ -1600,7 +1610,7 @@ async function authRequest(action,payload={}) {
 function switchAuthTab() {
  $("loginForm").classList.remove("hidden");
  $("loginTab").classList.add("active");
- $("authTitle").textContent="دخول الحسابات السابقة";
+ $("authTitle").textContent="تسجيل الدخول من المتصفح";
  $("authMessage").classList.add("hidden");
 }
 function showTelegramLevelSetup(result) {
@@ -1681,7 +1691,7 @@ async function activateStudent(){
  }
  $("authPanel").classList.add("hidden");$("authPanel").setAttribute("aria-hidden","true");$("menuBtn").classList.remove("hidden");$("authUserbar").classList.remove("hidden");$("authWelcome").textContent="مرحبًا "+(studentSession.profile.displayName||studentSession.profile.username)+" — "+(studentSession.profile.levelName||"مستواك الدراسي");
  $("start").classList.remove("hidden");$("resultsStorageNote").textContent="تُحفظ نتائجك وتقدمك في حسابك، وتظهر عند الدخول من تيليجرام أو المتصفح.";
- try{await loadCatalogFromSupabase();$("connectionStatus").textContent="الحساب معتمد";}
+ try{studentCloudData=await studentApi("me");await loadCatalogFromSupabase();$("connectionStatus").textContent="متصل";}
  catch(e){$("start").classList.add("hidden");$("authPanel").classList.remove("hidden");$("authPanel").setAttribute("aria-hidden","false");showAuthMessage(e.message,"error");}
 }
 $("logoutBtn").addEventListener("click",()=>{studentSession=null;sessionStorage.removeItem(AUTH_SESSION_KEY);location.reload();});
@@ -1968,7 +1978,7 @@ if (telegramLaunch) {
     console.error("تعذر تهيئة حساب Telegram:", error);
   });
 } else if (studentSession) {
-  // Browser sessions use the fixed username assigned to the account and its password.
+  // Direct browser access requires username/password; Telegram access uses verified initData.
   ensureSiteAvailable().then(available => {
     if (available) return activateStudent();
   }).then(() => {

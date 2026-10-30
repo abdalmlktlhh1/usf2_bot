@@ -50,7 +50,7 @@ export function helpText() {
 }
 
 const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-ui-final3';
-const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-presence1';
+const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-presence2';
 
 export function homeKeyboard(isAdmin = false) {
   const rows = [

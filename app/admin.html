@@ -270,7 +270,8 @@ textarea{min-height:86px;resize:vertical}
   function visitorDetail(row) {
     const parts = [];
     if (row.accountUsername) parts.push('حساب المنصة: ' + row.accountUsername);
-    if (row.telegramUsername) parts.push('@' + row.telegramUsername);
+    if (row.telegramUsername) parts.push('يوزر تيليجرام: @' + row.telegramUsername.replace(/^@/, ''));
+    if (row.telegramId) parts.push('Telegram ID: ' + row.telegramId);
     return parts.join(' · ') || 'دخول عبر تيليجرام';
   }
   function presenceRow(name, detail, time, online = false) {

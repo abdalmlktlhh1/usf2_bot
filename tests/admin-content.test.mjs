@@ -37,13 +37,16 @@ test('واجهة الإدارة تتحقق من الحساب عبر API ولا �
   assert.match(adminApi, /لا يمكن تغيير صلاحيات المدير الرئيسي أو استبداله/);
   assert.match(adminPage, /Telegram\.WebApp/);
   assert.match(miniApp, /id="drawerAdminBtn"/);
-  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261030-ehsan-presence1"/);
+  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261030-ehsan-presence2"/);
 });
 
 test('لوحة المدير تعرض المتواجدين وآخر الحسابات والنشاط مع تحديث الحضور', () => {
   const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
   const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
   const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
+  assert.match(adminHtml, /يوزر تيليجرام/);
+  assert.match(adminHtml, /Telegram ID:/);
+  assert.match(adminHtml, /row\.telegramId/);
   assert.match(adminHtml, /المستخدمون المتواجدون الآن/);
   assert.match(adminHtml, /أحدث الحسابات المسجلة/);
   assert.match(adminHtml, /آخر نشاط للمستخدمين/);

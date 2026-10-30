@@ -8,7 +8,7 @@ const supabase = createClient(
 
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), {
   status,
-  headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "https://app8964547541.tgcloud.ai", "Access-Control-Allow-Headers": "content-type,x-content-sync-secret", "Access-Control-Allow-Methods": "POST,OPTIONS" },
+  headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "https://app8964547541.tgcloud.ai", "Access-Control-Allow-Headers": "content-type,authorization,apikey,x-content-sync-secret", "Access-Control-Allow-Methods": "POST,OPTIONS" },
 });
 const bad = (message: string, code = "BAD_REQUEST", status = 400) => Object.assign(new Error(message), { code, status });
 
@@ -412,13 +412,39 @@ Deno.serve(async (req: Request) => {
   } catch {
     return json({error:"تعذر التحقق من صلاحية الاتصال."},503);
   }
-  if (!internalAuthorized) return json({error:"غير مصرح."},401);
+  let browserAdminProfile:any=null;
+  if (!internalAuthorized) {
+    const token=(req.headers.get("authorization")||"").replace(/^Bearer\\s+/i,"");
+    if (!token) return json({error:"سجّل الدخول بحساب المدير من المتصفح."},401);
+    const {data:{user},error:authError}=await supabase.auth.getUser(token);
+    if (authError || !user) return json({error:"انتهت جلسة الدخول؛ سجّل الدخول مجددًا."},401);
+    const {data:profile,error:profileError}=await supabase.from("app_student_profiles")
+      .select("user_id,username,display_name,role,approval_status")
+      .eq("user_id",user.id).maybeSingle();
+    if (profileError || !profile || profile.role!=="admin" || ["suspended","blocked"].includes(String(profile.approval_status))) {
+      return json({error:"هذه اللوحة مخصصة لحساب المدير المصرّح به."},403);
+    }
+    browserAdminProfile=profile;
+  }
   try {
-    const body=await req.json(), action=String(body.action||""), p=body.payload||{}, auth=body.auth||{};
+    const body=await req.json(), action=String(body.action||""), p=body.payload||{};
+    const auth=browserAdminProfile
+      ? {isOwner:true,permissions:["*"],scopeCourseIds:["*"]}
+      : (body.auth||{});
     let result:any;
     if(action==="dashboard") {
       if(!auth.isOwner && !["levels.read","levels.write","subjects.read","subjects.write","courses.read","courses.write","questions.read","questions.write","questions.publish","questions.delete","statistics.read","audit.read"].some((x:string)=>has(auth,x))) throw bad("غير مصرح.","FORBIDDEN",403);
-      result=await dashboard(p.summaryOnly === true);
+      if (browserAdminProfile) {
+        result=await dashboardSummary();
+        result.user={isOwner:false,username:browserAdminProfile.username,displayName:browserAdminProfile.display_name||browserAdminProfile.username};
+        result.permissions=["levels.read","levels.write","subjects.read","subjects.write","courses.read","courses.write","questions.read","questions.write","questions.publish","questions.delete","students.read","students.manage"];
+        result.canManageCatalog=true;
+        result.canManageModerators=false;
+        result.allCoursesCount=(result.courses||[]).length;
+        result.browserAdmin=true;
+      } else {
+        result=await dashboard(p.summaryOnly === true);
+      }
     } else if(action==="dashboardSummary") {
       if(!auth.isOwner && !["levels.read","levels.write","subjects.read","subjects.write","courses.read","courses.write","questions.read","questions.write","questions.publish","questions.delete","statistics.read","audit.read"].some((x:string)=>has(auth,x))) throw bad("غير مصرح.","FORBIDDEN",403);
       result=await dashboardSummary();

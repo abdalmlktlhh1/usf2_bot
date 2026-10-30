@@ -1916,7 +1916,7 @@ const telegramLaunch = Boolean(
   (typeof telegramAppAtStartup?.initData === "string" && telegramAppAtStartup.initData.trim())
 );
 
-if (telegramLaunch && telegramAppAtStartup?.Serverless?.call) {
+if (telegramLaunch) {
   // TGCloud supplies server-verified Telegram initData to studentApi.
   studentSession = null;
   $("authPanel").classList.add("hidden");
@@ -1928,6 +1928,10 @@ if (telegramLaunch && telegramAppAtStartup?.Serverless?.call) {
 
   ensureSiteAvailable().then(async available => {
     if (!available) return;
+    const telegramReady = await waitForTelegramServerless();
+    if (!telegramReady?.Serverless?.call) {
+      throw new Error("تعذر تشغيل خدمة التحقق الآمن. أغلق الصفحة وافتحها من زر المنصة داخل البوت.");
+    }
     await runTelegramAccountAuth();
   }).then((signedIn) => {
     if (signedIn === false) {
@@ -1948,15 +1952,6 @@ if (telegramLaunch && telegramAppAtStartup?.Serverless?.call) {
     $("connectionStatus").textContent = navigator.onLine ? "تعذر التحقق من الحساب" : "بدون اتصال";
     console.error("تعذر تهيئة حساب Telegram:", error);
   });
-} else if (telegramLaunch) {
-  $("authPanel").classList.remove("hidden");
-  $("authPanel").setAttribute("aria-hidden", "false");
-  $("authTitle").textContent = "افتح المنصة من داخل تيليجرام";
-  document.querySelector(".auth-tabs")?.classList.add("hidden");
-  $("loginForm").classList.add("hidden");
-
-  showAuthMessage("تعذر تشغيل خدمة التحقق الآمن. أغلق الصفحة وافتحها من زر المنصة داخل البوت.", "error");
-  $("connectionStatus").textContent = "يلزم فتح التطبيق من البوت";
 } else if (studentSession) {
   // Browser sessions use the fixed username assigned to the account and its password.
   ensureSiteAvailable().then(available => {

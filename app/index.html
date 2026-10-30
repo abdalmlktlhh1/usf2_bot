@@ -270,7 +270,7 @@ function waitForTelegramServerless(maxAttempts = 15) {
   });
 }
 
-const BROWSER_STUDENT_DATA_URL = SUPABASE_URL + "/functions/v1/browser-student-data";
+const BROWSER_STUDENT_DATA_URL = "https://jrrsnpijbizbwxopyvam.supabase.co/functions/v1/browser-student-data";
 async function studentApi(action, payload = {}) {
   const webApp = window.Telegram?.WebApp;
   if (webApp?.Serverless?.call || (typeof webApp?.initData === "string" && webApp.initData.trim())) {

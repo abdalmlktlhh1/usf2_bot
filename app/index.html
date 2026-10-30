@@ -332,7 +332,7 @@ let studentCloudData = null;
 let studentAttemptPromise = null;
 let studentSaveTimer = null;
 
-function waitForTelegramServerless(maxAttempts = 60) {
+function waitForTelegramServerless(maxAttempts = 150) {
   return new Promise((resolve) => {
     const initialApp = window.Telegram && window.Telegram.WebApp;
     try { initialApp?.ready?.(); } catch (_) {}
@@ -348,7 +348,7 @@ function waitForTelegramServerless(maxAttempts = 60) {
 }
 
 async function telegramServerlessCall(moduleName, payload = {}, timeoutMs = 20000) {
-  const app = await waitForTelegramServerless(60);
+  const app = await waitForTelegramServerless(150);
   if (!app?.Serverless?.call) {
     throw new Error("خدمة Telegram لم تجهز بعد. أغلق النافذة وافتح المنصة مجددًا من البوت.");
   }
@@ -2387,13 +2387,28 @@ async function loadCatalogFromSupabase({ forceRefresh = false } = {}) {
   }
 }
 
+async function fetchCatalogWithSession(url, cacheMode = "") {
+  const request = () => fetch(url, {
+    method: "GET",
+    ...(cacheMode ? { cache: cacheMode } : {}),
+    headers: {
+      "Accept": "application/json",
+      "Authorization": "Bearer " + (studentSession?.accessToken || ""),
+    },
+  });
+  let response = await request();
+  // A valid refresh token can outlive the access token. Refresh once, then
+  // retry the same catalog request with the new access token.
+  if (response.status === 401 && studentSession?.refreshToken && await refreshBrowserSession()) {
+    response = await request();
+  }
+  return response;
+}
+
 async function fetchSupabaseCatalog() {
   let response;
   try {
-    response = await fetch(SUPABASE_URL + "/functions/v1/public-catalog", {
-      method: "GET",
-      headers: { "Accept": "application/json", "Authorization": "Bearer " + (studentSession?.accessToken || "") },
-    });
+    response = await fetchCatalogWithSession(SUPABASE_URL + "/functions/v1/public-catalog");
   } catch {
     throw new Error("تعذر الاتصال بقاعدة المحتوى. تحقق من الإنترنت ثم أعد فتح الصفحة.");
   }
@@ -2411,11 +2426,7 @@ async function fetchSupabaseCatalogDelta(cursor) {
   let response;
   try {
     const url = SUPABASE_URL + "/functions/v1/public-catalog?since=" + encodeURIComponent(String(cursor));
-    response = await fetch(url, {
-      method: "GET",
-      cache: "no-store",
-      headers: { "Accept": "application/json", "Authorization": "Bearer " + (studentSession?.accessToken || "") },
-    });
+    response = await fetchCatalogWithSession(url, "no-store");
   } catch {
     throw new Error("تعذر الاتصال بمزامنة تغييرات المحتوى.");
   }
@@ -2586,6 +2597,49 @@ try {
   localStorage.removeItem(AUTH_SESSION_KEY);
   sessionStorage.removeItem(AUTH_SESSION_KEY);
 }
+function showTelegramStartupError(error) {
+  catalogLoadState = "error";
+  $("authPanel").classList.remove("hidden");
+  $("authPanel").setAttribute("aria-hidden", "false");
+  $("authTitle").textContent = "تعذر تهيئة المنصة";
+  $("authIntro").textContent = "لم يكتمل الاتصال الآمن بتيليجرام. أعد المحاولة دون تسجيل الخروج.";
+  document.querySelector(".auth-tabs")?.classList.add("hidden");
+  $("loginForm").classList.add("hidden");
+  $("telegramSetup").classList.add("hidden");
+  showAuthMessage(error?.message || "تعذر التحقق من حساب تيليجرام.", "error");
+  $("connectionStatus").textContent = navigator.onLine ? "تعذر الاتصال بالحساب" : "بدون اتصال";
+
+  let retry = $("telegramRetryBtn");
+  if (!retry) {
+    retry = document.createElement("button");
+    retry.id = "telegramRetryBtn";
+    retry.type = "button";
+    retry.className = "btn btn-primary";
+    retry.textContent = "إعادة المحاولة";
+    retry.addEventListener("click", async () => {
+      retry.disabled = true;
+      retry.textContent = "جارٍ إعادة الاتصال…";
+      try {
+        const ready = await waitForTelegramServerless(150);
+        if (!ready?.Serverless?.call) throw new Error("لم تجهز خدمة Telegram بعد. أعد المحاولة.");
+        const signedIn = await runTelegramAccountAuth();
+        if (signedIn === false) {
+          retry.classList.add("hidden");
+          $("connectionStatus").textContent = "اختر المستوى الدراسي";
+        }
+      } catch (retryError) {
+        showAuthMessage(retryError?.message || "تعذر الاتصال. أعد المحاولة.", "error");
+      } finally {
+        retry.disabled = false;
+        retry.textContent = "إعادة المحاولة";
+      }
+    });
+    $("authMessage").insertAdjacentElement("afterend", retry);
+  }
+  retry.classList.remove("hidden");
+  console.error("تعذر تهيئة حساب Telegram:", error);
+}
+
 const telegramAppAtStartup = window.Telegram?.WebApp || null;
 const telegramLaunch = Boolean(
   telegramAppAtStartup?.Serverless?.call ||
@@ -2615,17 +2669,7 @@ if (telegramLaunch) {
       return;
     }
     $("connectionStatus").textContent = catalogLoadState === "loaded" ? "مرتبط بتيليجرام" : "تعذر تحميل المحتوى";
-  }).catch((error) => {
-    catalogLoadState = "error";
-    $("authPanel").classList.remove("hidden");
-    $("authPanel").setAttribute("aria-hidden", "false");
-    $("authTitle").textContent = "تعذّر تسجيل الدخول";
-    document.querySelector(".auth-tabs")?.classList.add("hidden");
-    $("loginForm").classList.add("hidden");
-    showAuthMessage(error.message || "تعذر التحقق من حساب تيليجرام.", "error");
-    $("connectionStatus").textContent = navigator.onLine ? "تعذر التحقق من الحساب" : "بدون اتصال";
-    console.error("تعذر تهيئة حساب Telegram:", error);
-  });
+  }).catch((error) => showTelegramStartupError(error));
 } else if (studentSession) {
   ensureSiteAvailable().then(() => activateStudent()).then(() => {
     $("connectionStatus").textContent = catalogLoadState === "loaded" ? "متصل" : "تعذر تحميل المحتوى";

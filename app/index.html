@@ -122,9 +122,8 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
       <div class="auth-field"><label for="telegramLevel">المستوى الدراسي</label><select id="telegramLevel" required><option value="">اختر المستوى الدراسي</option></select></div>
       <button id="telegramContinueBtn" class="btn btn-primary" type="button">متابعة إلى المنصة</button>
     </div>
-    <div class="auth-tabs"><button id="loginTab" class="active" type="button">دخول الحسابات السابقة</button><button id="signupTab" type="button">إنشاء حساب</button></div>
-    <form id="loginForm" class="auth-grid"><div class="auth-field"><label for="loginIdentifier">اسم المستخدم</label><input id="loginIdentifier" autocomplete="username" required maxlength="64"></div><div class="auth-field"><label for="loginPassword">كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" required minlength="8"></div><button class="btn btn-primary" type="submit">دخول</button></form>
-    <form id="signupForm" class="auth-grid hidden"><div class="auth-field"><label for="signupName">الاسم الكامل</label><input id="signupName" autocomplete="name" maxlength="120" required></div><div class="auth-field"><label for="signupPassword">كلمة المرور (8 أحرف على الأقل)</label><input id="signupPassword" type="password" autocomplete="new-password" minlength="8" required></div><div class="auth-field"><label for="signupLevel">المستوى الدراسي</label><select id="signupLevel" required><option value="">جارٍ تحميل المستويات…</option></select></div><button class="btn btn-primary" type="submit">إنشاء الحساب وإرساله للموافقة</button></form><div id="authMessage" class="auth-message hidden" role="status" aria-live="polite"></div>
+    <div class="auth-tabs"><button id="loginTab" class="active" type="button">دخول الحسابات السابقة</button></div>
+    <form id="loginForm" class="auth-grid"><div class="auth-field"><label for="loginIdentifier">اسم المستخدم</label><input id="loginIdentifier" autocomplete="username" required maxlength="64"></div><div class="auth-field"><label for="loginPassword">كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" required minlength="8"></div><button class="btn btn-primary" type="submit">دخول</button></form><div id="authMessage" class="auth-message hidden" role="status" aria-live="polite"></div>
   </section>
 
   <div id="authUserbar" class="auth-userbar hidden"><span id="authWelcome"></span><button id="logoutBtn" class="btn btn-secondary" type="button">تسجيل الخروج</button></div>
@@ -1583,10 +1582,11 @@ async function authRequest(action,payload={}) {
  if(!response.ok) throw new Error(result.error||"تعذر تنفيذ العملية.");
  return result;
 }
-function switchAuthTab(signup) {
- $("loginForm").classList.toggle("hidden",signup); $("signupForm").classList.toggle("hidden",!signup);
- $("loginTab").classList.toggle("active",!signup); $("signupTab").classList.toggle("active",signup);
- $("authTitle").textContent=signup?"إنشاء حساب طالب":"تسجيل الدخول للطلاب"; $("authMessage").classList.add("hidden");
+function switchAuthTab() {
+ $("loginForm").classList.remove("hidden");
+ $("loginTab").classList.add("active");
+ $("authTitle").textContent="دخول الحسابات السابقة";
+ $("authMessage").classList.add("hidden");
 }
 function showTelegramLevelSetup(result) {
  $("authPanel").classList.remove("hidden");
@@ -1595,7 +1595,7 @@ function showTelegramLevelSetup(result) {
  $("authIntro").textContent="تم التعرّف على حساب تيليجرام. اختر مستواك الدراسي مرة واحدة للبدء.";
  document.querySelector(".auth-tabs")?.classList.add("hidden");
  $("loginForm").classList.add("hidden");
- $("signupForm").classList.add("hidden");
+
  $("telegramSetup").classList.remove("hidden");
  $("telegramProfileName").textContent="الحساب: "+(result.telegramProfile?.displayName||"حساب تيليجرام");
  const select=$("telegramLevel");
@@ -1650,19 +1650,7 @@ $("telegramContinueBtn").addEventListener("click",async()=>{
  }
 });
 
-$("loginTab").addEventListener("click",()=>switchAuthTab(false));
-$("signupTab").addEventListener("click",()=>switchAuthTab(true));
-
-async function loadSignupLevels(){
- try{const r=await authRequest("levels");const sel=$("signupLevel");sel.replaceChildren(new Option("اختر المستوى الدراسي",""));for(const level of r.levels||[])sel.add(new Option(level.name,String(level.id)));}
- catch(e){$("signupLevel").replaceChildren(new Option("تعذر تحميل المستويات",""));}
-}
-$("signupForm").addEventListener("submit",async(e)=>{
- e.preventDefault();const btn=$("signupForm").querySelector('button[type="submit"]');btn.disabled=true;
- try{const r=await authRequest("signup",{displayName:$("signupName").value,password:$("signupPassword").value,levelId:Number($("signupLevel").value)});
- showAuthMessage(r.message||"تم إنشاء الحساب. بانتظار موافقة المشرف.","success");$("signupPassword").value="";}
- catch(err){showAuthMessage(err.message,"error");}finally{btn.disabled=false;}
-});
+$("loginTab").addEventListener("click",()=>switchAuthTab());
 $("loginForm").addEventListener("submit",async(e)=>{
  e.preventDefault();const btn=$("loginForm").querySelector('button[type="submit"]');btn.disabled=true;
  try{const r=await authRequest("login",{username:$("loginIdentifier").value.trim(),password:$("loginPassword").value});
@@ -1951,7 +1939,7 @@ if (telegramLaunch && telegramAppAtStartup?.Serverless?.call) {
     $("authTitle").textContent = "تعذّر تسجيل الدخول";
     document.querySelector(".auth-tabs")?.classList.add("hidden");
     $("loginForm").classList.add("hidden");
-    $("signupForm").classList.add("hidden");
+
     showAuthMessage(error.message || "تعذر التحقق من حساب تيليجرام.", "error");
     $("connectionStatus").textContent = navigator.onLine ? "تعذر التحقق من الحساب" : "بدون اتصال";
     console.error("تعذر تهيئة حساب Telegram:", error);
@@ -1962,7 +1950,7 @@ if (telegramLaunch && telegramAppAtStartup?.Serverless?.call) {
   $("authTitle").textContent = "افتح المنصة من داخل تيليجرام";
   document.querySelector(".auth-tabs")?.classList.add("hidden");
   $("loginForm").classList.add("hidden");
-  $("signupForm").classList.add("hidden");
+
   showAuthMessage("تعذر تشغيل خدمة التحقق الآمن. أغلق الصفحة وافتحها من زر المنصة داخل البوت.", "error");
   $("connectionStatus").textContent = "يلزم فتح التطبيق من البوت";
 } else if (studentSession) {
@@ -1983,10 +1971,9 @@ if (telegramLaunch && telegramAppAtStartup?.Serverless?.call) {
   $("authUserbar").classList.add("hidden");
   $("menuBtn").classList.add("hidden");
   $("start").classList.add("hidden");
-  $("signupTab").classList.add("hidden");
-  $("signupForm").classList.add("hidden");
+
   $("authIntro").textContent = "للحسابات السابقة، سجّل الدخول ببيانات حسابك. إنشاء الحسابات الجديدة يتم عبر فتح المنصة من داخل تيليجرام.";
-  switchAuthTab(false);
+  switchAuthTab();
 
   ensureSiteAvailable().then(available => {
     if (!available) return;

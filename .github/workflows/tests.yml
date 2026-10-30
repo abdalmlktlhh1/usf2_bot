@@ -1,0 +1,20 @@
+name: Project tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, feature/unified-student-access]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run automated tests
+        run: npm test

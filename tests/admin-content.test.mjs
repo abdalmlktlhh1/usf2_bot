@@ -37,7 +37,7 @@ test('واجهة الإدارة تتحقق من الحساب عبر API ولا �
   assert.match(adminApi, /لا يمكن تغيير صلاحيات المدير الرئيسي أو استبداله/);
   assert.match(adminPage, /Telegram\.WebApp/);
   assert.match(miniApp, /id="drawerAdminBtn"/);
-  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261030-telegram-auth-a"/);
+  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261030-student-management-a"/);
 });
 
 test('واجهة الإدارة تتضمن إدارة المستوى والمادة والمقرر والأسئلة والمشرفين والسجل', () => {
@@ -94,4 +94,37 @@ test('التصفح الدراسي هرمي وروابط أزرار المستو�
   assert.ok(openLine && /^  const openMenuMatch = \/\^menu:open:/.test(openLine));
   const matcher = /^menu:open:(\d+)$/;
   assert.equal(matcher.exec('menu:open:12')?.[1], '12');
+});
+
+
+test('إدارة الطلاب متاحة للمدير وتدعم الإيقاف دون حذف سجل الطالب', () => {
+  const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
+  assert.match(adminHtml, /data-page="students"/);
+  assert.match(adminHtml, /function renderStudents/);
+  assert.match(adminHtml, /toggleStudent/);
+  assert.match(adminApi, /students\.read/);
+  assert.match(adminApi, /action === 'listStudents'/);
+  assert.match(adminApi, /action === 'setStudentStatus'/);
+  assert.match(contentAdmin, /async function listStudents/);
+  assert.match(contentAdmin, /async function setStudentStatus/);
+  assert.match(contentAdmin, /auth\.isOwner/);
+  assert.match(contentAdmin, /\["approved","suspended"\]/);
+  assert.doesNotMatch(contentAdmin, /deleteUser|delete\(\).*app_student_profiles/);
+});
+
+
+test('تسجيل دخول المدير من المتصفح يتحقق من دور admin في الخادم ولا يثق بصلاحيات العميل', () => {
+  const app = fs.readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
+  const adminPage = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
+  assert.match(app, /studentSession\?\.profile\?\.role === "admin"/);
+  assert.match(adminPage, /BROWSER_ADMIN_API_URL/);
+  assert.match(adminPage, /sessionStorage\.getItem\("usf2_student_session_v1"\)/);
+  assert.match(adminPage, /Authorization: "Bearer " \+ session\.accessToken/);
+  assert.match(contentAdmin, /supabase\.auth\.getUser\(token\)/);
+  assert.match(contentAdmin, /profile\.role!=="admin"/);
+  assert.match(contentAdmin, /result\.browserAdmin=true/);
+  assert.doesNotMatch(contentAdmin, /auth=body\.auth\|\|\{\}/);
 });

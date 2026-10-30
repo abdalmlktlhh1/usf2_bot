@@ -8,7 +8,7 @@ const supabase = createClient(
 
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), {
   status,
-  headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "https://app8964547541.tgcloud.ai", "Access-Control-Allow-Headers": "content-type,x-content-sync-secret", "Access-Control-Allow-Methods": "POST,OPTIONS" },
+  headers: { "Content-Type": "application/json; charset=utf-8", "Access-Control-Allow-Origin": "https://app8964547541.tgcloud.ai", "Access-Control-Allow-Headers": "content-type,authorization,apikey,x-content-sync-secret", "Access-Control-Allow-Methods": "POST,OPTIONS" },
 });
 const bad = (message: string, code = "BAD_REQUEST", status = 400) => Object.assign(new Error(message), { code, status });
 
@@ -364,6 +364,45 @@ async function questionHistory(auth:any) {
   return {revisions:rows.filter((row:any)=>courseScope(auth,Number(row.course_id)))};
 }
 
+
+async function listStudents(auth:any) {
+  requirePermission(auth, "students.read");
+  const {data,error}=await supabase.from("app_student_profiles")
+    .select("user_id,username,display_name,level_id,approval_status,role,created_at,last_telegram_login_at,telegram_id,academic_levels(name)")
+    .eq("role","student").order("created_at",{ascending:false}).limit(500);
+  if(error)throw error;
+  return {students:(data||[]).map((row:any)=>({
+    userId:row.user_id,
+    username:row.username,
+    displayName:row.display_name,
+    levelId:row.level_id,
+    levelName:Array.isArray(row.academic_levels)?row.academic_levels[0]?.name:row.academic_levels?.name,
+    approvalStatus:row.approval_status,
+    createdAt:row.created_at,
+    lastTelegramLoginAt:row.last_telegram_login_at,
+    telegramLinked:row.telegram_id!=null,
+  }))};
+}
+
+async function setStudentStatus(auth:any,p:any) {
+  if(!auth?.isOwner)throw bad("إيقاف حسابات الطلاب متاح للمدير الرئيسي فقط.","FORBIDDEN",403);
+  const userId=clean(p.userId,"معرّف الحساب",64);
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId))
+    throw bad("معرّف الحساب غير صالح.");
+  const status=String(p.status||"");
+  if(!["approved","suspended"].includes(status))throw bad("حالة الحساب غير صالحة.");
+  const {data:target,error:targetError}=await supabase.from("app_student_profiles")
+    .select("user_id,username,role").eq("user_id",userId).maybeSingle();
+  if(targetError)throw targetError;
+  if(!target||target.role!=="student")throw bad("حساب الطالب غير موجود أو لا يمكن إيقافه.","NOT_FOUND",404);
+  const {data,error}=await supabase.from("app_student_profiles")
+    .update({approval_status:status,updated_at:new Date().toISOString()})
+    .eq("user_id",userId).eq("role","student")
+    .select("user_id,username,approval_status").single();
+  if(error)throw error;
+  return {ok:true,userId:data.user_id,username:data.username,status:data.approval_status};
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return json({ok:true});
   if (req.method !== "POST") return json({error:"Method not allowed"},405);
@@ -373,17 +412,45 @@ Deno.serve(async (req: Request) => {
   } catch {
     return json({error:"تعذر التحقق من صلاحية الاتصال."},503);
   }
-  if (!internalAuthorized) return json({error:"غير مصرح."},401);
+  let browserAdminProfile:any=null;
+  if (!internalAuthorized) {
+    const token=(req.headers.get("authorization")||"").replace(/^Bearer\\s+/i,"");
+    if (!token) return json({error:"سجّل الدخول بحساب المدير من المتصفح."},401);
+    const {data:{user},error:authError}=await supabase.auth.getUser(token);
+    if (authError || !user) return json({error:"انتهت جلسة الدخول؛ سجّل الدخول مجددًا."},401);
+    const {data:profile,error:profileError}=await supabase.from("app_student_profiles")
+      .select("user_id,username,display_name,role,approval_status")
+      .eq("user_id",user.id).maybeSingle();
+    if (profileError || !profile || profile.role!=="admin" || ["suspended","blocked"].includes(String(profile.approval_status))) {
+      return json({error:"هذه اللوحة مخصصة لحساب المدير المصرّح به."},403);
+    }
+    browserAdminProfile=profile;
+  }
   try {
-    const body=await req.json(), action=String(body.action||""), p=body.payload||{}, auth=body.auth||{};
+    const body=await req.json(), action=String(body.action||""), p=body.payload||{};
+    const auth=browserAdminProfile
+      ? {isOwner:true,permissions:["*"],scopeCourseIds:["*"]}
+      : (body.auth||{});
     let result:any;
     if(action==="dashboard") {
       if(!auth.isOwner && !["levels.read","levels.write","subjects.read","subjects.write","courses.read","courses.write","questions.read","questions.write","questions.publish","questions.delete","statistics.read","audit.read"].some((x:string)=>has(auth,x))) throw bad("غير مصرح.","FORBIDDEN",403);
-      result=await dashboard(p.summaryOnly === true);
+      if (browserAdminProfile) {
+        result=await dashboardSummary();
+        result.user={isOwner:false,username:browserAdminProfile.username,displayName:browserAdminProfile.display_name||browserAdminProfile.username};
+        result.permissions=["levels.read","levels.write","subjects.read","subjects.write","courses.read","courses.write","questions.read","questions.write","questions.publish","questions.delete","students.read","students.manage"];
+        result.canManageCatalog=true;
+        result.canManageModerators=false;
+        result.allCoursesCount=(result.courses||[]).length;
+        result.browserAdmin=true;
+      } else {
+        result=await dashboard(p.summaryOnly === true);
+      }
     } else if(action==="dashboardSummary") {
       if(!auth.isOwner && !["levels.read","levels.write","subjects.read","subjects.write","courses.read","courses.write","questions.read","questions.write","questions.publish","questions.delete","statistics.read","audit.read"].some((x:string)=>has(auth,x))) throw bad("غير مصرح.","FORBIDDEN",403);
       result=await dashboardSummary();
     } else if(action==="questionsPage") result=await questionsPage(auth,p);
+    else if(action==="listStudents") result=await listStudents(auth);
+    else if(action==="setStudentStatus") result=await setStudentStatus(auth,p);
     else if(action==="saveLevel") result=await saveLevel(auth,p);
     else if(action==="setLevelActive") result=await setLevelActive(auth,p);
     else if(action==="saveSubject") result=await saveSubject(auth,p);

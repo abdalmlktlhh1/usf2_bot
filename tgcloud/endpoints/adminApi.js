@@ -16,13 +16,13 @@ const PERMISSIONS = [
   'subjects.read', 'subjects.write',
   'courses.read', 'courses.write',
   'questions.read', 'questions.write', 'questions.publish', 'questions.delete',
-  'statistics.read', 'audit.read',
+  'statistics.read', 'audit.read', 'students.read',
 ];
 const ROLE_PRESETS = {
   academic_manager: [
     'levels.read', 'levels.write', 'subjects.read', 'subjects.write',
     'courses.read', 'courses.write', 'questions.read', 'questions.write',
-    'questions.publish', 'statistics.read',
+    'questions.publish', 'statistics.read', 'students.read',
   ],
   question_editor: ['courses.read', 'questions.read', 'questions.write'],
   reviewer: ['courses.read', 'questions.read', 'questions.publish'],
@@ -46,6 +46,7 @@ const PERMISSION_LABELS = {
   'questions.delete': 'أرشفة الأسئلة',
   'statistics.read': 'عرض إحصائيات المحتوى',
   'audit.read': 'عرض سجل العمليات',
+  'students.read': 'عرض حسابات الطلاب وحالاتها',
 };
 
 function fail(message, code = 'BAD_REQUEST') {
@@ -569,6 +570,22 @@ export default async function (input = {}, ctx) {
   }
   if (action === 'dashboard') return rowsForDashboard(auth);
   if (action === 'questionsPage') return rowsForQuestionsPage(auth, input);
+  if (action === 'listStudents') {
+    if (!auth.isOwner && !allowed(auth, 'students.read')) fail('لا تملك صلاحية عرض حسابات الطلاب.', 'FORBIDDEN');
+    return await supabaseContentRequest('listStudents', {}, auth);
+  }
+  if (action === 'setStudentStatus') {
+    if (!auth.isOwner) fail('إيقاف حسابات الطلاب متاح للمدير الرئيسي فقط.', 'FORBIDDEN');
+    const result = await supabaseContentRequest('setStudentStatus', {
+      userId: input.userId,
+      status: input.status,
+    }, auth);
+    await audit(auth, input.status === 'suspended' ? 'student_suspend' : 'student_reactivate', 'student', 0, {
+      username: result.username,
+      status: result.status,
+    });
+    return result;
+  }
 
   if (action === 'saveLevel') return saveLevel(auth, input);
   if (action === 'setLevelActive') return setLevelActive(auth, input);

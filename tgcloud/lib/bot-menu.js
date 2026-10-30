@@ -113,7 +113,7 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null) {
       button = { text: item.text, callback_data: 'menu:open:' + item.id };
     } else if (item.type === 'web_app') {
       if (item.value === 'admin' && !isAdmin) continue;
-      button = { text: item.text, web_app: { url: item.value === 'admin' ? MINI_APP_URL + 'admin.html?v=20261030-student-management-a' : MINI_APP_URL } };
+      button = { text: item.text, web_app: { url: item.value === 'admin' ? ADMIN_APP_URL : MINI_APP_URL } };
     } else if (item.type === 'catalog') {
       let target;
       try { target = JSON.parse(item.value); } catch { continue; }
@@ -125,7 +125,9 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null) {
         params.set('year', String(target.sourceYear));
         params.set('file', String(target.sourceFile));
       }
-      button = { text: item.text, web_app: { url: MINI_APP_URL + '?' + params.toString() } };
+      const targetUrl = new URL(MINI_APP_URL);
+      for (const [key, value] of params) targetUrl.searchParams.set(key, value);
+      button = { text: item.text, web_app: { url: targetUrl.toString() } };
     } else if (item.type === 'url') {
       if (!safeUrl(item.value)) continue;
       button = { text: item.text, url: item.value };

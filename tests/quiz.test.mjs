@@ -51,7 +51,7 @@ test('القائمة والتعليمات تفتح المنصة التفاعلي
   assert.doesNotMatch(helpText(), /\/quiz|\/test/);
   for (const keyboard of [homeKeyboard(), helpKeyboard()]) {
     const buttons = keyboard.inline_keyboard.flat();
-    const appButton = buttons.find((button) => button.web_app && button.web_app.url === 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-ui-final2');
+    const appButton = buttons.find((button) => button.web_app && button.web_app.url === 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-ui-final3');
     assert.ok(appButton, 'يجب توفير زر لفتح المنصة التفاعلية');
     for (const button of buttons.filter((item) => item.callback_data)) {
       assert.equal(button.callback_data, 'menu:home');

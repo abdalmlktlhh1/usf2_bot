@@ -50,6 +50,11 @@ test('مسارا Telegram والمتصفح يستخدمان الحساب نفس�
 });
 
 
+test('كل عناصر DOM التي يحتاجها تفعيل الطالب موجودة في الصفحة', () => {
+  assert.match(miniApp, /id=\"resultsStorageNote\"/);
+  assert.match(miniApp, /function activateStudent\(\)[\s\S]*?\$\(\"resultsStorageNote\"\)\.textContent/);
+});
+
 test('تهيئة Telegram لا تنتظر قراءة سجل غير أساسي قبل إظهار القائمة والمستويات', () => {
   assert.match(miniApp, /function telegramServerlessCall\(moduleName, payload = \{\}, timeoutMs = 20000\)/);
   assert.match(miniApp, /setTimeout\(\(\) => \{[\s\S]*?تأخر رد الخادم/);

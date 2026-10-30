@@ -2,7 +2,7 @@ import { db } from 'sdk';
 import { asc, eq } from 'sdk/db';
 import { botMenuItems } from '../schema.js';
 
-const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-ui-final2';
+const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-ui-final3';
 const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-ui-final2';
 const VALID_TYPES = new Set(['submenu', 'web_app', 'url', 'command', 'message', 'catalog']);
 const VALID_COMMANDS = new Set(['quiz', 'help', 'about', 'home']);

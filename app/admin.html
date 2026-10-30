@@ -79,6 +79,7 @@ textarea{min-height:86px;resize:vertical}
       <button data-page="models">▦ النماذج</button>
       <button data-page="botMenu" id="botMenuNav" hidden>☷ أزرار البوت</button>
       <button data-page="maintenance" id="maintenanceNav" hidden>🛠️ صيانة الموقع</button>
+      <button data-page="students" id="studentsNav" hidden>♙ الطلاب والحسابات</button>
       <button data-page="moderators" id="moderatorsNav" hidden>♙ المشرفون</button>
       <button data-page="logs" id="logsNav" hidden>◷ سجل العمليات</button>
     </nav>
@@ -105,10 +106,11 @@ textarea{min-height:86px;resize:vertical}
     ['courses.read','عرض المقررات'],['courses.write','إضافة وتعديل المقررات'],
     ['questions.read','عرض الأسئلة والإجابات'],['questions.write','إضافة وتعديل الأسئلة'],
     ['questions.publish','نشر الأسئلة وإلغاء نشرها'],['questions.delete','أرشفة الأسئلة'],
-    ['statistics.read','عرض إحصائيات المحتوى'],['audit.read','عرض سجل العمليات']
+    ['statistics.read','عرض إحصائيات المحتوى'],['audit.read','عرض سجل العمليات'],
+    ['students.read','عرض حسابات الطلاب وحالاتها']
   ];
   const ROLE_DEFAULTS = {
-    academic_manager: ['levels.read','levels.write','subjects.read','subjects.write','courses.read','courses.write','questions.read','questions.write','questions.publish','statistics.read'],
+    academic_manager: ['levels.read','levels.write','subjects.read','subjects.write','courses.read','courses.write','questions.read','questions.write','questions.publish','statistics.read','students.read'],
     question_editor: ['courses.read','questions.read','questions.write'],
     reviewer: ['courses.read','questions.read','questions.publish'],
     content_viewer: ['levels.read','subjects.read','courses.read','questions.read'],
@@ -398,6 +400,22 @@ textarea{min-height:86px;resize:vertical}
         button('تعديل','editModerator',r.telegramId) + button(r.isActive?'سحب الوصول':'تفعيل الوصول','toggleModerator',r.telegramId,r.isActive?'danger':'secondary') +
         '</div></td></tr>'));
   }
+  function renderStudents() {
+    if (!(state?.user?.isOwner || can('students.read'))) return '<div class="panel empty">لا تملك صلاحية عرض حسابات الطلاب.</div>';
+    const rows = filtered(state.students || [], (r) => [r.displayName,r.username,r.levelName].join(' '));
+    return startPage('إدارة الطلاب والحسابات','تابع حسابات الطلاب وحالة الدخول. إيقاف الحساب يمنع الدخول من Telegram والمتصفح دون حذف النتائج أو سجل التقدم.','تحديث','refresh',false) +
+      toolbar() + table(['الطالب','اسم دخول المتصفح','المستوى','طريقة الربط','الحالة','تاريخ التسجيل','الإجراء'], rows.map((r) => {
+        const suspended = ['suspended','blocked'].includes(String(r.approvalStatus));
+        const badge = suspended ? '<span class="status off">موقوف</span>' : '<span class="status">نشط</span>';
+        const action = state?.user?.isOwner
+          ? button(suspended ? 'إعادة التفعيل' : 'إيقاف الحساب','toggleStudent',r.userId,suspended?'secondary':'danger')
+          : '—';
+        return '<tr><td><b>' + escapeHtml(r.displayName || 'طالب') + '</b></td><td dir="ltr">' + escapeHtml(r.username || '—') +
+          '</td><td>' + escapeHtml(r.levelName || 'لم يحدد') + '</td><td>' + (r.telegramLinked ? 'مرتبط بتيليجرام' : 'حساب متصفح') +
+          '</td><td>' + badge + '</td><td>' + escapeHtml(r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-YE') : '—') +
+          '</td><td><div class="row-actions">' + action + '</div></td></tr>';
+      }), 'لا توجد حسابات طلاب مسجلة بعد.');
+  }
   function renderLogs() {
     const rows = filtered(state.logs || [], (r) => r.action + ' ' + r.entityType + ' ' + r.actorName + ' ' + r.actorId);
     return startPage('سجل العمليات','آخر العمليات الإدارية المسجلة للمراجعة والتدقيق.','تحديث','refresh',false) +
@@ -407,7 +425,7 @@ textarea{min-height:86px;resize:vertical}
         escapeHtml(r.entityType) + ' #' + escapeHtml(r.entityId) + '</td><td><div class="audit-details">' +
         escapeHtml(JSON.stringify(r.details || {})) + '</div></td></tr>'), 'لا توجد عمليات مسجلة بعد.');
   }
-  const renderers = {maintenance:renderMaintenance,dashboard:renderDashboard,levels:renderLevels,subjects:renderSubjects,courses:renderCourses,questions:renderQuestions,reviewQueue:renderReviewQueue,models:renderModels,botMenu:renderBotMenu,moderators:renderModerators,logs:renderLogs};
+  const renderers = {maintenance:renderMaintenance,dashboard:renderDashboard,levels:renderLevels,subjects:renderSubjects,courses:renderCourses,questions:renderQuestions,reviewQueue:renderReviewQueue,models:renderModels,botMenu:renderBotMenu,students:renderStudents,moderators:renderModerators,logs:renderLogs};
   function render() {
     $('content').innerHTML = (renderers[activePage] || renderDashboard)();
     document.querySelectorAll('[data-page]').forEach((btn) => btn.classList.toggle('active',btn.dataset.page===activePage));
@@ -451,6 +469,11 @@ textarea{min-height:86px;resize:vertical}
         menuItems = Array.isArray(value.items) ? value.items : [];
       }).catch((error) => { showNotice('تعذر تحميل أزرار البوت: ' + error.message); }));
     }
+    if (result.user.isOwner || result.permissions.includes('*') || result.permissions.includes('students.read')) {
+      backgroundTasks.push(api('listStudents').then((value) => {
+        state.students = Array.isArray(value.students) ? value.students : [];
+      }).catch((error) => { showNotice('تعذر تحميل حسابات الطلاب: ' + error.message); }));
+    }
     // Do not block the first paint on optional admin-only data.
     // These requests update their own state when they finish and never hold the dashboard spinner.
     Promise.all(backgroundTasks).then(() => {
@@ -458,6 +481,7 @@ textarea{min-height:86px;resize:vertical}
       state.menuItems = menuItems;
       if (activePage === 'botMenu') render();
       if (activePage === 'maintenance' && state.user?.isOwner) render();
+      if (activePage === 'students') render();
     }).catch(() => {});
     state.menuItems = menuItems;
     $('botMenuNav').hidden = !result.canManageModerators;
@@ -472,6 +496,7 @@ textarea{min-height:86px;resize:vertical}
       questions: ['questions.read','questions.write','questions.publish','questions.delete'],
       models: ['questions.read','questions.write','questions.publish','questions.delete'],
       botMenu: ['bot_menu.write'],
+      students: ['students.read'],
       maintenance: ['maintenance.manage']
     };
     document.querySelectorAll('#nav [data-page]').forEach((button) => {
@@ -821,6 +846,7 @@ textarea{min-height:86px;resize:vertical}
   $('nav').addEventListener('click', async (event)=>{
     const btn=event.target.closest('[data-page]');if(!btn)return;
     if(btn.dataset.page==='moderators'&&!state?.canManageModerators)return;
+    if(btn.dataset.page==='students'&&!(state?.user?.isOwner||can('students.read')))return;
     if(btn.dataset.page==='maintenance'&&!state?.user?.isOwner)return;
     activePage=btn.dataset.page;searchValue='';
 
@@ -835,6 +861,22 @@ textarea{min-height:86px;resize:vertical}
     const btn=event.target.closest('[data-action]');if(!btn)return;
     const action=btn.dataset.action;const id=btn.dataset.id;
 
+    if (action === 'toggleStudent') {
+      const student = (state?.students || []).find((row) => String(row.userId) === String(id));
+      if (!student || !state?.user?.isOwner) { showNotice('إيقاف الحسابات متاح للمدير الرئيسي فقط.'); return; }
+      const suspended = ['suspended','blocked'].includes(String(student.approvalStatus));
+      const nextStatus = suspended ? 'approved' : 'suspended';
+      const display = student.displayName || student.username || 'هذا الطالب';
+      if (!confirm(suspended
+        ? 'إعادة تفعيل حساب «' + display + '»؟ ستعود إمكانية الدخول مع بقاء نتائجه السابقة.'
+        : 'إيقاف حساب «' + display + '»؟ سيُمنع من الدخول دون حذف نتائجه أو تقدمه.')) return;
+      try {
+        await api('setStudentStatus', { userId: student.userId, status: nextStatus });
+        showNotice(suspended ? 'تمت إعادة تفعيل الحساب.' : 'تم إيقاف الحساب.', true);
+        await reload(true);
+      } catch (error) { showNotice(error.message || 'تعذر تحديث حالة الحساب.'); }
+      return;
+    }
     if (action === 'refreshMaintenance') {
       try { state.maintenance = await api('getMaintenance'); render(); showNotice('تم تحديث حالة الصيانة.', true); }
       catch (error) { showNotice(error.message); }

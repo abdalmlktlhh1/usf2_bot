@@ -77,6 +77,16 @@ test('تجديد الجلسة مرة واحدة عند انتهاء رمز ال�
   assert.match(miniApp, /fetchCatalogWithSession\(url, "no-store"\)/);
 });
 
+
+test('واجهة المستويات لا تنتظر حفظ الفهرس الكبير في IndexedDB', () => {
+  const loader = miniApp.slice(miniApp.indexOf('async function loadCatalogFromSupabase'), miniApp.indexOf('async function fetchCatalogWithSession'));
+  assert.match(loader, /applyCatalogResult\(result\);[\s\S]*?void writeCatalogCache\(/);
+  assert.doesNotMatch(loader, /await writeCatalogCache\(\{ payload: result/);
+  assert.match(miniApp, /const CATALOG_CACHE_KEY = "public_catalog_v3"/);
+  assert.match(miniApp, /\$\("menuBtn"\)\.classList\.remove\("hidden"\)/);
+  assert.match(miniApp, /\$\("start"\)\.classList\.remove\("hidden"\)/);
+});
+
 test('فشل تهيئة Telegram يعرض زر إعادة محاولة بدلاً من ترك الواجهة مخفية', () => {
   assert.match(miniApp, /function showTelegramStartupError\(error\)/);
   assert.match(miniApp, /id = "telegramRetryBtn"/);

@@ -1911,7 +1911,7 @@ function initBrowse() {
   }
   $("adminPanelClose").addEventListener("click", closeAdminPanel);
   $("adminPanelOverlay").addEventListener("click", (event) => { if (event.target === $("adminPanelOverlay")) closeAdminPanel(); });
-  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-ehsan-initfix1"; });
+  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-ehsan-ui-final2"; });
   const telegramWebApp = window.Telegram && window.Telegram.WebApp;
   if (telegramWebApp) telegramWebApp.ready();
   waitForTelegramServerless().then((readyApp) => {
@@ -2224,7 +2224,7 @@ async function ensureSiteAvailable() {
 // records changed since the last saved cursor, rather than downloading the full bank.
 const CATALOG_CACHE_DB = "usf2_device_cache_v1";
 const CATALOG_CACHE_STORE = "catalog";
-const CATALOG_CACHE_KEY = "public_catalog_v2";
+const CATALOG_CACHE_KEY = "public_catalog_v3";
 let catalogCacheDbPromise = null;
 let catalogSyncPromise = null;
 
@@ -2374,8 +2374,12 @@ async function loadCatalogFromSupabase({ forceRefresh = false } = {}) {
     const result = await fetchSupabaseCatalog();
     const cursor = String(result.syncCursor ?? '');
     if (!/^\d+$/.test(cursor)) throw new Error('استجابة الفهرس لا تحتوي مؤشر مزامنة صالحًا.');
-    await writeCatalogCache({ payload: result, cursor, savedAt: Date.now() });
+    // The catalog must become visible before IndexedDB persistence. Some
+    // Telegram Android WebViews can stall or block a large IndexedDB write;
+    // storage is only an optimization and must never gate the main interface.
     applyCatalogResult(result);
+    void writeCatalogCache({ payload: result, cursor, savedAt: Date.now() })
+      .catch((cacheError) => console.warn('تعذر حفظ نسخة الفهرس محليًا؛ بقي المحتوى ظاهرًا:', cacheError));
   } catch (error) {
     if (cached?.payload && Array.isArray(cached.payload.questions)) {
       // Legacy cache remains a fallback if the initial migration download fails.

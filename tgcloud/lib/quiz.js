@@ -49,8 +49,8 @@ export function helpText() {
 لاستعراض الاختبارات، افتح «الاختبار التفاعلي»، ثم اختر المستوى والمقرر والنموذج المتاح. بعد إنهاء الاختبار يمكنك مشاهدة النتيجة ومراجعة الإجابات.`;
 }
 
-const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-refresh2';
-const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-refresh2';
+const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-initfix1';
+const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-initfix1';
 
 export function homeKeyboard(isAdmin = false) {
   const rows = [

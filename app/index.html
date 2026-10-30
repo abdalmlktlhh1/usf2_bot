@@ -332,7 +332,7 @@ let studentCloudData = null;
 let studentAttemptPromise = null;
 let studentSaveTimer = null;
 
-function waitForTelegramServerless(maxAttempts = 15) {
+function waitForTelegramServerless(maxAttempts = 60) {
   return new Promise((resolve) => {
     const initialApp = window.Telegram && window.Telegram.WebApp;
     try { initialApp?.ready?.(); } catch (_) {}
@@ -347,6 +347,30 @@ function waitForTelegramServerless(maxAttempts = 15) {
   });
 }
 
+async function telegramServerlessCall(moduleName, payload = {}, timeoutMs = 20000) {
+  const app = await waitForTelegramServerless(60);
+  if (!app?.Serverless?.call) {
+    throw new Error("خدمة Telegram لم تجهز بعد. أغلق النافذة وافتح المنصة مجددًا من البوت.");
+  }
+  return await new Promise((resolve, reject) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("تأخر رد الخادم. اضغط إعادة المحاولة بدل البقاء على شاشة فارغة."));
+    }, timeoutMs);
+    const finish = (error, result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (error) reject(new Error(error.description || error.message || "تعذر الاتصال بخدمة المنصة."));
+      else resolve(result || {});
+    };
+    try { app.Serverless.call(moduleName, payload, finish); }
+    catch (error) { finish(error); }
+  });
+}
+
 const BROWSER_STUDENT_DATA_URL = "https://jrrsnpijbizbwxopyvam.supabase.co/functions/v1/browser-student-data";
 async function studentApi(action, payload = {}, allowBrowserRefresh = true) {
   if (action === "leaderboard") {
@@ -357,18 +381,11 @@ async function studentApi(action, payload = {}, allowBrowserRefresh = true) {
   }
   const webApp = window.Telegram?.WebApp;
   if (webApp?.Serverless?.call || (typeof webApp?.initData === "string" && webApp.initData.trim())) {
-    const app = await waitForTelegramServerless();
-    if (!app?.Serverless?.call) throw new Error("تعذر تشغيل التحقق الآمن من Telegram. أعد فتح المنصة من البوت.");
-    return new Promise((resolve, reject) => {
-      app.Serverless.call("studentApi", {
-        action,
-        payload,
-        accessToken: studentSession?.accessToken || ""
-      }, (err, result) => {
-        if (err) reject(new Error(err.description || err.message || "تعذر الاتصال بحساب الطالب."));
-        else resolve(result);
-      });
-    });
+    return telegramServerlessCall("studentApi", {
+      action,
+      payload,
+      accessToken: studentSession?.accessToken || ""
+    }, action === "appAuth" ? 25000 : 15000);
   }
   const token = studentSession?.accessToken;
   if (!token) throw new Error("سجّل الدخول من المتصفح أولًا لعرض بيانات حسابك وحفظ تقدمك.");
@@ -1181,9 +1198,31 @@ function renderLevels() {
     message.textContent = catalogLoadState === "loading"
       ? "جار تحميل المستويات والمواد والنماذج من قاعدة البيانات…"
       : catalogLoadState === "error"
-        ? "تعذر تحميل الفهرس. تحقق من الاتصال وافتح المنصة من داخل Telegram ثم أعد المحاولة."
+        ? "تعذر تحميل الفهرس. حسابك ما زال متصلًا؛ أعد المحاولة دون تسجيل خروج."
         : "لا توجد مستويات منشورة حاليًا.";
     list.append(message);
+    if (catalogLoadState === "error") {
+      const retry=document.createElement("button");
+      retry.type="button";
+      retry.className="btn btn-primary";
+      retry.textContent="إعادة تحميل المستويات";
+      retry.addEventListener("click",async()=>{
+        retry.disabled=true;
+        catalogLoadState="loading";
+        renderLevels();
+        $("connectionStatus").textContent="جارٍ تحميل المستويات";
+        try {
+          await loadCatalogFromSupabase({forceRefresh:true});
+          $("connectionStatus").textContent=CATALOG.levels.length?"متصل":"لا توجد مستويات منشورة";
+        } catch(error) {
+          catalogLoadState="error";
+          renderLevels();
+          $("connectionStatus").textContent="تعذر تحميل المستويات";
+          console.error("إعادة تحميل الفهرس فشلت:",error);
+        }
+      });
+      list.append(retry);
+    }
     return;
   }
   CATALOG.levels.forEach((level, index) => {
@@ -1872,7 +1911,7 @@ function initBrowse() {
   }
   $("adminPanelClose").addEventListener("click", closeAdminPanel);
   $("adminPanelOverlay").addEventListener("click", (event) => { if (event.target === $("adminPanelOverlay")) closeAdminPanel(); });
-  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-student-management-a"; });
+  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-ehsan-initfix1"; });
   const telegramWebApp = window.Telegram && window.Telegram.WebApp;
   if (telegramWebApp) telegramWebApp.ready();
   waitForTelegramServerless().then((readyApp) => {
@@ -2100,9 +2139,11 @@ async function runTelegramAccountAuth(levelId=null) {
   return false;
  }
  saveTelegramAuthSession(result);
- try { studentCloudData=await studentApi("me"); }
- catch(error) { console.warn("تعذر تحميل سجل الطالب القديم:",error); }
+ // appAuth already returned a server-verified profile and session. Do not block
+ // the first visible render on a second, non-essential progress lookup.
  await activateStudent();
+ studentApi("me").then((data) => { studentCloudData=data; })
+  .catch((error) => console.warn("تعذر تحميل سجل الطالب المحفوظ مؤقتًا:",error));
  return true;
 }
 $("telegramContinueBtn").addEventListener("click",async()=>{
@@ -2133,7 +2174,9 @@ $("loginForm").addEventListener("submit",async(e)=>{
  finally { btn.disabled=false; }
 });
 async function activateStudent() {
- await refreshStudentProfile();
+ // Telegram appAuth is itself the trusted server-side authentication step.
+ // Existing browser sessions still require the normal profile check.
+ if (studentSession?.telegramAuth !== true) await refreshStudentProfile();
  await ensureSiteAvailable();
  reportVisitorPresence();
  $("authPanel").classList.add("hidden");
@@ -2147,17 +2190,20 @@ async function activateStudent() {
  $("start").classList.remove("hidden");
  $("resultsStorageNote").textContent="تُحفظ نتائجك وتقدمك في حسابك، وتظهر عند الدخول من تيليجرام أو المتصفح.";
  updateAdminEntry();
+ catalogLoadState="loading";
+ renderLevels();
+ setBrowseStep(0,false);
+ $("connectionStatus").textContent="جارٍ تحميل المستويات";
  try {
-  try { studentCloudData=await studentApi("me"); } catch(error) { console.warn("تعذر تحميل سجل الحساب:",error); }
   await loadCatalogFromSupabase();
-  $("connectionStatus").textContent="متصل";
+  $("connectionStatus").textContent=CATALOG.levels.length?"متصل":"لا توجد مستويات منشورة";
  } catch(error) {
-  $("start").classList.add("hidden");
-  $("authPanel").classList.remove("hidden");
-  $("authPanel").setAttribute("aria-hidden","false");
-  $("menuBtn").classList.add("hidden");
-  showAuthMessage(error.message||"تعذر تحميل محتوى المنصة.","error");
-  throw error;
+  catalogLoadState="error";
+  renderLevels();
+  $("connectionStatus").textContent="تعذر تحميل المستويات";
+  console.error("تعذر تحميل فهرس إحسان:",error);
+  // Keep the authenticated shell and sidebar visible. A catalog failure must
+  // never send the learner back to an empty, hidden app.
  }
 }
 $("logoutBtn").addEventListener("click",()=>{clearStudentSession(false);location.reload();});

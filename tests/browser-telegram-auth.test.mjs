@@ -40,13 +40,24 @@ test('Telegram identity details are taken from verified initData and include the
 test('مسارا Telegram والمتصفح يستخدمان الحساب نفسه ومخزن النتائج نفسه', () => {
   assert.match(miniApp, /BROWSER_STUDENT_DATA_URL/);
   assert.match(miniApp, /Authorization: "Bearer " \+ token/);
-  assert.match(miniApp, /app\.Serverless\.call\("studentApi",[\s\S]*?accessToken: studentSession\?\.accessToken/);
+  assert.match(miniApp, /telegramServerlessCall\("studentApi", \{[\s\S]*?accessToken: studentSession\?\.accessToken/);
   assert.match(studentApi, /SHARED_ACCOUNT_ACTIONS/);
   assert.match(studentApi, /body: JSON\.stringify\(\{ action, payload: input\.payload \|\| \{\}, telegramId \}\)/);
   assert.match(browserStudentData, /legacyTelegramAccount/);
   assert.match(browserStudentData, /attemptsTable = legacyTelegramAccount \? "student_attempts" : "app_student_attempts"/);
   assert.match(browserStudentData, /progressTable = legacyTelegramAccount \? "student_progress" : "app_student_progress"/);
   assert.match(browserStudentData, /requestedTelegramId/);
+});
+
+
+test('تهيئة Telegram لا تنتظر قراءة سجل غير أساسي قبل إظهار القائمة والمستويات', () => {
+  assert.match(miniApp, /function telegramServerlessCall\(moduleName, payload = \{\}, timeoutMs = 20000\)/);
+  assert.match(miniApp, /setTimeout\(\(\) => \{[\s\S]*?تأخر رد الخادم/);
+  assert.match(miniApp, /if \(studentSession\?\.telegramAuth !== true\) await refreshStudentProfile\(\)/);
+  assert.match(miniApp, /\$\("menuBtn"\)\.classList\.remove\("hidden"\)/);
+  assert.match(miniApp, /\$\("start"\)\.classList\.remove\("hidden"\)/);
+  assert.match(miniApp, /studentApi\("me"\)\.then\(\(data\) => \{ studentCloudData=data; \}\)/);
+  assert.match(miniApp, /retry\.textContent="إعادة تحميل المستويات"/);
 });
 
 test('كلمة مرور المتصفح اختيارية وتُضبط من الحساب، وشرط الموافقة الإدارية ملغى', () => {

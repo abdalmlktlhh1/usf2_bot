@@ -49,13 +49,14 @@ export function helpText() {
 لاستعراض الاختبارات، افتح «الاختبار التفاعلي»، ثم اختر المستوى والمقرر والنموذج المتاح. بعد إنهاء الاختبار يمكنك مشاهدة النتيجة ومراجعة الإجابات.`;
 }
 
-const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/';
+const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-refresh2';
+const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-refresh2';
 
 export function homeKeyboard(isAdmin = false) {
   const rows = [
     [{ text: '📱 الاختبار التفاعلي', web_app: { url: MINI_APP_URL } }],
   ];
-  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261030-student-management-a` } }]);
+  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: ADMIN_APP_URL } }]);
   // The bot now directs learners to the college's interactive exam platform only.
   return { inline_keyboard: rows };
 }
@@ -64,7 +65,7 @@ export function helpKeyboard(isAdmin = false) {
   const rows = [
     [{ text: '📱 فتح الاختبار التفاعلي', web_app: { url: MINI_APP_URL } }],
   ];
-  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261030-student-management-a` } }]);
+  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: ADMIN_APP_URL } }]);
   rows.push([{ text: '🏠 القائمة الرئيسية', callback_data: 'menu:home' }]);
   return { inline_keyboard: rows };
 }

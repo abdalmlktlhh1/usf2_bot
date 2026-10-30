@@ -17,7 +17,7 @@ test('الفهرس يأتي من Supabase ولا يحتفظ بنسخة محتو�
 
 test('تقدم الطالب محفوظ على الخادم ومربوط بهوية Telegram الموثقة', () => {
   const studentApi = fs.readFileSync(new URL('../tgcloud/endpoints/studentApi.js', import.meta.url), 'utf8');
-  const studentHelper = fs.readFileSync(new URL('../tgcloud/lib/supabase-students.js', import.meta.url), 'utf8');
+  const studentHelper = fs.readFileSync(new URL('../tgcloud/lib/supabase-students.js.example', import.meta.url), 'utf8');
   const miniApp = fs.readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
   assert.match(studentApi, /ctx\?\.initData\?\.user/);
   assert.match(studentApi, /startAttempt.*saveProgress.*completeAttempt/s);

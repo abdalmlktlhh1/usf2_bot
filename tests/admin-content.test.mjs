@@ -8,7 +8,8 @@ test('الفهرس يأتي من Supabase ولا يحتفظ بنسخة محتو�
   assert.match(miniApp, /functions\/v1\/public-catalog/);
   assert.doesNotMatch(miniApp, /SUPABASE_ANON_JWT|SUPABASE_PUBLIC_KEY/);
   assert.match(miniApp, /if \(studentSession\) \{[\s\S]*?activateStudent\(\)/);
-  assert.match(miniApp, /ensureSiteAvailable\(\)\.then\(available => \{[\s\S]*?loadCatalogFromSupabase\(\)/);
+  assert.match(miniApp, /function activateStudent\(\)[\s\S]*?loadCatalogFromSupabase\(\)/);
+  assert.match(miniApp, /if \(telegramLaunch && telegramAppAtStartup\?\.Serverless\?\.call\)[\s\S]*?runTelegramAccountAuth\(\)/);
   assert.match(miniApp, /catalogLoadState = 'error'/);
   assert.doesNotMatch(miniApp, /سجّل الدخول لعرض المحتوى|سجل الدخول لعرض المحتوى/);
   assert.doesNotMatch(miniApp, /try \{ studentSession = JSON\.parse\(sessionStorage\.getItem\(AUTH_SESSION_KEY\)[\s\S]{0,200}loadCatalogFromSupabase\(\)\.then/);
@@ -36,7 +37,7 @@ test('واجهة الإدارة تتحقق من الحساب عبر API ولا �
   assert.match(adminApi, /لا يمكن تغيير صلاحيات المدير الرئيسي أو استبداله/);
   assert.match(adminPage, /Telegram\.WebApp/);
   assert.match(miniApp, /id="drawerAdminBtn"/);
-  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261025a"/);
+  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261030-telegram-auth-a"/);
 });
 
 test('واجهة الإدارة تتضمن إدارة المستوى والمادة والمقرر والأسئلة والمشرفين والسجل', () => {

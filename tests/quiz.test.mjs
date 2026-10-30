@@ -45,18 +45,19 @@ test('السؤال ورقم التقدم والنتيجة يتم عرضها بش
   assert.ok(resultKeyboard().inline_keyboard.length > 0);
 });
 
-test('القائمة والتعليمات تفتح Mini App وتحافظ على أزرار البوت النصية', () => {
+test('القائمة والتعليمات تفتح المنصة التفاعلية ولا تعرض أوامر الاختبار النصي القديم', () => {
   assert.match(homeText(), /بوت الاختبارات/);
-  assert.match(helpText(), /\/quiz/);
+  assert.match(helpText(), /الاختبار التفاعلي/);
+  assert.doesNotMatch(helpText(), /\/quiz|\/test/);
   for (const keyboard of [homeKeyboard(), helpKeyboard()]) {
     const buttons = keyboard.inline_keyboard.flat();
-    const appButton = buttons.find((button) => button.web_app);
-    assert.ok(appButton, 'يجب توفير زر لفتح الاختبار التفاعلي');
-    assert.equal(appButton.web_app.url, 'https://app8964547541.tgcloud.ai/');
+    const appButton = buttons.find((button) => button.web_app && button.web_app.url === 'https://app8964547541.tgcloud.ai/');
+    assert.ok(appButton, 'يجب توفير زر لفتح المنصة التفاعلية');
     for (const button of buttons.filter((item) => item.callback_data)) {
-      assert.ok(['quiz:start', 'menu:help', 'menu:home'].includes(button.callback_data));
+      assert.equal(button.callback_data, 'menu:home');
     }
   }
+  assert.equal(homeKeyboard().inline_keyboard.flat().some((button) => button.callback_data), false);
 });
 
 test('واجهة الاختبار تدعم اختصارات لوحة المفاتيح وتصف بيانات المنصة بدقة', async () => {

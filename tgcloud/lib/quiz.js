@@ -32,24 +32,21 @@ export const QUESTIONS = [
 ];
 
 export function homeText() {
-  return `أهلًا بك في بوت الاختبارات! 🎓
+  return `أهلًا بك في بوت الاختبارات ⚖️📚
 
-افتح «الاختبار التفاعلي» لبدء اختبار محاسبة المراجعة (أ) المكوّن من ٤٩ سؤالًا، مع ترتيب عشوائي ومؤقت ونتيجة نهائية ومراجعة للإجابات.
+🏫 كلية الشريعة والقانون — جامعة صنعاء
 
-ويمكنك اختيار «ابدأ اختبارًا نصيًا» لخوض الاختبار التجريبي داخل المحادثة.`;
+افتح «الاختبار التفاعلي» لاستعراض المستويات الدراسية، ثم اختر المقرر والنموذج المتاح لبدء الاختبار. بعد الإنهاء ستظهر نتيجتك مع إمكانية مراجعة الإجابات.
+
+تُعرض النماذج بحسب المحتوى المضاف للمنصة. اختر زر «الاختبار التفاعلي» لاستعراض المقررات والنماذج المتاحة.`;
 }
 
 export function helpText() {
-  return `📚 المساعدة — بوت الاختبارات
+  return `📚 بوت الاختبارات
 
-/start — بدء البوت
-/quiz — بدء اختبار نصي جديد
-/help — عرض التعليمات
-/about — معلومات عن البوت
-/cancel — إلغاء الاختبار النصي الحالي
-/id — عرض معرّف المحادثة ومعرّف حسابك
+🏫 كلية الشريعة والقانون — جامعة صنعاء
 
-اختر «فتح الاختبار التفاعلي» لفتح صفحة محاسبة المراجعة (أ)، أو «ابدأ اختبارًا نصيًا» للاختبار التجريبي داخل المحادثة.`;
+لاستعراض الاختبارات، افتح «الاختبار التفاعلي»، ثم اختر المستوى والمقرر والنموذج المتاح. بعد إنهاء الاختبار يمكنك مشاهدة النتيجة ومراجعة الإجابات.`;
 }
 
 const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/';
@@ -58,11 +55,8 @@ export function homeKeyboard(isAdmin = false) {
   const rows = [
     [{ text: '📱 الاختبار التفاعلي', web_app: { url: MINI_APP_URL } }],
   ];
-  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261025a` } }]);
-  rows.push(
-    [{ text: '📝 ابدأ اختبارًا نصيًا', callback_data: 'quiz:start' }],
-    [{ text: '❔ طريقة الاستخدام', callback_data: 'menu:help' }],
-  );
+  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261030-student-management-a` } }]);
+  // The bot now directs learners to the college's interactive exam platform only.
   return { inline_keyboard: rows };
 }
 
@@ -70,11 +64,8 @@ export function helpKeyboard(isAdmin = false) {
   const rows = [
     [{ text: '📱 فتح الاختبار التفاعلي', web_app: { url: MINI_APP_URL } }],
   ];
-  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261025a` } }]);
-  rows.push(
-    [{ text: '📝 ابدأ اختبارًا نصيًا', callback_data: 'quiz:start' }],
-    [{ text: '🏠 القائمة الرئيسية', callback_data: 'menu:home' }],
-  );
+  if (isAdmin) rows.push([{ text: '⚙️ لوحة الإدارة', web_app: { url: `${MINI_APP_URL}admin.html?v=20261030-student-management-a` } }]);
+  rows.push([{ text: '🏠 القائمة الرئيسية', callback_data: 'menu:home' }]);
   return { inline_keyboard: rows };
 }
 

@@ -26,8 +26,6 @@ export async function ensureDefaultBotMenu() {
   const defaults = [
     { text: '📱 الاختبار التفاعلي', type: 'web_app', value: 'exam', sortOrder: 10, adminOnly: false },
     { text: '⚙️ لوحة الإدارة', type: 'web_app', value: 'admin', sortOrder: 20, adminOnly: true },
-    { text: '📝 ابدأ اختبارًا نصيًا', type: 'command', value: 'quiz', sortOrder: 30, adminOnly: false },
-    { text: '❔ طريقة الاستخدام', type: 'command', value: 'help', sortOrder: 40, adminOnly: false },
   ];
   for (const item of defaults) {
     await db.insert(botMenuItems).values({
@@ -89,7 +87,8 @@ export function validateBotMenuItem(input, rows, currentId = 0) {
 
 export async function getBotMenuKeyboard(isAdmin, parentId = null) {
   const all = await ensureDefaultBotMenu();
-  const visible = all.filter((item) => item.isActive && (!item.adminOnly || isAdmin));
+  const retiredCommands = new Set(['quiz', 'help', 'about']);
+  const visible = all.filter((item) => item.isActive && (!item.adminOnly || isAdmin) && !(item.type === 'command' && retiredCommands.has(item.value)));
   const byId = new Map(all.map((item) => [Number(item.id), item]));
   const parent = parentId == null ? null : visible.find((item) => Number(item.id) === Number(parentId));
   if (parentId != null && (!parent || parent.type !== 'submenu')) {
@@ -113,7 +112,7 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null) {
       button = { text: item.text, callback_data: 'menu:open:' + item.id };
     } else if (item.type === 'web_app') {
       if (item.value === 'admin' && !isAdmin) continue;
-      button = { text: item.text, web_app: { url: item.value === 'admin' ? MINI_APP_URL + 'admin.html?v=20261025a' : MINI_APP_URL } };
+      button = { text: item.text, web_app: { url: item.value === 'admin' ? MINI_APP_URL + 'admin.html?v=20261030-student-management-a' : MINI_APP_URL } };
     } else if (item.type === 'catalog') {
       let target;
       try { target = JSON.parse(item.value); } catch { continue; }

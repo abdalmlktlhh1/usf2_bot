@@ -74,6 +74,16 @@ export default async function (query) {
   const messageId = message?.message_id;
   const userId = query.from?.id;
 
+  // Old Telegram messages may still contain buttons from the retired text-only demo.
+  if (data === 'quiz:start' || data.startsWith('quiz:answer:') || data === 'menu:action:quiz' || data === 'menu:action:about') {
+    await api.answerCallbackQuery({
+      callback_query_id: query.id,
+      text: 'الاختبار النصي داخل المحادثة لم يعد متاحًا. افتح «الاختبار التفاعلي» من القائمة.',
+      show_alert: true,
+    });
+    return;
+  }
+
   const openMenuMatch = /^menu:open:(\d+)$/.exec(data);
   if (openMenuMatch) {
     if (!chatId || !messageId || !userId) {
@@ -118,7 +128,7 @@ export default async function (query) {
     return;
   }
 
-  const menuActionMatch = /^menu:action:(quiz|help|about|home)$/.exec(data);
+  const menuActionMatch = /^menu:action:(help|about|home)$/.exec(data);
   if (menuActionMatch) {
     if (!chatId || !messageId || !userId) {
       await api.answerCallbackQuery({ callback_query_id: query.id });
@@ -126,10 +136,6 @@ export default async function (query) {
     }
     const action = menuActionMatch[1];
     await api.answerCallbackQuery({ callback_query_id: query.id });
-    if (action === 'quiz') {
-      await startQuizInMessage(chatId, userId, messageId);
-      return;
-    }
     if (action === 'home' || action === 'help') {
       await showMenu(chatId, userId, messageId, action === 'help');
       return;
@@ -174,7 +180,7 @@ export default async function (query) {
   if (!match) {
     await api.answerCallbackQuery({
       callback_query_id: query.id,
-      text: 'هذا الزر غير صالح. افتح /quiz لبدء اختبار جديد.',
+      text: 'هذا الزر قديم أو غير صالح. افتح «الاختبار التفاعلي» من القائمة.',
       show_alert: true,
     });
     return;
@@ -196,7 +202,7 @@ export default async function (query) {
       optionIndex >= question.options.length) {
     await api.answerCallbackQuery({
       callback_query_id: query.id,
-      text: 'السؤال أو الاختيار غير صالح. ابدأ اختبارًا جديدًا باستخدام /quiz.',
+      text: 'السؤال أو الاختيار غير صالح. افتح «الاختبار التفاعلي» من القائمة.',
       show_alert: true,
     });
     return;
@@ -213,7 +219,7 @@ export default async function (query) {
       session.questionIndex !== questionIndex) {
     await api.answerCallbackQuery({
       callback_query_id: query.id,
-      text: 'هذا السؤال انتهى أو لم يعد نشطًا. استخدم /quiz لبدء اختبار جديد.',
+      text: 'هذا السؤال انتهى أو لم يعد نشطًا. افتح «الاختبار التفاعلي» من القائمة.',
       show_alert: true,
     });
     return;

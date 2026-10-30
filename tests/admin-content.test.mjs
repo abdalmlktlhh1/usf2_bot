@@ -9,7 +9,7 @@ test('الفهرس يأتي من Supabase ولا يحتفظ بنسخة محتو�
   assert.doesNotMatch(miniApp, /SUPABASE_ANON_JWT|SUPABASE_PUBLIC_KEY/);
   assert.match(miniApp, /if \(studentSession\) \{[\s\S]*?activateStudent\(\)/);
   assert.match(miniApp, /function activateStudent\(\)[\s\S]*?loadCatalogFromSupabase\(\)/);
-  assert.match(miniApp, /if \(telegramLaunch && telegramAppAtStartup\?\.Serverless\?\.call\)[\s\S]*?runTelegramAccountAuth\(\)/);
+  assert.match(miniApp, /if \(telegramLaunch\)[\s\S]*?waitForTelegramServerless\(\)[\s\S]*?runTelegramAccountAuth\(\)/);
   assert.match(miniApp, /catalogLoadState = 'error'/);
   assert.doesNotMatch(miniApp, /سجّل الدخول لعرض المحتوى|سجل الدخول لعرض المحتوى/);
   assert.doesNotMatch(miniApp, /try \{ studentSession = JSON\.parse\(sessionStorage\.getItem\(AUTH_SESSION_KEY\)[\s\S]{0,200}loadCatalogFromSupabase\(\)\.then/);

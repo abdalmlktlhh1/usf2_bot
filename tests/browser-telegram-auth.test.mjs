@@ -17,7 +17,8 @@ test('المتصفح يحتفظ بدخول الحسابات السابقة ول�
 
 test('Telegram auth uses server-verified identity, assigns a level only on first visit, and creates a session', () => {
   assert.match(miniApp, /const telegramLaunch = Boolean\(/);
-  assert.match(miniApp, /if \(telegramLaunch && telegramAppAtStartup\?\.Serverless\?\.call\)/);
+  assert.match(miniApp, /if \(telegramLaunch\)/);
+  assert.match(miniApp, /waitForTelegramServerless\(\)/);
   assert.match(miniApp, /studentApi\("appAuth",levelId\?\{levelId\}:\{\}\)/);
   assert.match(miniApp, /if\(result\?\.needsLevel\)[\s\S]*?showTelegramLevelSetup\(result\)/);
   assert.match(miniApp, /saveTelegramAuthSession\(result\)/);

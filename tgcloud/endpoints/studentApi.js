@@ -2,7 +2,7 @@ import { EndpointError } from 'sdk';
 import { supabaseStudentRequest } from '../lib/supabase-students.js';
 import { fetch } from 'sdk/fetch';
 
-const ALLOWED_ACTIONS = new Set(['me', 'leaderboard', 'startAttempt', 'saveProgress', 'completeAttempt', 'abandonAttempt']);
+const ALLOWED_ACTIONS = new Set(['appAuth', 'me', 'leaderboard', 'startAttempt', 'saveProgress', 'completeAttempt', 'abandonAttempt']);
 
 export default async function (input = {}, ctx) {
   const user = ctx?.initData?.user;
@@ -24,6 +24,7 @@ export default async function (input = {}, ctx) {
       username: typeof user.username === 'string' ? user.username : '',
       first_name: typeof user.first_name === 'string' ? user.first_name : '',
       last_name: typeof user.last_name === 'string' ? user.last_name : '',
+      photo_url: typeof user.photo_url === 'string' ? user.photo_url : '',
     },
   };
 

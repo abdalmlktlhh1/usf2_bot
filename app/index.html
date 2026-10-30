@@ -1929,7 +1929,11 @@ if (telegramLaunch && telegramAppAtStartup?.Serverless?.call) {
   ensureSiteAvailable().then(async available => {
     if (!available) return;
     await runTelegramAccountAuth();
-  }).then(() => {
+  }).then((signedIn) => {
+    if (signedIn === false) {
+      $("connectionStatus").textContent = "اختر المستوى الدراسي";
+      return;
+    }
     $("connectionStatus").textContent = catalogLoadState === "loaded"
       ? "مرتبط بتيليجرام" : "تعذر تحميل المحتوى";
   }).catch((error) => {

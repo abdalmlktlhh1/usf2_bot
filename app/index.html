@@ -861,7 +861,8 @@ function returnHome() {
   $("quiz").classList.remove("finished");
   $("resultScreen").classList.add("hidden");
   $("resultScreen").replaceChildren();
-  $("start").classList.remove("hidden");
+  if (studentSession?.profile?.role === "admin") { $("drawerAdminBtn").hidden = false; $("drawerAdminBtn").classList.remove("hidden"); }
+ $("start").classList.remove("hidden");
   document.body.classList.remove("quiz-active");
   window.scrollTo({ top: 0, behavior: "smooth" });
   refreshSetup();
@@ -1529,17 +1530,18 @@ function initBrowse() {
   $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-student-management-a"; });
   const telegramWebApp = window.Telegram && window.Telegram.WebApp;
   if (telegramWebApp) telegramWebApp.ready();
-  waitForTelegramServerless().then((readyApp) => {
-    if (!readyApp?.Serverless?.call) return;
-    readyApp.Serverless.call('adminApi', { action: 'checkAccess' }, (err, result) => {
-      if (!err && result?.allowed === true) {
-        const adminButton = $("drawerAdminBtn");
-        adminButton.hidden = false;
-        adminButton.classList.remove("hidden");
-      }
-    });
-  });
-  $("infoCloseBtn").addEventListener("click", closeInfo);
+  if (telegramWebApp?.Serverless?.call || (typeof telegramWebApp?.initData === "string" && telegramWebApp.initData.trim())) {
+    waitForTelegramServerless().then((readyApp) => {
+      if (!readyApp?.Serverless?.call) return;
+      readyApp.Serverless.call('adminApi', { action: 'checkAccess' }, (err, result) => {
+        if (!err && result?.allowed === true) {
+          const adminButton = $("drawerAdminBtn");
+          adminButton.hidden = false;
+          adminButton.classList.remove("hidden");
+        }
+      });
+    }).catch(() => {});
+  }  $("infoCloseBtn").addEventListener("click", closeInfo);
   document.addEventListener("keydown", (e) => {
     let owner = null;
     if (!$("drawer").classList.contains("hidden")) owner = $("drawer");

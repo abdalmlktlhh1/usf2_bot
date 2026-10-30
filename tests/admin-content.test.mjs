@@ -95,3 +95,21 @@ test('التصفح الدراسي هرمي وروابط أزرار المستو�
   const matcher = /^menu:open:(\d+)$/;
   assert.equal(matcher.exec('menu:open:12')?.[1], '12');
 });
+
+
+test('إدارة الطلاب متاحة للمدير وتدعم الإيقاف دون حذف سجل الطالب', () => {
+  const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
+  assert.match(adminHtml, /data-page="students"/);
+  assert.match(adminHtml, /function renderStudents/);
+  assert.match(adminHtml, /toggleStudent/);
+  assert.match(adminApi, /students\.read/);
+  assert.match(adminApi, /action === 'listStudents'/);
+  assert.match(adminApi, /action === 'setStudentStatus'/);
+  assert.match(contentAdmin, /async function listStudents/);
+  assert.match(contentAdmin, /async function setStudentStatus/);
+  assert.match(contentAdmin, /auth\.isOwner/);
+  assert.match(contentAdmin, /\["approved","suspended"\]/);
+  assert.doesNotMatch(contentAdmin, /deleteUser|delete\(\).*app_student_profiles/);
+});

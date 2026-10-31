@@ -277,6 +277,53 @@ async function setModelActive(auth:any,p:any) {
   if(error)throw error;if(!data?.length)throw bad("لم يُعثر على أسئلة هذا النموذج.","NOT_FOUND",404);
   return {updated:data.length,courseId,sourceYear,sourceFile,isActive};
 }
+async function deleteModel(auth:any,p:any) {
+  requirePermission(auth,"questions.delete");
+  const courseId=positive(p.courseId,"المقرر");requireCourse(auth,courseId);
+  const sourceYear=Number.isInteger(Number(p.sourceYear))?Number(p.sourceYear):0;
+  if(sourceYear<0||sourceYear>2100) throw bad("سنة النموذج غير صالحة.");
+  const sourceFile=clean(p.sourceFile,"اسم النموذج",500);
+
+  const hasActiveRows = async (table:string) => {
+    let query=supabase.from(table).select("id").eq("course_id",courseId)
+      .eq("source_file",sourceFile).eq("status","in_progress").limit(1);
+    query=sourceYear===0
+      ? query.or("source_year.eq.0,source_year.is.null")
+      : query.eq("source_year",sourceYear);
+    const {data,error}=await query;
+    if(error) throw error;
+    return (data||[]).length>0;
+  };
+  const [activeAttempts,activeProgress]=await Promise.all([
+    hasActiveRows("student_attempts"),
+    hasActiveRows("student_progress"),
+  ]);
+  if(activeAttempts||activeProgress) {
+    throw bad("لا يمكن حذف النموذج الآن؛ يوجد طالب لديه اختبار جارٍ منه. انتظر انتهاء المحاولة ثم أعد الحذف.","MODEL_IN_PROGRESS",409);
+  }
+
+  let questionQuery=supabase.from("academic_questions").select("id").eq("course_id",courseId).eq("source_file",sourceFile);
+  questionQuery=sourceYear===0
+    ? questionQuery.or("source_year.eq.0,source_year.is.null")
+    : questionQuery.eq("source_year",sourceYear);
+  const {data:matches,error:matchError}=await questionQuery;
+  if(matchError) throw matchError;
+  const questionIds=(matches||[]).map((row:any)=>Number(row.id)).filter((id:number)=>Number.isSafeInteger(id)&&id>0);
+  if(!questionIds.length) throw bad("لم يُعثر على أسئلة هذا النموذج.","NOT_FOUND",404);
+
+  let deleteQuery=supabase.from("academic_questions").delete().eq("course_id",courseId).eq("source_file",sourceFile);
+  deleteQuery=sourceYear===0
+    ? deleteQuery.or("source_year.eq.0,source_year.is.null")
+    : deleteQuery.eq("source_year",sourceYear);
+  const {data:deleted,error:deleteError}=await deleteQuery.select("id");
+  if(deleteError) throw deleteError;
+  const deletedCount=(deleted||[]).length;
+  if(deletedCount!==questionIds.length) {
+    throw bad("لم يكتمل حذف جميع أسئلة النموذج؛ راجع قائمة النماذج قبل إعادة المحاولة.","MODEL_DELETE_PARTIAL",409);
+  }
+  return {deleted:true,deletedQuestions:deletedCount,courseId,sourceYear,sourceFile,attemptsPreserved:true};
+}
+
 async function approveQuestionChange(auth:any,p:any) {
   requirePermission(auth,"questions.publish");
   const payload=p.question&&typeof p.question==="object"?p.question:{};
@@ -464,6 +511,7 @@ Deno.serve(async (req: Request) => {
     else if(action==="setQuestionActive") result=await setQuestionActive(auth,p);
     else if(action==="renameModel") result=await renameModel(auth,p);
     else if(action==="setModelActive") result=await setModelActive(auth,p);
+    else if(action==="deleteModel") result=await deleteModel(auth,p);
     else throw bad("العملية المطلوبة غير معروفة.","UNKNOWN_ACTION",404);
     return json(result);
   } catch(e:any) {

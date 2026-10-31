@@ -522,7 +522,7 @@ textarea{min-height:86px;resize:vertical}
           const modelTitle = String(m.sourceFile || 'بلا اسم')
             .replace(/^⟦نظام:([^⟧]+)⟧/, 'النظام $1 ·')
             .replace(/⟦الفئة:[^⟧]+⟧/g, '').trim();
-          subjectHtml += '<div class="panel" style="margin:8px 0;padding:12px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+escapeHtml(modelTitle)+'</b><div class="hint">'+escapeHtml(m.sourceYear||'بلا سنة')+' · '+escapeHtml(m.total)+' سؤال · نشط '+escapeHtml(m.activeCount)+'</div></div><div class="row-actions">'+(can('questions.write')?button('عرض الأسئلة','viewModelQuestions',encodeURIComponent(JSON.stringify([m.courseId,m.sourceFile,m.sourceYear])))+button('＋ سؤال','addModelQuestion',encodeURIComponent(JSON.stringify([subject.id,m.courseId,m.sourceYear,m.sourceFile])))+button('تعديل النموذج','editModel',m.id):'')+(m.isActive&&can('questions.delete')?button('أرشفة','toggleModel',m.id,'danger'):(!m.isActive&&can('questions.publish')?button('نشر','toggleModel',m.id,'secondary'):''))+'</div></div></div>';
+          subjectHtml += '<div class="panel" style="margin:8px 0;padding:12px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+escapeHtml(modelTitle)+'</b><div class="hint">'+escapeHtml(m.sourceYear||'بلا سنة')+' · '+escapeHtml(m.total)+' سؤال · نشط '+escapeHtml(m.activeCount)+'</div></div><div class="row-actions">'+(can('questions.write')?button('عرض الأسئلة','viewModelQuestions',encodeURIComponent(JSON.stringify([m.courseId,m.sourceFile,m.sourceYear])))+button('＋ سؤال','addModelQuestion',encodeURIComponent(JSON.stringify([subject.id,m.courseId,m.sourceYear,m.sourceFile])))+button('تعديل النموذج','editModel',m.id):'')+(m.isActive&&can('questions.delete')?button('أرشفة','toggleModel',m.id,'danger'):(!m.isActive&&can('questions.publish')?button('نشر','toggleModel',m.id,'secondary'):''))+(can('questions.delete')?button('حذف النموذج','deleteModel',encodeURIComponent(JSON.stringify([m.courseId,m.sourceFile,m.sourceYear])),'danger'):'')+'</div></div></div>';
         }
         subjectHtml+='</div></details>';
       }
@@ -1326,6 +1326,53 @@ textarea{min-height:86px;resize:vertical}
       finally {
         const current = $('importModelJsonBtn');
         if (current) { current.disabled = false; current.textContent = '⬆ استيراد النموذج والأسئلة'; }
+      }
+      return;
+    }
+    if (action === 'deleteModel') {
+      if (!can('questions.delete')) { showNotice('لا تملك صلاحية حذف النماذج.'); return; }
+      let courseId, sourceFile, sourceYear;
+      try { [courseId, sourceFile, sourceYear] = JSON.parse(decodeURIComponent(id)); }
+      catch (_) { showNotice('تعذر تحديد النموذج المطلوب حذفه.'); return; }
+      const model = (state.models || []).find((row) =>
+        Number(row.courseId) === Number(courseId) &&
+        Number(row.sourceYear || 0) === Number(sourceYear || 0) &&
+        String(row.sourceFile || '') === String(sourceFile || ''));
+      if (!model) { showNotice('النموذج غير موجود في القائمة الحالية؛ حدّث البيانات وحاول مجددًا.'); return; }
+      const title = String(model.sourceFile || 'هذا النموذج')
+        .replace(/^⟦نظام:([^⟧]+)⟧/, 'النظام $1 ·')
+        .replace(/⟦الفئة:[^⟧]+⟧/g, '').trim();
+      const questionCount = Number(model.total || 0);
+      const confirmation =
+        'تأكيد حذف «' + title + '»؟\n\n' +
+        'سيتم حذف ' + questionCount + ' سؤالاً من بنك الأسئلة نهائيًا لهذا المقرر والسنة فقط.\n' +
+        'لن تُحذف نتائج ومحاولات الطلاب السابقة.\n' +
+        'لن يسمح النظام بالحذف إذا كان هناك اختبار جارٍ من هذا النموذج.\n\n' +
+        'هذا الإجراء لا يمكن التراجع عنه.';
+      if (!confirm(confirmation)) return;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'جارٍ الحذف…';
+      let result;
+      try {
+        result = await api('deleteModel', {
+          courseId: Number(courseId),
+          sourceYear: Number(sourceYear) || 0,
+          sourceFile: String(sourceFile),
+        });
+      } catch (error) {
+        showNotice(error.message || 'تعذر حذف النموذج.');
+        btn.disabled = false;
+        btn.textContent = originalText;
+        return;
+      }
+      showNotice('تم حذف النموذج نهائيًا وحذف ' + Number(result.deletedQuestions || 0) + ' سؤالاً. نتائج المحاولات السابقة محفوظة.', true);
+      try {
+        await reload();
+      } catch (_) {
+        showNotice('تم حذف النموذج، لكن تعذر تحديث القائمة الآن. أعد تحميل الصفحة لرؤية التغييرات.', true);
+        btn.disabled = false;
+        btn.textContent = originalText;
       }
       return;
     }

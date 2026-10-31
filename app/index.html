@@ -1897,7 +1897,7 @@ function initBrowse() {
     const overlay = $("adminPanelOverlay");
     const frame = $("adminPanelFrame");
     const browserAdmin = studentSession?.profile?.role === "admin" || String(studentSession?.profile?.role || "").toLowerCase() === "admin";
-    const target = browserAdmin ? "admin-students.html?v=20261031-ehsan-model-hierarchy1" : "admin.html?v=20261031-ehsan-model-hierarchy1";
+    const target = browserAdmin ? "admin-students.html?v=20261031-ehsan-model-hierarchy2" : "admin.html?v=20261031-ehsan-model-hierarchy2";
     if (frame.dataset.panelTarget !== target) {
       frame.src = target;
       frame.dataset.panelTarget = target;
@@ -1911,7 +1911,7 @@ function initBrowse() {
   }
   $("adminPanelClose").addEventListener("click", closeAdminPanel);
   $("adminPanelOverlay").addEventListener("click", (event) => { if (event.target === $("adminPanelOverlay")) closeAdminPanel(); });
-  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261031-ehsan-model-hierarchy1"; });
+  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261031-ehsan-model-hierarchy2"; });
   const telegramWebApp = window.Telegram && window.Telegram.WebApp;
   if (telegramWebApp) telegramWebApp.ready();
   waitForTelegramServerless().then((readyApp) => {

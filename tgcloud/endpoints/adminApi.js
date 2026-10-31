@@ -631,22 +631,21 @@ async function moveModelWithinLevel(auth, input) {
 
 async function deleteModel(auth, input) {
   requirePermission(auth, 'questions.delete');
-  const courseId = positiveId(input.courseId, 'المقرر'); requireCourseScope(auth, courseId);
+  const courseId = positiveId(input.courseId, 'المقرر');
+  requireCourseScope(auth, courseId);
   const sourceYear = Number(input.sourceYear) || 0;
+  if (!Number.isSafeInteger(sourceYear) || sourceYear < 0 || sourceYear > 2100) fail('سنة النموذج غير صالحة.');
   const sourceFile = cleanString(input.sourceFile, 'اسم النموذج', 500);
-  const content = await supabaseContentRequest('dashboard', {}, auth);
-  const questions = (content.questions || []).filter(q => Number(q.courseId) === courseId && Number(q.sourceYear || 0) === sourceYear && String(q.sourceFile || 'بلا اسم') === sourceFile);
-  if (!questions.length) fail('لم يُعثر على أسئلة هذا النموذج.', 'NOT_FOUND');
-  // Keep source rows for recovery and history; remove every question in the group from the student-facing bank.
-  let result = null;
-  try { result = await supabaseContentRequest('setModelActive', { courseId, sourceYear, sourceFile, isActive: false }, auth); } catch (_) { /* fallback below handles legacy null source_year values */ }
-  if (Number(result?.updated || 0) !== questions.length) {
-    const activeQuestions = questions.filter(q => q.isActive);
-    const outcomes = await Promise.allSettled(activeQuestions.map(q => supabaseContentRequest('setQuestionActive', { id: q.id, isActive: false }, auth)));
-    if (outcomes.some(entry => entry.status === 'rejected')) fail('تعذرت أرشفة جميع أسئلة النموذج؛ أعد المحاولة بعد تحديث البيانات.', 'MODEL_ARCHIVE_PARTIAL');
-  }
-  await audit(auth, 'archive', 'model', 0, { courseId, sourceYear, sourceFile, archivedQuestions: questions.length });
-  return { archived: true, archivedQuestions: questions.length };
+  const result = await supabaseContentRequest('deleteModel', {
+    courseId, sourceYear, sourceFile,
+  }, auth);
+  if (!result.deleted || !Number(result.deletedQuestions)) fail('لم يُحذف النموذج؛ لم يتم العثور على أسئلته.', 'MODEL_NOT_DELETED');
+  await audit(auth, 'delete', 'model', 0, {
+    courseId, sourceYear, sourceFile,
+    deletedQuestions: Number(result.deletedQuestions),
+    attemptsPreserved: result.attemptsPreserved === true,
+  });
+  return result;
 }
 async function setModelActive(auth, input) {
   const courseId = positiveId(input.courseId, 'المقرر');

@@ -37,7 +37,7 @@ test('واجهة الإدارة تتحقق من الحساب عبر API ولا �
   assert.match(adminApi, /لا يمكن تغيير صلاحيات المدير الرئيسي أو استبداله/);
   assert.match(adminPage, /Telegram\.WebApp/);
   assert.match(miniApp, /id="drawerAdminBtn"/);
-  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261031-ehsan-model-hierarchy1"/);
+  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261031-ehsan-model-hierarchy2"/);
 });
 
 test('لوحة المدير تعرض المتواجدين وآخر الحسابات والنشاط مع تحديث الحضور', () => {
@@ -181,4 +181,28 @@ test('إضافة النماذج متدرجة حسب المستوى والماد�
   assert.ok(adminApi.includes("'MODEL_EXISTS'"));
   assert.ok(miniApp.includes('audience && audience !== "طلاب"'));
   assert.ok(!adminHtml.includes('const courseOptions=(state.courses||[]).map'));
+});
+
+test('حذف النموذج يحذف أسئلته المحددة فقط ويحافظ على النتائج السابقة ويمنع الحذف أثناء اختبار جارٍ', () => {
+  const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
+  const uiDelete = adminHtml.slice(adminHtml.indexOf("if (action === 'deleteModel')"), adminHtml.indexOf("if (action === 'viewModelQuestions')"));
+  const apiDelete = adminApi.slice(adminApi.indexOf('async function deleteModel(auth, input)'), adminApi.indexOf('async function setModelActive(auth, input)'));
+  const dbDelete = contentAdmin.slice(contentAdmin.indexOf('async function deleteModel(auth:any,p:any)'), contentAdmin.indexOf('async function approveQuestionChange(auth:any,p:any)'));
+
+  assert.ok(adminHtml.includes("button('حذف النموذج','deleteModel'"));
+  assert.ok(uiDelete.includes("api('deleteModel'"));
+  assert.ok(uiDelete.includes('نتائج ومحاولات الطلاب السابقة'));
+  assert.ok(uiDelete.includes('لا يمكن التراجع عنه'));
+  assert.ok(apiDelete.includes("supabaseContentRequest('deleteModel'"));
+  assert.ok(apiDelete.includes("audit(auth, 'delete', 'model'"));
+  assert.ok(dbDelete.includes('requirePermission(auth,"questions.delete")'));
+  assert.ok(dbDelete.includes('hasActiveRows("student_attempts")'));
+  assert.ok(dbDelete.includes('hasActiveRows("student_progress")'));
+  assert.ok(dbDelete.includes('"MODEL_IN_PROGRESS"'));
+  assert.ok(dbDelete.includes('supabase.from("academic_questions").delete()'));
+  assert.ok(dbDelete.includes('attemptsPreserved:true'));
+  assert.ok(!dbDelete.includes('student_attempts").delete()'));
+  assert.ok(!apiDelete.includes("supabaseContentRequest('setModelActive'"));
 });

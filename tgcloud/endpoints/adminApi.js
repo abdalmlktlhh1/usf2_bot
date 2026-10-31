@@ -847,16 +847,24 @@ async function importModelJson(auth, input) {
   const levelId = positiveId(input.levelId, 'المستوى');
   const courseId = positiveId(input.courseId, 'المقرر');
   const sourceYear = Number(input.sourceYear);
-  if (!Number.isSafeInteger(sourceYear) || sourceYear < 0 || sourceYear > 2100) fail('سنة النموذج غير صالحة.');
+  if (!Number.isSafeInteger(sourceYear) || sourceYear < 2020 || sourceYear > 2025) fail('سنة النموذج يجب أن تكون من 2020 إلى 2025.');
   const sourceSystem = cleanString(input.sourceSystem, 'النظام الدراسي', 80);
   if (sourceSystem === '__other__') fail('اكتب اسم النظام الآخر بدلًا من ترك الخيار الافتراضي.');
   const sourceAudience = cleanString(input.sourceAudience, 'الفئة المستهدفة', 20);
-  const sourceFile = encodeModelSourceFile(input.sourceFile, sourceSystem, sourceAudience);
+  const allowedPeriods = ['الفترة الأولى', 'الفترة الثانية', 'الفترة الثالثة', 'الفترة الرابعة', 'الفترة الخامسة'];
+  const modelPeriod = cleanString(input.sourceFile, 'الفترة', 80);
+  if (!allowedPeriods.includes(modelPeriod)) fail('فترة النموذج غير صالحة؛ اختر فترة من الأولى إلى الخامسة.');
+  const sourceFile = encodeModelSourceFile(modelPeriod, sourceSystem, sourceAudience);
   if (!Array.isArray(input.questions) || input.questions.length < 1 || input.questions.length > 500) fail('عدد الأسئلة يجب أن يكون من 1 إلى 500.');
   const catalog = await supabaseContentRequest('dashboard', {}, auth);
   const selectedCourse = (catalog.courses || []).find((row) => Number(row.id) === courseId);
   if (!selectedCourse) fail('المقرر المحدد غير موجود.', 'NOT_FOUND');
   if (selectedCourse.isActive === false) fail('لا يمكن إضافة نموذج إلى مقرر مؤرشف. فعّل المقرر أولًا.', 'COURSE_ARCHIVED');
+  const sourceExists = (catalog.models || []).some((model) =>
+    Number(model.courseId) === courseId &&
+    Number(model.sourceYear) === sourceYear &&
+    String(model.sourceFile || '') === sourceFile);
+  if (sourceExists) fail('يوجد نموذج مسجل مسبقًا لهذه المادة والنظام والسنة والفترة. لن نكرر الأسئلة داخله.', 'MODEL_EXISTS');
   const selectedSubject = (catalog.subjects || []).find((row) => Number(row.id) === Number(selectedCourse.subjectId));
   if (!selectedSubject || Number(selectedSubject.levelId) !== levelId) fail('المقرر المختار لا يتبع المستوى المحدد.', 'COURSE_LEVEL_MISMATCH');
   const normalized = input.questions.map((raw, index) => {

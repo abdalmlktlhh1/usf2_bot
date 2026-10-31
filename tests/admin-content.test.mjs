@@ -37,7 +37,7 @@ test('واجهة الإدارة تتحقق من الحساب عبر API ولا �
   assert.match(adminApi, /لا يمكن تغيير صلاحيات المدير الرئيسي أو استبداله/);
   assert.match(adminPage, /Telegram\.WebApp/);
   assert.match(miniApp, /id="drawerAdminBtn"/);
-  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261030-ehsan-presence2"/);
+  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261031-ehsan-model-hierarchy1"/);
 });
 
 test('لوحة المدير تعرض المتواجدين وآخر الحسابات والنشاط مع تحديث الحضور', () => {
@@ -145,4 +145,40 @@ test('تسجيل دخول المدير من المتصفح يتحقق من دو�
   assert.match(contentAdmin, /profile\.role!=="admin"/);
   assert.match(contentAdmin, /result\.browserAdmin=true/);
   assert.doesNotMatch(contentAdmin, /auth=body\.auth\|\|\{\}/);
+});
+
+test('إضافة النماذج متدرجة حسب المستوى والمادة والنظام والسنة والفترة وتقبل JSON لصقًا أو ملفًا', () => {
+  const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  const miniApp = fs.readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
+
+  for (const id of ['jsonModelLevel', 'jsonModelSubject', 'jsonModelCourseWrap', 'jsonModelSystem', 'jsonModelYear', 'jsonModelName', 'jsonModelFile']) {
+    assert.ok(adminHtml.includes('id="' + id + '"'), 'missing model import control: ' + id);
+  }
+  assert.ok(adminHtml.includes('const subjects = (state.subjects || []).filter((row) => Number(row.levelId) === levelId);'));
+  assert.ok(adminHtml.includes("$('jsonModelSystem').disabled = true;"));
+  assert.ok(adminHtml.includes("$('jsonModelYear').disabled = !valid;"));
+  assert.ok(adminHtml.includes("$('jsonModelName').disabled = !target.value;"));
+  assert.ok(adminHtml.includes("$('jsonModelInput').disabled = !valid || activeMode !== 'paste';"));
+  assert.ok(adminHtml.includes("startPage('النماذج والأسئلة'" ) && adminHtml.includes("+ toolbar();"));
+  assert.ok(adminHtml.includes('if (courses.length === 1)'));
+  assert.ok(adminHtml.includes('else if (courses.length > 1)'));
+  for (const system of ['العام', 'الموازي', 'النفقة', '__other__']) {
+    assert.ok(adminHtml.includes('value="' + system + '"'), 'missing study system: ' + system);
+  }
+  for (const period of ['الفترة الأولى','الفترة الثانية','الفترة الثالثة','الفترة الرابعة','الفترة الخامسة']) {
+    assert.ok(adminHtml.includes(period), 'missing model period: ' + period);
+  }
+  assert.ok(adminHtml.includes('Array.from({length: 6}, (_, index) => 2020 + index)'));
+  assert.ok(adminHtml.includes('data-model-input-mode="paste"'));
+  assert.ok(adminHtml.includes('data-model-input-mode="file"'));
+  assert.ok(adminHtml.includes('id="jsonModelFile" type="file" disabled accept=".json,application/json"'));
+  assert.ok(adminHtml.includes('reader.readAsText(file)'));
+  assert.ok(adminHtml.includes("levelId, courseId, sourceYear, sourceSystem, sourceAudience: 'طلاب', sourceFile, questions"));
+  assert.ok(adminApi.includes('sourceYear < 2020 || sourceYear > 2025'));
+  assert.ok(adminApi.includes("const allowedPeriods = ['الفترة الأولى', 'الفترة الثانية', 'الفترة الثالثة', 'الفترة الرابعة', 'الفترة الخامسة']"));
+  assert.ok(adminApi.includes('const sourceExists = (catalog.models || []).some('));
+  assert.ok(adminApi.includes("'MODEL_EXISTS'"));
+  assert.ok(miniApp.includes('audience && audience !== "طلاب"'));
+  assert.ok(!adminHtml.includes('const courseOptions=(state.courses||[]).map'));
 });

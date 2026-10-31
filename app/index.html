@@ -1548,7 +1548,7 @@ function cleanModelLabel(value) {
     raw = raw.slice(tagged[0].length);
   }
   const name = (raw.replace(/\.json$/i, "").replace(/الاختبار\s+النهائي/gi, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim() || "نموذج") +
-    (audience ? "_" + audience : "");
+    (audience && audience !== "طلاب" ? "_" + audience : "");
   return system ? "النظام " + system + " - " + name : name;
 }
 function openSavedQuestions() {
@@ -1897,7 +1897,7 @@ function initBrowse() {
     const overlay = $("adminPanelOverlay");
     const frame = $("adminPanelFrame");
     const browserAdmin = studentSession?.profile?.role === "admin" || String(studentSession?.profile?.role || "").toLowerCase() === "admin";
-    const target = browserAdmin ? "admin-students.html?v=20261030b" : "admin.html?v=20261028c";
+    const target = browserAdmin ? "admin-students.html?v=20261031-ehsan-model-hierarchy1" : "admin.html?v=20261031-ehsan-model-hierarchy1";
     if (frame.dataset.panelTarget !== target) {
       frame.src = target;
       frame.dataset.panelTarget = target;
@@ -1911,7 +1911,7 @@ function initBrowse() {
   }
   $("adminPanelClose").addEventListener("click", closeAdminPanel);
   $("adminPanelOverlay").addEventListener("click", (event) => { if (event.target === $("adminPanelOverlay")) closeAdminPanel(); });
-  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261030-ehsan-presence2"; });
+  $("drawerAdminBtn").addEventListener("click", () => { closeDrawer(); window.location.href = "admin.html?v=20261031-ehsan-model-hierarchy1"; });
   const telegramWebApp = window.Telegram && window.Telegram.WebApp;
   if (telegramWebApp) telegramWebApp.ready();
   waitForTelegramServerless().then((readyApp) => {

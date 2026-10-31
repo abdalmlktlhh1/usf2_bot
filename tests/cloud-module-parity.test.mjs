@@ -41,7 +41,7 @@ test('إعلانات الإنجازات وبلاغات الأسئلة لا تق�
 
 test('المسار القديم لإدارة الطلاب يحوّل إلى اللوحة الحالية ولا يعرض موافقات التسجيل', () => {
   const legacyRoute = read('app/admin-students.html');
-  assert.match(legacyRoute, /location\.replace\('admin\.html\?v=20261030-ehsan-presence2'\)/);
+  assert.match(legacyRoute, /location\.replace\('admin\.html\?v=20261031-ehsan-model-hierarchy1'\)/);
   assert.doesNotMatch(legacyRoute, /طلبات التسجيل المنتظرة|اعتماد حساب المتقدمين|api\("pending"\)/);
 });
 

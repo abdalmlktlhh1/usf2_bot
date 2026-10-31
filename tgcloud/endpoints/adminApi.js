@@ -220,6 +220,22 @@ async function rowsForDashboard(auth) {
   const visibleModels = [...modelMap.values()].sort((a, b) => {
     const levelA = levelByCourse.get(a.courseId) || 0, levelB = levelByCourse.get(b.courseId) || 0;
     if (levelA !== levelB) return levelA - levelB;
+    const courseOrder = a.courseId - b.courseId;
+    if (courseOrder) return courseOrder;
+    const yearOrder = b.sourceYear - a.sourceYear;
+    if (yearOrder) return yearOrder;
+    const systemRank = (file) => {
+      const system = String(file || '').match(/⟦نظام:([^⟧]+)⟧/)?.[1] || '';
+      return ({ العام: 0, الموازي: 1, النفقة: 2 })[system] ?? 9;
+    };
+    const periodRank = (file) => {
+      const period = String(file || '').match(/الفترة (الأولى|الثانية|الثالثة|الرابعة|الخامسة)/)?.[1] || '';
+      return ({ الأولى: 1, الثانية: 2, الثالثة: 3, الرابعة: 4, الخامسة: 5 })[period] ?? 99;
+    };
+    const systemOrder = systemRank(a.sourceFile) - systemRank(b.sourceFile);
+    if (systemOrder) return systemOrder;
+    const periodOrder = periodRank(a.sourceFile) - periodRank(b.sourceFile);
+    if (periodOrder) return periodOrder;
     const keyA = `${a.courseId}|${a.sourceYear}|${a.sourceFile}`;
     const keyB = `${b.courseId}|${b.sourceYear}|${b.sourceFile}`;
     const orderA = modelOrderByKey.get(`${levelA}:${keyA}`), orderB = modelOrderByKey.get(`${levelB}:${keyB}`);
@@ -228,7 +244,7 @@ async function rowsForDashboard(auth) {
       if (orderB == null) return -1;
       if (orderA !== orderB) return orderA - orderB;
     }
-    return a.courseId - b.courseId || b.sourceYear - a.sourceYear || a.sourceFile.localeCompare(b.sourceFile, 'ar');
+    return a.sourceFile.localeCompare(b.sourceFile, 'ar');
   });
 
   let visibleModerators = [];

@@ -1,13 +1,16 @@
-name: Deploy Supabase content-admin
+name: Deploy Supabase student transfer functions
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/student-level-transfer
 
 permissions:
   contents: read
 
 jobs:
-  deploy-content-admin:
+  deploy-transfer-functions:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,3 +25,8 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy content-admin --project-ref jrrsnpijbizbwxopyvam --no-verify-jwt
+
+      - name: Deploy browser-student-data
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy browser-student-data --project-ref jrrsnpijbizbwxopyvam --no-verify-jwt

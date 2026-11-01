@@ -581,7 +581,9 @@ textarea{min-height:86px;resize:vertical}
     if (!(state?.user?.isOwner || can('students.read'))) return '<div class="panel empty">لا تملك صلاحية عرض حسابات الطلاب.</div>';
     const rows = filtered(state.students || [], (r) => [r.displayName,r.username,r.levelName].join(' '));
     return startPage('إدارة الطلاب والحسابات','تابع حسابات الطلاب وحالة الدخول. إيقاف الحساب يمنع الدخول من Telegram والمتصفح دون حذف النتائج أو سجل التقدم.','تحديث','refresh',false) +
-      toolbar() + table(['الطالب','اسم دخول المتصفح','المستوى','طريقة الربط','الحالة','تاريخ التسجيل','الإجراء'], rows.map((r) => {
+      toolbar() +
+      (state?.user?.isOwner ? '<section class="panel" style="margin:12px 0"><h3>طلبات نقل المستوى</h3>' + ((state.levelTransferRequests||[]).length ? '<div class="table-wrap"><table><thead><tr><th>الطالب</th><th>المستوى الحالي</th><th>المستوى المطلوب</th><th>السبب</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody>' + state.levelTransferRequests.map(request=>'<tr><td><b>' + escapeHtml(request.studentName) + '</b><div class="hint">' + escapeHtml(request.username||"") + '</div></td><td>' + escapeHtml(request.currentLevelName) + '</td><td>' + escapeHtml(request.requestedLevelName) + '</td><td>' + escapeHtml(request.reason||"—") + '</td><td>' + (request.status==="pending"?"قيد المراجعة":request.status==="approved"?"تمت الموافقة":"مرفوض") + '</td><td>' + (request.status==="pending" ? '<div class="row-actions"><button class="btn small primary" data-action="reviewStudentLevelRequest" data-id="' + escapeHtml(request.id) + '" data-status="approved">موافقة ونقل</button><button class="btn small danger" data-action="reviewStudentLevelRequest" data-id="' + escapeHtml(request.id) + '" data-status="rejected">رفض</button></div>' : "—") + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="muted">لا توجد طلبات نقل مسجلة.</p>') + '</section>' : '') +
+      table(['الطالب','اسم دخول المتصفح','المستوى','طريقة الربط','الحالة','تاريخ التسجيل','الإجراء'], rows.map((r) => {
         const suspended = ['suspended','blocked'].includes(String(r.approvalStatus));
         const badge = suspended ? '<span class="status off">موقوف</span>' : '<span class="status">نشط</span>';
         const action = state?.user?.isOwner || can('students.manage')
@@ -590,7 +592,8 @@ textarea{min-height:86px;resize:vertical}
         return '<tr><td><b>' + escapeHtml(r.displayName || 'طالب') + '</b></td><td dir="ltr">' + escapeHtml(r.username || '—') +
           '</td><td>' + escapeHtml(r.levelName || 'لم يحدد') + '</td><td>' + (r.telegramLinked ? 'مرتبط بتيليجرام' : 'حساب متصفح') +
           '</td><td>' + badge + '</td><td>' + escapeHtml(r.createdAt ? new Date(r.createdAt).toLocaleDateString('ar-YE') : '—') +
-          '</td><td><div class="row-actions">' + action + '</div></td></tr>';
+          '</td><td><div class="row-actions">' + action +
+          (state?.user?.isOwner ? '<select class="student-level-select" data-student-level="' + escapeHtml(r.userId) + '" aria-label="المستوى الجديد للطالب">' + (state.levels||[]).filter(level=>level.isActive!==false).map(level=>'<option value="' + escapeHtml(level.id) + '"' + (Number(level.id)===Number(r.levelId)?' selected':'') + '>' + escapeHtml(level.name) + '</option>').join('') + '</select>' + button('نقل للمستوى','moveStudentLevel',r.userId,'secondary') : '') + '</div></td></tr>';
       }), 'لا توجد حسابات طلاب مسجلة بعد.');
   }
   function renderLogs() {
@@ -655,6 +658,9 @@ textarea{min-height:86px;resize:vertical}
       backgroundTasks.push(api('listStudents').then((value) => {
         state.students = Array.isArray(value.students) ? value.students : [];
       }).catch((error) => { showNotice('تعذر تحميل حسابات الطلاب: ' + error.message); }));
+      if (result.user.isOwner) backgroundTasks.push(api('listStudentLevelRequests').then((value) => {
+        state.levelTransferRequests = Array.isArray(value.requests) ? value.requests : [];
+      }).catch((error) => { showNotice('تعذر تحميل طلبات نقل المستوى: ' + error.message); }));
     }
     // Do not block the first paint on optional admin-only data.
     // These requests update their own state when they finish and never hold the dashboard spinner.
@@ -1201,6 +1207,29 @@ textarea{min-height:86px;resize:vertical}
     const btn=event.target.closest('[data-action]');if(!btn)return;
     const action=btn.dataset.action;const id=btn.dataset.id;
 
+    if (action === 'moveStudentLevel') {
+      if(!state?.user?.isOwner){showNotice('نقل الطلاب متاح للمالك فقط.');return;}
+      const student=(state.students||[]).find(row=>String(row.userId)===String(id));
+      const select=document.querySelector('[data-student-level="'+CSS.escape(String(id))+'"]');
+      const levelId=Number(select?.value);
+      if(!student||!Number.isSafeInteger(levelId)||levelId<=0){showNotice('اختر مستوى صحيحًا.');return;}
+      if(levelId===Number(student.levelId)){showNotice('الطالب مسجل بالفعل في هذا المستوى.');return;}
+      if(!confirm('نقل '+(student.displayName||student.username||'الطالب')+' إلى '+idName(state.levels,levelId)+'؟'))return;
+      btn.disabled=true;
+      try{await api('moveStudentLevel',{userId:student.userId,levelId});showNotice('تم نقل الطالب إلى '+idName(state.levels,levelId)+'.',true);await reload(true);}
+      catch(error){showNotice(error.message||'تعذر نقل الطالب.');btn.disabled=false;}
+      return;
+    }
+    if (action === 'reviewStudentLevelRequest') {
+      if(!state?.user?.isOwner){showNotice('مراجعة الطلبات متاحة للمالك فقط.');return;}
+      const requestId=id,status=btn.dataset.status;
+      const promptNote=prompt(status==='approved'?'ملاحظة الموافقة (اختياري)':'سبب الرفض (اختياري)')||'';
+      if(!confirm(status==='approved'?'الموافقة على الطلب ونقل الطالب إلى المستوى المطلوب؟':'رفض طلب نقل المستوى؟'))return;
+      btn.disabled=true;
+      try{await api('reviewStudentLevelRequest',{requestId,status,reviewNote:promptNote});showNotice(status==='approved'?'تمت الموافقة ونقل الطالب.':'تم رفض الطلب.',true);await reload(true);}
+      catch(error){showNotice(error.message||'تعذرت مراجعة الطلب.');btn.disabled=false;}
+      return;
+    }
     if (action === 'toggleStudent') {
       const student = (state?.students || []).find((row) => String(row.userId) === String(id));
       if (!student || !(state?.user?.isOwner || can('students.manage'))) { showNotice('إيقاف الحسابات متاح للمدير المصرّح به فقط.'); return; }

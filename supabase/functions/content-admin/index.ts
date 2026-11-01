@@ -431,6 +431,61 @@ async function listStudents(auth:any) {
   }))};
 }
 
+async function moveStudentLevel(auth:any,p:any) {
+  if(!auth?.isOwner) throw bad("نقل الطلاب بين المستويات متاح للمدير الرئيسي فقط.","FORBIDDEN",403);
+  const userId=clean(p.userId,"معرّف الحساب",64);
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)) throw bad("معرّف حساب الطالب غير صالح.");
+  const levelId=Number(p.levelId);
+  if(!Number.isSafeInteger(levelId)||levelId<=0) throw bad("المستوى المطلوب غير صالح.");
+  const {data:target,error:targetError}=await supabase.from("app_student_profiles").select("user_id,username,display_name,role,level_id").eq("user_id",userId).maybeSingle();
+  if(targetError) throw targetError;
+  if(!target||target.role!=="student") throw bad("حساب الطالب غير موجود.","NOT_FOUND",404);
+  const {data:level,error:levelError}=await supabase.from("academic_levels").select("id,name").eq("id",levelId).eq("is_active",true).maybeSingle();
+  if(levelError) throw levelError; if(!level) throw bad("المستوى المطلوب غير متاح.");
+  if(Number(target.level_id)===levelId) return {ok:true,unchanged:true,userId,levelId,levelName:level.name};
+  const {data,error}=await supabase.from("app_student_profiles").update({level_id:levelId,updated_at:new Date().toISOString()}).eq("user_id",userId).eq("role","student").select("user_id,username,display_name,level_id").single();
+  if(error) throw error;
+  const {error:cancelError}=await supabase.from("student_level_transfer_requests")
+    .update({status:"cancelled",review_note:"أُلغي الطلب بسبب نقل الطالب مباشرة من الإدارة.",reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()})
+    .eq("user_id",userId).eq("status","pending");
+  if(cancelError) throw cancelError;
+  return {ok:true,userId:data.user_id,username:data.username,displayName:data.display_name,levelId:Number(data.level_id),levelName:level.name,previousLevelId:Number(target.level_id)};
+}
+
+async function listStudentLevelRequests(auth:any) {
+  if(!auth?.isOwner) throw bad("عرض طلبات النقل متاح للمدير الرئيسي فقط.","FORBIDDEN",403);
+  const {data:requests,error}=await supabase.from("student_level_transfer_requests")
+    .select("id,user_id,current_level_id,requested_level_id,reason,status,review_note,created_at,reviewed_at,reviewed_by")
+    .order("created_at",{ascending:false}).limit(500);
+  if(error) throw error;
+  const userIds=[...new Set((requests||[]).map((r:any)=>r.user_id))];
+  const levelIds=[...new Set((requests||[]).flatMap((r:any)=>[r.current_level_id,r.requested_level_id]).filter(Boolean).map(Number))];
+  const [{data:students,error:studentsError},{data:levels,error:levelsError}]=await Promise.all([
+    userIds.length?supabase.from("app_student_profiles").select("user_id,username,display_name,telegram_id").in("user_id",userIds):Promise.resolve({data:[],error:null}),
+    levelIds.length?supabase.from("academic_levels").select("id,name").in("id",levelIds):Promise.resolve({data:[],error:null})
+  ]);
+  if(studentsError) throw studentsError; if(levelsError) throw levelsError;
+  const studentMap=new Map((students||[]).map((r:any)=>[r.user_id,r]));
+  const levelMap=new Map((levels||[]).map((r:any)=>[Number(r.id),r.name]));
+  return {requests:(requests||[]).map((r:any)=>{const student:any=studentMap.get(r.user_id)||{};return {...r,studentName:student.display_name||student.username||"طالب",username:student.username||"",telegramId:student.telegram_id, currentLevelName:levelMap.get(Number(r.current_level_id))||"غير محدد",requestedLevelName:levelMap.get(Number(r.requested_level_id))||"غير معروف"};})};
+}
+
+async function reviewStudentLevelRequest(auth:any,p:any) {
+  if(!auth?.isOwner) throw bad("مراجعة طلبات النقل متاحة للمدير الرئيسي فقط.","FORBIDDEN",403);
+  const requestId=clean(p.requestId,"طلب النقل",64);
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) throw bad("معرّف طلب النقل غير صالح.");
+  const status=String(p.status||"");
+  if(!["approved","rejected"].includes(status)) throw bad("قرار المراجعة غير صالح.");
+  const {data,error}=await supabase.rpc("review_student_level_transfer",{
+    p_request_id:requestId,
+    p_status:status,
+    p_reviewed_by:auth.userId||null,
+    p_review_note:clean(p.reviewNote||"","ملاحظة المراجعة",500,false)
+  });
+  if(error) throw error;
+  return {ok:true,request:data};
+}
+
 async function setStudentStatus(auth:any,p:any) {
   if(!auth?.isOwner)throw bad("إيقاف حسابات الطلاب متاح للمدير الرئيسي فقط.","FORBIDDEN",403);
   const userId=clean(p.userId,"معرّف الحساب",64);
@@ -498,6 +553,9 @@ Deno.serve(async (req: Request) => {
     } else if(action==="questionsPage") result=await questionsPage(auth,p);
     else if(action==="listStudents") result=await listStudents(auth);
     else if(action==="setStudentStatus") result=await setStudentStatus(auth,p);
+    else if(action==="moveStudentLevel") result=await moveStudentLevel(auth,p);
+    else if(action==="listStudentLevelRequests") result=await listStudentLevelRequests(auth);
+    else if(action==="reviewStudentLevelRequest") result=await reviewStudentLevelRequest(auth,p);
     else if(action==="saveLevel") result=await saveLevel(auth,p);
     else if(action==="setLevelActive") result=await setLevelActive(auth,p);
     else if(action==="saveSubject") result=await saveSubject(auth,p);

@@ -2,8 +2,8 @@ import { EndpointError } from 'sdk';
 import { supabaseStudentRequest } from '../lib/supabase-students.js';
 import { fetch } from 'sdk/fetch';
 
-const ALLOWED_ACTIONS = new Set(['appAuth', 'me', 'leaderboard', 'startAttempt', 'saveProgress', 'completeAttempt', 'abandonAttempt']);
-const SHARED_ACCOUNT_ACTIONS = new Set(['me', 'startAttempt', 'saveProgress', 'completeAttempt', 'abandonAttempt']);
+const ALLOWED_ACTIONS = new Set(['appAuth', 'me', 'leaderboard', 'startAttempt', 'saveProgress', 'completeAttempt', 'abandonAttempt', 'levelTransferOptions', 'requestLevelTransfer']);
+const SHARED_ACCOUNT_ACTIONS = new Set(['me', 'startAttempt', 'saveProgress', 'completeAttempt', 'abandonAttempt', 'levelTransferOptions', 'requestLevelTransfer']);
 const BROWSER_STUDENT_DATA_URL = 'https://jrrsnpijbizbwxopyvam.supabase.co/functions/v1/browser-student-data';
 
 export default async function (input = {}, ctx) {

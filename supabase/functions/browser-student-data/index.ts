@@ -63,6 +63,34 @@ Deno.serve(async (req: Request) => {
     ? "telegram_id,course_id,source_year,source_file"
     : "user_id,course_id,source_year,source_file";
   const accountMatches = (query: any) => query.eq(accountColumn, accountId);
+  if (action === "levelTransferOptions") {
+   const [{data:levels,error:levelsError},{data:requests,error:requestsError}] = await Promise.all([
+    db.from("academic_levels").select("id,name,sort_order").eq("is_active",true).order("sort_order"),
+    db.from("student_level_transfer_requests").select("id,current_level_id,requested_level_id,reason,status,review_note,created_at,reviewed_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(10)
+   ]);
+   if(levelsError) throw levelsError; if(requestsError) throw requestsError;
+   return json({levels:levels||[],requests:requests||[],currentLevelId:profile.level_id});
+  }
+  if (action === "requestLevelTransfer") {
+   if(profile.role!=="student") throw fail("هذه الخدمة مخصصة لحسابات الطلاب.",403);
+   const requestedLevelId=int(p.requestedLevelId,-1);
+   if(requestedLevelId<1) throw fail("اختر المستوى المطلوب.");
+   if(Number(profile.level_id)===requestedLevelId) throw fail("أنت مسجل بالفعل في هذا المستوى.");
+   const {data:targetLevel,error:targetError}=await db.from("academic_levels").select("id").eq("id",requestedLevelId).eq("is_active",true).maybeSingle();
+   if(targetError) throw targetError; if(!targetLevel) throw fail("المستوى المطلوب غير متاح.");
+   const reason=str(p.reason,500);
+   const {data:existing,error:existingError}=await db.from("student_level_transfer_requests").select("id").eq("user_id",user.id).eq("status","pending").maybeSingle();
+   if(existingError) throw existingError;
+   if(existing) throw fail("لديك طلب نقل قيد المراجعة بالفعل.");
+   const {data:request,error}=await db.from("student_level_transfer_requests").insert({
+    user_id:user.id,current_level_id:profile.level_id,requested_level_id:requestedLevelId,reason,status:"pending"
+   }).select("id,current_level_id,requested_level_id,reason,status,created_at").single();
+   if(error) {
+    if(error.code==="23505") throw fail("لديك طلب نقل قيد المراجعة بالفعل.");
+    throw error;
+   }
+   return json({ok:true,request});
+  }
   if (action === "me") {
    const [{ data: progress, error: pe }, { data: attempts, error: ae }] = await Promise.all([
     accountMatches(db.from(progressTable).select("*")).order("updated_at", { ascending: false }).limit(100),

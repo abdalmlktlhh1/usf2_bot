@@ -206,3 +206,28 @@ test('حذف النموذج يحذف أسئلته المحددة فقط ويحا
   assert.ok(!dbDelete.includes('student_attempts").delete()'));
   assert.ok(!apiDelete.includes("supabaseContentRequest('setModelActive'"));
 });
+
+
+test('نقل المستوى المباشر وطلبات نقل الطلاب محصورة بالمالك مع حفظ تاريخ الطلب', () => {
+  const read = (path) => fs.readFileSync(new URL(path, import.meta.url), 'utf8');
+  const edge = read('../supabase/functions/content-admin/index.ts');
+  const browser = read('../supabase/functions/browser-student-data/index.ts');
+  const telegram = read('../tgcloud/endpoints/studentApi.js');
+  const adminApi = read('../tgcloud/endpoints/adminApi.js');
+  const adminUi = read('../app/admin.html');
+  const studentUi = read('../app/index.html');
+  assert.match(edge, /async function moveStudentLevel\(auth:any,p:any\)/);
+  assert.match(edge, /if\(!auth\?\.isOwner\) throw bad\("نقل الطلاب بين المستويات/);
+  assert.match(edge, /async function reviewStudentLevelRequest\(auth:any,p:any\)/);
+  assert.match(edge, /if\(!auth\?\.isOwner\) throw bad\("مراجعة طلبات النقل/);
+  assert.match(browser, /action === "requestLevelTransfer"/);
+  assert.match(browser, /student_level_transfer_requests/);
+  assert.match(browser, /action === "levelTransferOptions"/);
+  assert.match(telegram, /requestLevelTransfer/);
+  assert.match(adminApi, /action === 'moveStudentLevel'/);
+  assert.match(adminApi, /action === 'reviewStudentLevelRequest'/);
+  assert.match(adminUi, /data-action="reviewStudentLevelRequest"/);
+  assert.match(adminUi, /data-student-level/);
+  assert.match(studentUi, /طلب النقل إلى مستوى آخر/);
+  assert.match(studentUi, /لن يتغير مستواك حتى تتم مراجعته/);
+});

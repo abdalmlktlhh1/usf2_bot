@@ -1082,6 +1082,22 @@ export default async function (input = {}, ctx) {
     if (!auth.isOwner && !allowed(auth, 'students.read')) fail('لا تملك صلاحية عرض حسابات الطلاب.', 'FORBIDDEN');
     return await supabaseContentRequest('listStudents', {}, auth);
   }
+  if (action === 'moveStudentLevel') {
+    if (!auth.isOwner) fail('نقل الطلاب بين المستويات متاح للمدير الرئيسي فقط.', 'FORBIDDEN');
+    const result = await supabaseContentRequest('moveStudentLevel', {userId:input.userId,levelId:input.levelId}, auth);
+    await audit(auth, 'student_level_changed', 'student', 0, {username:result.username,previousLevelId:result.previousLevelId,levelId:result.levelId,levelName:result.levelName});
+    return result;
+  }
+  if (action === 'listStudentLevelRequests') {
+    if (!auth.isOwner) fail('عرض طلبات النقل متاح للمدير الرئيسي فقط.', 'FORBIDDEN');
+    return await supabaseContentRequest('listStudentLevelRequests', {}, auth);
+  }
+  if (action === 'reviewStudentLevelRequest') {
+    if (!auth.isOwner) fail('مراجعة طلبات النقل متاحة للمدير الرئيسي فقط.', 'FORBIDDEN');
+    const result = await supabaseContentRequest('reviewStudentLevelRequest', input, auth);
+    await audit(auth, result.request.status === 'approved' ? 'student_level_request_approved' : 'student_level_request_rejected', 'student_level_request', 0, {requestId:result.request.id,userId:result.request.user_id,levelId:result.request.requested_level_id});
+    return result;
+  }
   if (action === 'setStudentStatus') {
     if (!auth.isOwner) fail('إيقاف حسابات الطلاب متاح للمدير الرئيسي فقط.', 'FORBIDDEN');
     const result = await supabaseContentRequest('setStudentStatus', {

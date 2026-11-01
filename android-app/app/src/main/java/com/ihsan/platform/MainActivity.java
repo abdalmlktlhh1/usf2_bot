@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.CookieManager;
-import android.webkit.SafeBrowsingResponse;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -28,7 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.webkit.SslError;
+import android.net.http.SslError;
 
 import java.util.Locale;
 
@@ -110,7 +109,6 @@ public final class MainActivity extends Activity {
         root.addView(progressBar, progressParams);
         setContentView(root);
 
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
 
         if (savedInstanceState != null && webView.restoreState(savedInstanceState) != null) {
             // The previous page state has been restored.

@@ -411,7 +411,6 @@ async function analyzeModelJson(auth:any,p:any) {
 async function importModelJson(auth:any,p:any) {
   requireFeature(auth,"modelImport");
   requirePermission(auth,"questions.write");
-  requirePermission(auth,"questions.publish");
   const courseId=positive(p.courseId,"المقرر");
   requireCourse(auth,courseId);
   const sourceYear=Number(p.sourceYear);

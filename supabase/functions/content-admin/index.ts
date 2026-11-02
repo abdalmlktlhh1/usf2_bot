@@ -370,6 +370,8 @@ async function approveQuestionChange(auth:any,p:any) {
 async function analyzeModelJson(auth:any,p:any) {
   requireFeature(auth,"assistant");
   requirePermission(auth,"questions.write");
+  const courseId=positive(p.courseId,"المقرر");
+  requireCourse(auth,courseId);
   const questions=Array.isArray(p.questions)?p.questions:[];
   if(!questions.length||questions.length>500)throw bad("عدد الأسئلة يجب أن يكون من 1 إلى 500.");
   const apiKey=Deno.env.get("GEMINI_API_KEY");
@@ -385,7 +387,7 @@ async function analyzeModelJson(auth:any,p:any) {
     let correctIndex:any=null;
     if(rawAnswer!==undefined&&rawAnswer!==null&&rawAnswer!==""){
       correctIndex=typeof rawAnswer==="string"&&!/^\d+$/.test(rawAnswer)?options.findIndex((v:string)=>v===rawAnswer.trim()):Number(rawAnswer);
-      if(!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=options.length)correctIndex=null;
+      if(!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=options.length)throw bad("الإجابة المحددة في السؤال رقم "+(index+1)+" غير صالحة؛ اتركها فارغة إن لم تكن معروفة.");
     }
     return {questionText,options,correctIndex,explanation:String(raw.explanation??raw.explain??"").slice(0,1500),difficulty:["easy","normal","hard"].includes(raw.difficulty)?raw.difficulty:"normal"};
   });
@@ -422,12 +424,7 @@ async function importModelJson(auth:any,p:any) {
   const sourceFile="⟦نظام:"+sourceSystem.replace(/[⟦⟧]/g,"")+"⟧⟦الفئة:"+sourceAudience+"⟧ "+modelName;
   if(sourceFile.length>500) throw bad("اسم النموذج مع النظام والفئة أطول من المسموح.");
   if(!Array.isArray(p.questions)||p.questions.length<1||p.questions.length>500) throw bad("عدد الأسئلة يجب أن يكون من 1 إلى 500.");
-  let sourceQuestions=p.questions;
-  if(p.useAI===true){
-    requireFeature(auth,"assistant");
-    const aiResult=await analyzeModelJson(auth,{questions:sourceQuestions});
-    sourceQuestions=aiResult.questions;
-  }
+  const sourceQuestions=p.questions;
   const actorId=Number(auth.telegramId);
   if(!Number.isSafeInteger(actorId)||actorId<=0) throw bad("تعذر تحديد حساب المدير الذي يجري الاستيراد.");
   const {data:course,error:courseError}=await supabase.from("academic_courses").select("id,subject_id,is_active").eq("id",courseId).maybeSingle();
@@ -445,7 +442,14 @@ async function importModelJson(auth:any,p:any) {
     if(Number(existingCount)===p.questions.length) return {imported:0,skipped:true,existing:Number(existingCount),courseId,sourceYear,sourceFile};
     throw bad("يوجد نموذج بالاسم نفسه يحتوي عددًا مختلفًا من الأسئلة؛ أوقفت الاستيراد لتجنب تكرار أو خلط البيانات.","MODEL_EXISTS");
   }
-  const rows=sourceQuestions.map((raw:any,index:number)=>{
+  let questionsToInsert=sourceQuestions;
+  if(p.useAI===true){
+    requireFeature(auth,"assistant");
+    const aiResult=await analyzeModelJson(auth,{courseId,questions:sourceQuestions});
+    if(!Array.isArray(aiResult?.questions)||aiResult.questions.length!==sourceQuestions.length)throw bad("لم يُرجع المساعد الذكي عدد الأسئلة نفسه؛ لم يبدأ الاستيراد.","AI_INVALID_RESULT");
+    questionsToInsert=aiResult.questions;
+  }
+  const rows=questionsToInsert.map((raw:any,index:number)=>{
     if(!raw||typeof raw!=="object"||Array.isArray(raw)) throw bad("بيانات السؤال رقم "+(index+1)+" غير صالحة.");
     const questionText=clean(raw.questionText??raw.question??raw.text,"نص السؤال "+(index+1),3000);
     const rawOptions=raw.options??raw.choices;
@@ -476,13 +480,9 @@ async function importModelJson(auth:any,p:any) {
       updated_by:actorId,
     };
   });
-  const inserted:any[]=[];
-  for(let start=0;start<rows.length;start+=100){
-    const {data,error}=await supabase.from("academic_questions").insert(rows.slice(start,start+100)).select("id");
-    if(error)throw error;
-    inserted.push(...(data||[]));
-  }
-  return {imported:inserted.length||rows.length,skipped:false,courseId,sourceYear,sourceFile,awaitingAnswer:rows.filter((row:any)=>row.correct_index===null).length};
+  const {data:inserted,error}=await supabase.from("academic_questions").insert(rows).select("id");
+  if(error)throw error;
+  return {imported:inserted?.length??rows.length,skipped:false,courseId,sourceYear,sourceFile,awaitingAnswer:rows.filter((row:any)=>row.correct_index===null).length};
 }
 
 async function questionHistory(auth:any) {

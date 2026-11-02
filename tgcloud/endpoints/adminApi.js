@@ -303,6 +303,7 @@ async function rowsForDashboard(auth) {
   return {
     user: { telegramId: auth.telegramId, displayName: auth.actorName, isOwner: auth.isOwner, roleKey: auth.roleKey },
     permissions: auth.permissions,
+    moderatorFeatures: auth.featureFlags || {},
     permissionLabels: PERMISSION_LABELS,
     rolePresets: Object.entries(ROLE_PRESETS).map(([key, value]) => ({ key, permissions: value })),
     levels: canSeeLevels || canSeeSubjects || canSeeCourses || canSeeQuestions ? visibleLevels : [],

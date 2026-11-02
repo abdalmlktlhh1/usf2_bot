@@ -11,6 +11,7 @@ import {
 } from '../schema.js';
 import { supabaseContentRequest } from '../lib/supabase-content.js';
 import { allBotMenuItems, ensureDefaultBotMenu, validateBotMenuItem } from '../lib/bot-menu.js';
+import { getModeratorFeatures } from '../lib/adminAccess.js';
 
 const OWNER_ID = 5187563344;
 const PERMISSIONS = [
@@ -20,6 +21,11 @@ const PERMISSIONS = [
   'questions.read', 'questions.write', 'questions.publish', 'questions.delete',
   'statistics.read', 'audit.read', 'students.read',
 ];
+const FEATURE_LABELS = {
+  quizCorrection: 'تحديد الإجابة الصحيحة من صفحة الاختبار',
+  assistant: 'استخدام المساعد الذكي لتحليل وتصنيف الأسئلة',
+  modelImport: 'إضافة النماذج عبر JSON أو ملف',
+};
 const ROLE_PRESETS = {
   academic_manager: [
     'levels.read', 'levels.write', 'subjects.read', 'subjects.write',
@@ -74,6 +80,12 @@ function allowed(auth, permission) {
 function requirePermission(auth, permission) {
   if (!allowed(auth, permission)) fail('لا تملك الصلاحية اللازمة لهذه العملية.', 'FORBIDDEN');
 }
+function requireFeature(auth, featureKey) {
+  if (!Object.hasOwn(FEATURE_LABELS, featureKey)) fail('الميزة المطلوبة غير معروفة.');
+  if (!auth.isOwner && auth.featureFlags?.[featureKey] !== true) {
+    fail('لم يفعّل المدير الرئيسي هذه الميزة لحسابك: ' + FEATURE_LABELS[featureKey] + '.', 'FEATURE_DISABLED');
+  }
+}
 function requireGlobalCatalogScope(auth) {
   if (!auth.isOwner && !auth.scopeCourseIds.includes('*')) {
     fail('هذه العملية تتطلب نطاق إدارة جميع المقررات.', 'SCOPE_FORBIDDEN');
@@ -96,7 +108,7 @@ async function authorize(ctx) {
   if (telegramId === OWNER_ID) {
     return {
       telegramId, actorName, isOwner: true, permissions: ['*'],
-      scopeCourseIds: ['*'], roleKey: 'owner',
+      scopeCourseIds: ['*'], roleKey: 'owner', featureFlags: await getModeratorFeatures(telegramId),
     };
   }
   const row = await db.select().from(moderators)
@@ -112,6 +124,7 @@ async function authorize(ctx) {
     roleKey: row.roleKey,
     permissions: uniqueStrings(row.permissions),
     scopeCourseIds: Array.isArray(row.scopeCourseIds) ? row.scopeCourseIds : [],
+    featureFlags: await getModeratorFeatures(telegramId),
   };
 }
 async function audit(auth, action, entityType, entityId = 0, details = {}) {
@@ -250,6 +263,9 @@ async function rowsForDashboard(auth) {
   let visibleModerators = [];
   if (auth.isOwner) {
     visibleModerators = await db.select().from(moderators).orderBy(desc(moderators.createdAt)).all();
+    visibleModerators = await Promise.all(visibleModerators.map(async (row) => ({
+      ...row, featureFlags: await getModeratorFeatures(row.telegramId),
+    })));
   }
 
   let logs = [];
@@ -415,9 +431,9 @@ async function submitQuestionApproval(auth, input) {
   const questionText = cleanString(input.questionText, 'نص السؤال', 3000);
   const sourceFile = cleanString(input.sourceFile, 'اسم النموذج', 500);
   const options = Array.isArray(input.options) ? input.options.map((value) => typeof value === 'string' ? value.trim() : '') : [];
-  const correctIndex = Number(input.correctIndex);
+  const correctIndex = input.correctIndex == null || input.correctIndex === '' ? null : Number(input.correctIndex);
   if (options.length < 2 || options.length > 8 || options.some((value) => !value || value.length > 500)) fail('يجب إدخال خيارين إلى ثمانية خيارات غير فارغة.');
-  if (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= options.length) fail('حدد الإجابة الصحيحة قبل إرسال السؤال للاعتماد.');
+  if (correctIndex !== null && (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= options.length)) fail('الإجابة الصحيحة المحددة غير صالحة.');
   let beforeSnapshot = null;
   let baseUpdatedAt = '';
   if (id) {
@@ -716,10 +732,21 @@ async function saveModerator(auth, input) {
       displayName, roleKey, permissions, scopeCourseIds, isActive: data.isActive, updatedAt: now,
     },
   }).run();
+  const previousFlags = await getModeratorFeatures(telegramId);
+  const requestedFlags = input.featureFlags && typeof input.featureFlags === 'object' ? input.featureFlags : {};
+  const featureFlags = Object.fromEntries(Object.keys(FEATURE_LABELS).map((key) => [
+    key, Object.hasOwn(requestedFlags, key) ? requestedFlags[key] === true : previousFlags[key] === true,
+  ]));
+  await db.insert(siteSettings).values({
+    key: 'moderator_features:' + telegramId, value: featureFlags, updatedAt: now, updatedBy: auth.telegramId,
+  }).onConflictDoUpdate({
+    target: siteSettings.key,
+    set: { value: featureFlags, updatedAt: now, updatedBy: auth.telegramId },
+  }).run();
   await audit(auth, current ? 'update' : 'create', 'moderator', telegramId, {
-    displayName, roleKey, permissions, scopeCourseIds, isActive: data.isActive,
+    displayName, roleKey, permissions, scopeCourseIds, featureFlags, isActive: data.isActive,
   });
-  return { telegramId, displayName, roleKey, permissions, scopeCourseIds, isActive: data.isActive };
+  return { telegramId, displayName, roleKey, permissions, scopeCourseIds, featureFlags, isActive: data.isActive };
 }
 async function setModeratorActive(auth, input) {
   if (!auth.isOwner) fail('إدارة المشرفين مخصصة للمدير الرئيسي فقط.', 'FORBIDDEN');
@@ -858,11 +885,14 @@ async function recordBackupExport(auth, input) {
 }
 
 async function importModelJson(auth, input) {
-  if (!auth.isOwner) fail('استيراد النماذج من JSON مخصص للمدير الرئيسي فقط.', 'FORBIDDEN');
+  requireFeature(auth, 'modelImport');
+  requirePermission(auth, 'questions.write');
+  requirePermission(auth, 'questions.publish');
   const levelId = positiveId(input.levelId, 'المستوى');
   const courseId = positiveId(input.courseId, 'المقرر');
+  requireCourseScope(auth, courseId);
   const sourceYear = Number(input.sourceYear);
-  if (!Number.isSafeInteger(sourceYear) || sourceYear < 2020 || sourceYear > 2025) fail('سنة النموذج يجب أن تكون من 2020 إلى 2025.');
+  if (!Number.isSafeInteger(sourceYear) || sourceYear < 0 || sourceYear > 2100) fail('سنة النموذج غير صالحة.');
   const sourceSystem = cleanString(input.sourceSystem, 'النظام الدراسي', 80);
   if (sourceSystem === '__other__') fail('اكتب اسم النظام الآخر بدلًا من ترك الخيار الافتراضي.');
   const sourceAudience = cleanString(input.sourceAudience, 'الفئة المستهدفة', 20);
@@ -871,6 +901,13 @@ async function importModelJson(auth, input) {
   if (!allowedPeriods.includes(modelPeriod)) fail('فترة النموذج غير صالحة؛ اختر فترة من الأولى إلى الخامسة.');
   const sourceFile = encodeModelSourceFile(modelPeriod, sourceSystem, sourceAudience);
   if (!Array.isArray(input.questions) || input.questions.length < 1 || input.questions.length > 500) fail('عدد الأسئلة يجب أن يكون من 1 إلى 500.');
+  let sourceQuestions = input.questions;
+  if (input.useAI === true) {
+    requireFeature(auth, 'assistant');
+    const aiResult = await supabaseContentRequest('analyzeModelJson', { questions: sourceQuestions }, auth);
+    if (!Array.isArray(aiResult?.questions) || aiResult.questions.length !== sourceQuestions.length) fail('لم يُرجع المساعد الذكي عدد الأسئلة نفسه؛ لم يبدأ الاستيراد.', 'AI_INVALID_RESULT');
+    sourceQuestions = aiResult.questions;
+  }
   const catalog = await supabaseContentRequest('dashboard', {}, auth);
   const selectedCourse = (catalog.courses || []).find((row) => Number(row.id) === courseId);
   if (!selectedCourse) fail('المقرر المحدد غير موجود.', 'NOT_FOUND');
@@ -882,7 +919,7 @@ async function importModelJson(auth, input) {
   if (sourceExists) fail('يوجد نموذج مسجل مسبقًا لهذه المادة والنظام والسنة والفترة. لن نكرر الأسئلة داخله.', 'MODEL_EXISTS');
   const selectedSubject = (catalog.subjects || []).find((row) => Number(row.id) === Number(selectedCourse.subjectId));
   if (!selectedSubject || Number(selectedSubject.levelId) !== levelId) fail('المقرر المختار لا يتبع المستوى المحدد.', 'COURSE_LEVEL_MISMATCH');
-  const normalized = input.questions.map((raw, index) => {
+  const normalized = sourceQuestions.map((raw, index) => {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) fail('بيانات السؤال رقم ' + (index + 1) + ' غير صالحة.');
     const questionText = cleanString(raw.questionText ?? raw.question ?? raw.text, 'نص السؤال ' + (index + 1), 3000);
     const rawOptions = raw.options ?? raw.choices;
@@ -890,11 +927,14 @@ async function importModelJson(auth, input) {
     const options = rawOptions.map((option) => cleanString(typeof option === 'string' ? option : (option?.text ?? option?.label ?? option?.value), 'الخيار', 500)).filter(Boolean);
     if (options.length < 2 || options.length > 8) fail('السؤال رقم ' + (index + 1) + ' يجب أن يحتوي من خيارين إلى 8 خيارات.');
     const answer = raw.correctIndex ?? raw.correctAnswer ?? raw.answerIndex ?? raw.answer;
-    let correctIndex = typeof answer === 'string' && !/^\d+$/.test(answer)
-      ? options.findIndex((option) => option === answer.trim()) : Number(answer);
-    if (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= options.length) fail('الإجابة الصحيحة للسؤال رقم ' + (index + 1) + ' غير صالحة؛ استخدم فهرسًا يبدأ من 0 أو نص الخيار.');
+    let correctIndex = answer == null || answer === '' ? null : (typeof answer === 'string' && !/^\d+$/.test(answer)
+      ? options.findIndex((option) => option === answer.trim()) : Number(answer));
+    if (correctIndex !== null && (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= options.length)) fail('الإجابة الصحيحة للسؤال رقم ' + (index + 1) + ' غير صالحة؛ استخدم فهرسًا يبدأ من 0 أو نص الخيار.');
+    const classification = typeof raw.classification === 'string' ? raw.classification.trim().slice(0, 160) : '';
+    const reviewFlags = Array.isArray(raw.reviewFlags) ? raw.reviewFlags.filter(v => typeof v === 'string').slice(0, 8) : [];
+    if (classification) reviewFlags.push('تصنيف مقترح بالذكاء الاصطناعي: ' + classification);
     return {
-      courseId, sourceYear, sourceFile, questionText, options, correctIndex,
+      courseId, sourceYear, sourceFile, questionText, options, correctIndex, reviewFlags,
       explanation: String(raw.explanation ?? raw.explain ?? '').slice(0, 1500),
       difficulty: ['easy', 'normal', 'hard'].includes(raw.difficulty) ? raw.difficulty : 'normal',
       sortOrder: Number.isSafeInteger(Number(raw.sortOrder)) && Number(raw.sortOrder) >= 0 ? Number(raw.sortOrder) : index + 1,
@@ -919,6 +959,25 @@ export default async function (input = {}, ctx) {
 
   if (action === 'checkAccess') {
     return { allowed: true, isOwner: auth.isOwner, telegramId: auth.telegramId };
+  }
+  if (action === 'quizCapabilities') {
+    return {
+      allowed: true, isOwner: auth.isOwner,
+      featureFlags: auth.featureFlags || {},
+      canCorrect: auth.isOwner || (auth.featureFlags?.quizCorrection === true && allowed(auth, 'questions.write')),
+    };
+  }
+  if (action === 'setQuestionCorrectAnswer') {
+    requireFeature(auth, 'quizCorrection');
+    requirePermission(auth, 'questions.write');
+    const courseId = positiveId(input.courseId, 'المقرر');
+    requireCourseScope(auth, courseId);
+    const questionId = cleanString(input.questionId, 'معرّف السؤال', 300);
+    const correctIndex = Number(input.correctIndex);
+    if (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex > 7) fail('الإجابة المحددة غير صالحة.');
+    const result = await supabaseContentRequest('setQuestionCorrectAnswer', { courseId, questionId, correctIndex }, auth);
+    await audit(auth, 'set_correct_answer', 'question', result.id || 0, { courseId, questionId, correctIndex });
+    return result;
   }
   if (action === 'getMaintenance') {
     if (!auth.isOwner) fail('إعداد الصيانة مخصص للمدير الرئيسي فقط.', 'FORBIDDEN');
@@ -1104,6 +1163,12 @@ export default async function (input = {}, ctx) {
   if (action === 'moveCourseWithinLevel') return moveCourseWithinLevel(auth, input);
   if (action === 'setCourseActive') return setCourseActive(auth, input);
   if (action === 'saveQuestion') return saveQuestion(auth, input);
+  if (action === 'analyzeModelJson') {
+    requireFeature(auth, 'assistant');
+    requirePermission(auth, 'questions.write');
+    if (!Array.isArray(input.questions) || input.questions.length < 1 || input.questions.length > 500) fail('عدد الأسئلة يجب أن يكون من 1 إلى 500.');
+    return await supabaseContentRequest('analyzeModelJson', { questions: input.questions }, auth);
+  }
   if (action === 'importModelJson') return importModelJson(auth, input);
   if (action === 'setQuestionActive') return setQuestionActive(auth, input);
   if (action === 'updateModel') return updateModel(auth, input);

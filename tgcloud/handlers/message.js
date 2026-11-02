@@ -26,7 +26,7 @@ function hasPermission(auth, permission) {
 }
 function canUpload(auth) {
   return Boolean(auth && auth.featureFlags?.modelImport === true &&
-    hasPermission(auth, 'questions.write') && hasPermission(auth, 'questions.publish'));
+    hasPermission(auth, 'questions.write'));
 }
 async function beginQuiz(chatId, userId) {
   const sessionId = makeSessionId(chatId, userId);

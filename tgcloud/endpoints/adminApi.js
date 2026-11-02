@@ -932,6 +932,7 @@ export default async function (input = {}, ctx) {
     return {
       allowed: true, isOwner: auth.isOwner,
       featureFlags: auth.featureFlags || {},
+      scopeCourseIds: auth.scopeCourseIds || [],
       canCorrect: auth.isOwner || (auth.featureFlags?.quizCorrection === true && allowed(auth, 'questions.write')),
     };
   }

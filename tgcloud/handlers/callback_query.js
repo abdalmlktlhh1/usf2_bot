@@ -148,7 +148,7 @@ export default async function (query) {
       chat_id: chatId,
       message_id: messageId,
       text: 'بوت الاختبارات 🎓\n\nمنصة نماذج الاختبارات لكلية الشريعة والقانون — جامعة صنعاء.',
-      reply_markup: await getBotMenuKeyboard(isAdmin),
+      reply_markup: await getBotMenuKeyboard(isAdmin, null, userId),
     });
     return;
   }

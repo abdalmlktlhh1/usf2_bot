@@ -50,6 +50,11 @@ function has(auth:any, permission:string) { return !!auth?.isOwner || auth?.perm
 function globalScope(auth:any) { return !!auth?.isOwner || auth?.scopeCourseIds?.includes("*"); }
 function courseScope(auth:any, id:number) { return !!auth?.isOwner || auth?.scopeCourseIds?.includes("*") || auth?.scopeCourseIds?.map(Number).includes(Number(id)); }
 function requirePermission(auth:any, permission:string) { if (!has(auth, permission)) throw bad("لا تملك الصلاحية اللازمة لهذه العملية.", "FORBIDDEN", 403); }
+function requireFeature(auth:any, featureKey:string) {
+  if (!auth?.isOwner && auth?.featureFlags?.[featureKey] !== true) {
+    throw bad("لم يفعّل المدير الرئيسي هذه الميزة لحسابك.", "FEATURE_DISABLED", 403);
+  }
+}
 function requireGlobal(auth:any) { if (!globalScope(auth)) throw bad("هذه العملية تتطلب نطاق إدارة جميع المقررات.", "SCOPE_FORBIDDEN", 403); }
 function requireCourse(auth:any, id:number) { if (!courseScope(auth,id)) throw bad("هذا المقرر خارج نطاق صلاحياتك.", "SCOPE_FORBIDDEN", 403); }
 function positive(value:any, label:string) { const n=Number(value); if(!Number.isSafeInteger(n)||n<=0) throw bad(label+" غير صالح."); return n; }
@@ -238,14 +243,40 @@ async function saveQuestion(auth:any,p:any,approvedByReviewer=false) {
   const questionText=clean(p.questionText,"نص السؤال",3000);
   const options=Array.isArray(p.options)?p.options.map((v:any)=>typeof v==="string"?v.trim():""):[];
   if(options.length<2||options.length>8||options.some((v:string)=>!v||v.length>500))throw bad("يجب أن يحتوي السؤال على خيارين إلى ثمانية خيارات، وألا يكون أي خيار فارغًا أو طويلًا جدًا.");
-  const correctIndex=Number(p.correctIndex); if(!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=options.length)throw bad("حدد الإجابة الصحيحة من بين الخيارات.");
+  const correctIndex=p.correctIndex==null||p.correctIndex===""?null:Number(p.correctIndex);
+  if(correctIndex!==null&&(!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=options.length))throw bad("الإجابة الصحيحة المحددة غير صالحة.");
   const explanation=clean(p.explanation,"التوضيح",1500,false),difficulty=["easy","normal","hard"].includes(p.difficulty)?p.difficulty:"normal",sortOrder=Number.isSafeInteger(Number(p.sortOrder))?Number(p.sortOrder):0;
   const now=new Date().toISOString();
-  const sourceYear=Number.isInteger(Number(p.sourceYear))?Number(p.sourceYear):new Date().getFullYear(); const sourceFile=clean(p.sourceFile||"لوحة الإدارة","اسم النموذج",500); const sourceIndex=Number.isSafeInteger(Number(p.sourceIndex))?Number(p.sourceIndex):sortOrder+1; const data={course_id:courseId,question_text:questionText,options,correct_index:correctIndex,explanation,difficulty,source_year:sourceYear,source_file:sourceFile,source_index:sourceIndex,sort_order:sortOrder,updated_by:Number(auth.telegramId)||null,updated_at:now};
+  const sourceYear=Number.isInteger(Number(p.sourceYear))?Number(p.sourceYear):new Date().getFullYear(); const sourceFile=clean(p.sourceFile||"لوحة الإدارة","اسم النموذج",500); const sourceIndex=Number.isSafeInteger(Number(p.sourceIndex))?Number(p.sourceIndex):sortOrder+1; const reviewFlags=Array.isArray(p.reviewFlags)?p.reviewFlags.filter((v:any)=>typeof v==="string").slice(0,8):[];
+  const data={course_id:courseId,question_text:questionText,options,correct_index:correctIndex,explanation,difficulty,source_year:sourceYear,source_file:sourceFile,source_index:sourceIndex,sort_order:sortOrder,review_flags:reviewFlags,updated_by:Number(auth.telegramId)||0,updated_at:now};
   let result;
   if(p.id){const id=positive(p.id,"السؤال");const {data:current,error}=await supabase.from("academic_questions").select("*").eq("id",id).maybeSingle();if(error)throw error;if(!current)throw bad("السؤال غير موجود.","NOT_FOUND",404);requireCourse(auth,Number(current.course_id));const {data:row,error:saveError}=await supabase.from("academic_questions").update(data).eq("id",id).select("*").single();if(saveError)throw saveError;result=row;}
   else {const active=has(auth,"questions.publish")&&p.isActive!==false;const {data:row,error}=await supabase.from("academic_questions").insert({...data,source_question_id:"admin:"+crypto.randomUUID(),source_year:sourceYear,source_file:sourceFile,source_index:sourceIndex,review_flags:[],review_status:"approved",is_active:active,created_by:Number(auth.telegramId)}).select("*").single();if(error)throw error;result=row;}
   return {saved:mapQuestion(result)};
+}
+async function setQuestionCorrectAnswer(auth:any,p:any) {
+  requireFeature(auth,"quizCorrection");
+  requirePermission(auth,"questions.write");
+  const courseId=positive(p.courseId,"المقرر");
+  requireCourse(auth,courseId);
+  const questionRef=clean(p.questionId,"معرّف السؤال",300);
+  let query=supabase.from("academic_questions").select("id,course_id,options,source_question_id");
+  if(/^db:\d+$/.test(questionRef)) query=query.eq("id",Number(questionRef.slice(3)));
+  else if(/^\d+$/.test(questionRef)) query=query.eq("id",Number(questionRef));
+  else query=query.eq("source_question_id",questionRef);
+  const {data:current,error}=await query.maybeSingle();
+  if(error)throw error;
+  if(!current||Number(current.course_id)!==courseId)throw bad("السؤال غير موجود في هذا المقرر.","NOT_FOUND",404);
+  const options=Array.isArray(current.options)?current.options:[];
+  const correctIndex=Number(p.correctIndex);
+  if(!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=options.length||!String(options[correctIndex]??"").trim())throw bad("اختر إجابة صحيحة من خيارات السؤال.");
+  const actorId=Number(auth.telegramId)||0,now=new Date().toISOString();
+  const {data,error:saveError}=await supabase.from("academic_questions")
+    .update({correct_index:correctIndex,review_status:"approved",updated_by:actorId,updated_at:now})
+    .eq("id",Number(current.id)).eq("course_id",courseId)
+    .select("id,course_id,source_question_id,correct_index,updated_at").single();
+  if(saveError)throw saveError;
+  return {saved:true,id:Number(data.id),courseId,questionId:data.source_question_id||"db:"+data.id,correctIndex,correctAnswer:options[correctIndex],updatedAt:data.updated_at};
 }
 async function setQuestionActive(auth:any,p:any) {
   const id=positive(p.id,"السؤال");
@@ -336,9 +367,53 @@ async function approveQuestionChange(auth:any,p:any) {
   const approvedPayload={...payload,isActive:payload.id?payload.isActive:true};
   return await saveQuestion(auth,approvedPayload,true);
 }
+async function analyzeModelJson(auth:any,p:any) {
+  requireFeature(auth,"assistant");
+  requirePermission(auth,"questions.write");
+  const questions=Array.isArray(p.questions)?p.questions:[];
+  if(!questions.length||questions.length>500)throw bad("عدد الأسئلة يجب أن يكون من 1 إلى 500.");
+  const apiKey=Deno.env.get("GEMINI_API_KEY");
+  if(!apiKey)throw bad("مفتاح المساعد الذكي غير مضبوط على الخادم.","AI_NOT_CONFIGURED",503);
+  const normalized=questions.map((raw:any,index:number)=>{
+    if(!raw||typeof raw!=="object"||Array.isArray(raw))throw bad("بيانات السؤال رقم "+(index+1)+" غير صالحة.");
+    const questionText=clean(raw.questionText??raw.question??raw.text,"نص السؤال "+(index+1),3000);
+    const rawOptions=raw.options??raw.choices;
+    if(!Array.isArray(rawOptions)||rawOptions.length<2||rawOptions.length>8)throw bad("خيارات السؤال رقم "+(index+1)+" غير صالحة.");
+    const options=rawOptions.map((v:any)=>typeof v==="string"?v.trim():String(v?.text??v?.label??v?.value??"").trim());
+    if(options.some((v:string)=>!v||v.length>500))throw bad("يوجد خيار فارغ أو طويل في السؤال رقم "+(index+1)+".");
+    const rawAnswer=raw.correctIndex??raw.correctAnswer??raw.answerIndex??raw.answer;
+    let correctIndex:any=null;
+    if(rawAnswer!==undefined&&rawAnswer!==null&&rawAnswer!==""){
+      correctIndex=typeof rawAnswer==="string"&&!/^\d+$/.test(rawAnswer)?options.findIndex((v:string)=>v===rawAnswer.trim()):Number(rawAnswer);
+      if(!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=options.length)correctIndex=null;
+    }
+    return {questionText,options,correctIndex,explanation:String(raw.explanation??raw.explain??"").slice(0,1500),difficulty:["easy","normal","hard"].includes(raw.difficulty)?raw.difficulty:"normal"};
+  });
+  const prompt="صنّف أسئلة اختيار من متعدد في مقرر جامعي قانوني. أعد كائن JSON فقط بالشكل {\"classifications\":[{\"index\":1,\"classification\":\"موضوع قصير بالعربية\"}]}. أعد تصنيفًا موضوعيًا قصيرًا لكل سؤال وفق نصه وخياراته، ولا تكتب إجابات ولا تغيّر أي سؤال أو خيار. ستتم المحافظة على نصوص الأسئلة والخيارات ومفاتيح الإجابة من المصدر خارج النموذج. إذا لم يتضح الموضوع فاكتب \"غير مصنف\".\n\n"+JSON.stringify(normalized.map((q:any,i:number)=>({index:i+1,question:q.questionText,options:q.options})));
+  const model=(Deno.env.get("GEMINI_MODEL")||"gemini-3.8-flash").trim();
+  let response:Response;
+  try{
+    response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(apiKey),{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseMimeType:"application/json",temperature:0.1,maxOutputTokens:Math.min(12000,Math.max(1000,questions.length*24))}})
+    });
+  }catch{throw bad("تعذر الاتصال بخدمة المساعد الذكي.","AI_UNAVAILABLE",503);}
+  if(!response.ok)throw bad("تعذر تحليل النموذج بالذكاء الاصطناعي. تحقق من إعدادات الخدمة ثم أعد المحاولة.","AI_REQUEST_FAILED",502);
+  const payload=await response.json().catch(()=>({}));
+  const output=(payload?.candidates?.[0]?.content?.parts||[]).map((part:any)=>part.text||"").join("").trim();
+  let parsed:any;
+  try{parsed=JSON.parse(output.replace(/^\uFEFF/,"").replace(/^\s*\x60{3}(?:json)?\s*/i,"").replace(/\s*\x60{3}\s*$/,""));}catch{throw bad("أعاد المساعد الذكي تنسيقًا غير صالح؛ لم تُحفظ أي أسئلة.","AI_INVALID_RESULT",502);}
+  const classified=Array.isArray(parsed?.classifications)?parsed.classifications:[];
+  const byIndex=new Map<number,string>();
+  for(const item of classified){const ix=Number(item?.index);const label=typeof item?.classification==="string"?item.classification.trim().slice(0,160):"";if(Number.isInteger(ix)&&ix>=1&&ix<=normalized.length&&label)byIndex.set(ix,label);}
+  return {questions:normalized.map((q:any,i:number)=>({...q,classification:byIndex.get(i+1)||"غير مصنف"})),classifiedCount:byIndex.size,model};
+}
 async function importModelJson(auth:any,p:any) {
-  if (!auth?.isOwner) throw bad("استيراد النماذج مخصص للمدير الرئيسي فقط.", "FORBIDDEN", 403);
+  requireFeature(auth,"modelImport");
+  requirePermission(auth,"questions.write");
+  requirePermission(auth,"questions.publish");
   const courseId=positive(p.courseId,"المقرر");
+  requireCourse(auth,courseId);
   const sourceYear=Number(p.sourceYear);
   if(!Number.isSafeInteger(sourceYear)||sourceYear<0||sourceYear>2100) throw bad("سنة النموذج غير صالحة.");
   const sourceSystem=clean(p.sourceSystem,"النظام الدراسي",80);
@@ -348,6 +423,12 @@ async function importModelJson(auth:any,p:any) {
   const sourceFile="⟦نظام:"+sourceSystem.replace(/[⟦⟧]/g,"")+"⟧⟦الفئة:"+sourceAudience+"⟧ "+modelName;
   if(sourceFile.length>500) throw bad("اسم النموذج مع النظام والفئة أطول من المسموح.");
   if(!Array.isArray(p.questions)||p.questions.length<1||p.questions.length>500) throw bad("عدد الأسئلة يجب أن يكون من 1 إلى 500.");
+  let sourceQuestions=p.questions;
+  if(p.useAI===true){
+    requireFeature(auth,"assistant");
+    const aiResult=await analyzeModelJson(auth,{questions:sourceQuestions});
+    sourceQuestions=aiResult.questions;
+  }
   const actorId=Number(auth.telegramId);
   if(!Number.isSafeInteger(actorId)||actorId<=0) throw bad("تعذر تحديد حساب المدير الذي يجري الاستيراد.");
   const {data:course,error:courseError}=await supabase.from("academic_courses").select("id,subject_id,is_active").eq("id",courseId).maybeSingle();
@@ -365,7 +446,7 @@ async function importModelJson(auth:any,p:any) {
     if(Number(existingCount)===p.questions.length) return {imported:0,skipped:true,existing:Number(existingCount),courseId,sourceYear,sourceFile};
     throw bad("يوجد نموذج بالاسم نفسه يحتوي عددًا مختلفًا من الأسئلة؛ أوقفت الاستيراد لتجنب تكرار أو خلط البيانات.","MODEL_EXISTS");
   }
-  const rows=p.questions.map((raw:any,index:number)=>{
+  const rows=sourceQuestions.map((raw:any,index:number)=>{
     if(!raw||typeof raw!=="object"||Array.isArray(raw)) throw bad("بيانات السؤال رقم "+(index+1)+" غير صالحة.");
     const questionText=clean(raw.questionText??raw.question??raw.text,"نص السؤال "+(index+1),3000);
     const rawOptions=raw.options??raw.choices;
@@ -373,9 +454,9 @@ async function importModelJson(auth:any,p:any) {
     const options=rawOptions.map((v:any)=>typeof v==="string"?v.trim():String(v?.text??v?.label??v?.value??"").trim());
     if(options.length<2||options.length>8||options.some((v:string)=>!v||v.length>500)) throw bad("السؤال رقم "+(index+1)+" يجب أن يحتوي من خيارين إلى 8 خيارات غير فارغة.");
     const rawAnswer=raw.correctIndex??raw.correctAnswer??raw.answerIndex??raw.answer;
-    const correctIndex=typeof rawAnswer==="string"&&!/^\d+$/.test(rawAnswer)
-      ? options.findIndex((v:string)=>v===rawAnswer.trim()) : Number(rawAnswer);
-    if(!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=options.length) throw bad("الإجابة الصحيحة للسؤال رقم "+(index+1)+" غير صالحة.");
+    const correctIndex=rawAnswer==null||rawAnswer===""?null:(typeof rawAnswer==="string"&&!/^\d+$/.test(rawAnswer)
+      ? options.findIndex((v:string)=>v===rawAnswer.trim()) : Number(rawAnswer));
+    if(correctIndex!==null&&(!Number.isInteger(correctIndex)||correctIndex<0||correctIndex>=options.length)) throw bad("الإجابة الصحيحة للسؤال رقم "+(index+1)+" غير صالحة.");
     return {
       course_id:courseId,
       source_question_id:"admin:"+crypto.randomUUID(),
@@ -388,7 +469,7 @@ async function importModelJson(auth:any,p:any) {
       source_year:sourceYear,
       source_file:sourceFile,
       source_index:index+1,
-      review_flags:[],
+      review_flags:typeof raw.classification==="string"&&raw.classification.trim()?["تصنيف مقترح بالذكاء الاصطناعي: "+raw.classification.trim().slice(0,160)]:[],
       review_status:"approved",
       sort_order:index+1,
       is_active:true,
@@ -396,9 +477,13 @@ async function importModelJson(auth:any,p:any) {
       updated_by:actorId,
     };
   });
-  const {data,error}=await supabase.from("academic_questions").insert(rows).select("id");
-  if(error) throw error;
-  return {imported:data?.length??rows.length,skipped:false,courseId,sourceYear,sourceFile};
+  const inserted:any[]=[];
+  for(let start=0;start<rows.length;start+=100){
+    const {data,error}=await supabase.from("academic_questions").insert(rows.slice(start,start+100)).select("id");
+    if(error)throw error;
+    inserted.push(...(data||[]));
+  }
+  return {imported:inserted.length||rows.length,skipped:false,courseId,sourceYear,sourceFile,awaitingAnswer:rows.filter((row:any)=>row.correct_index===null).length};
 }
 
 async function questionHistory(auth:any) {
@@ -429,6 +514,61 @@ async function listStudents(auth:any) {
     lastTelegramLoginAt:row.last_telegram_login_at,
     telegramLinked:row.telegram_id!=null,
   }))};
+}
+
+async function moveStudentLevel(auth:any,p:any) {
+  if(!auth?.isOwner) throw bad("نقل الطلاب بين المستويات متاح للمدير الرئيسي فقط.","FORBIDDEN",403);
+  const userId=clean(p.userId,"معرّف الحساب",64);
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)) throw bad("معرّف حساب الطالب غير صالح.");
+  const levelId=Number(p.levelId);
+  if(!Number.isSafeInteger(levelId)||levelId<=0) throw bad("المستوى المطلوب غير صالح.");
+  const {data:target,error:targetError}=await supabase.from("app_student_profiles").select("user_id,username,display_name,role,level_id").eq("user_id",userId).maybeSingle();
+  if(targetError) throw targetError;
+  if(!target||target.role!=="student") throw bad("حساب الطالب غير موجود.","NOT_FOUND",404);
+  const {data:level,error:levelError}=await supabase.from("academic_levels").select("id,name").eq("id",levelId).eq("is_active",true).maybeSingle();
+  if(levelError) throw levelError; if(!level) throw bad("المستوى المطلوب غير متاح.");
+  if(Number(target.level_id)===levelId) return {ok:true,unchanged:true,userId,levelId,levelName:level.name};
+  const {data,error}=await supabase.from("app_student_profiles").update({level_id:levelId,updated_at:new Date().toISOString()}).eq("user_id",userId).eq("role","student").select("user_id,username,display_name,level_id").single();
+  if(error) throw error;
+  const {error:cancelError}=await supabase.from("student_level_transfer_requests")
+    .update({status:"cancelled",review_note:"أُلغي الطلب بسبب نقل الطالب مباشرة من الإدارة.",reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()})
+    .eq("user_id",userId).eq("status","pending");
+  if(cancelError) throw cancelError;
+  return {ok:true,userId:data.user_id,username:data.username,displayName:data.display_name,levelId:Number(data.level_id),levelName:level.name,previousLevelId:Number(target.level_id)};
+}
+
+async function listStudentLevelRequests(auth:any) {
+  if(!auth?.isOwner) throw bad("عرض طلبات النقل متاح للمدير الرئيسي فقط.","FORBIDDEN",403);
+  const {data:requests,error}=await supabase.from("student_level_transfer_requests")
+    .select("id,user_id,current_level_id,requested_level_id,reason,status,review_note,created_at,reviewed_at,reviewed_by")
+    .order("created_at",{ascending:false}).limit(500);
+  if(error) throw error;
+  const userIds=[...new Set((requests||[]).map((r:any)=>r.user_id))];
+  const levelIds=[...new Set((requests||[]).flatMap((r:any)=>[r.current_level_id,r.requested_level_id]).filter(Boolean).map(Number))];
+  const [{data:students,error:studentsError},{data:levels,error:levelsError}]=await Promise.all([
+    userIds.length?supabase.from("app_student_profiles").select("user_id,username,display_name,telegram_id").in("user_id",userIds):Promise.resolve({data:[],error:null}),
+    levelIds.length?supabase.from("academic_levels").select("id,name").in("id",levelIds):Promise.resolve({data:[],error:null})
+  ]);
+  if(studentsError) throw studentsError; if(levelsError) throw levelsError;
+  const studentMap=new Map((students||[]).map((r:any)=>[r.user_id,r]));
+  const levelMap=new Map((levels||[]).map((r:any)=>[Number(r.id),r.name]));
+  return {requests:(requests||[]).map((r:any)=>{const student:any=studentMap.get(r.user_id)||{};return {...r,studentName:student.display_name||student.username||"طالب",username:student.username||"",telegramId:student.telegram_id, currentLevelName:levelMap.get(Number(r.current_level_id))||"غير محدد",requestedLevelName:levelMap.get(Number(r.requested_level_id))||"غير معروف"};})};
+}
+
+async function reviewStudentLevelRequest(auth:any,p:any) {
+  if(!auth?.isOwner) throw bad("مراجعة طلبات النقل متاحة للمدير الرئيسي فقط.","FORBIDDEN",403);
+  const requestId=clean(p.requestId,"طلب النقل",64);
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) throw bad("معرّف طلب النقل غير صالح.");
+  const status=String(p.status||"");
+  if(!["approved","rejected"].includes(status)) throw bad("قرار المراجعة غير صالح.");
+  const {data,error}=await supabase.rpc("review_student_level_transfer",{
+    p_request_id:requestId,
+    p_status:status,
+    p_reviewed_by:auth.userId||null,
+    p_review_note:clean(p.reviewNote||"","ملاحظة المراجعة",500,false)
+  });
+  if(error) throw error;
+  return {ok:true,request:data};
 }
 
 async function setStudentStatus(auth:any,p:any) {
@@ -498,6 +638,9 @@ Deno.serve(async (req: Request) => {
     } else if(action==="questionsPage") result=await questionsPage(auth,p);
     else if(action==="listStudents") result=await listStudents(auth);
     else if(action==="setStudentStatus") result=await setStudentStatus(auth,p);
+    else if(action==="moveStudentLevel") result=await moveStudentLevel(auth,p);
+    else if(action==="listStudentLevelRequests") result=await listStudentLevelRequests(auth);
+    else if(action==="reviewStudentLevelRequest") result=await reviewStudentLevelRequest(auth,p);
     else if(action==="saveLevel") result=await saveLevel(auth,p);
     else if(action==="setLevelActive") result=await setLevelActive(auth,p);
     else if(action==="saveSubject") result=await saveSubject(auth,p);
@@ -505,6 +648,8 @@ Deno.serve(async (req: Request) => {
     else if(action==="saveCourse") result=await saveCourse(auth,p);
     else if(action==="setCourseActive") result=await setCourseActive(auth,p);
     else if(action==="saveQuestion") result=await saveQuestion(auth,p);
+    else if(action==="setQuestionCorrectAnswer") result=await setQuestionCorrectAnswer(auth,p);
+    else if(action==="analyzeModelJson") result=await analyzeModelJson(auth,p);
     else if(action==="importModelJson") result=await importModelJson(auth,p);
     else if(action==="approveQuestionChange") result=await approveQuestionChange(auth,p);
     else if(action==="questionHistory") result=await questionHistory(auth);

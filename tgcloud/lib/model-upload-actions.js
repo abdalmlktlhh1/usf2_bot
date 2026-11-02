@@ -76,7 +76,7 @@ async function logImport(auth, result, state, useAI) {
 export async function handleModelUploadCallback(query) {
   const data = typeof query?.data === 'string' ? query.data : '';
   const isStart = data === 'menu:action:upload_model';
-  const match = /^modelupload:(cancel|level|course|system|audience|period|ai)(?::([^:]+))?$/.exec(data);
+  const match = /^modelupload:(cancel|level|course|system|year|audience|period|ai)(?::([^:]+))?$/.exec(data);
   if (!isStart && !match) return false;
 
   const chatId = query.message?.chat?.id;
@@ -158,9 +158,33 @@ export async function handleModelUploadCallback(query) {
     if (action === 'system') {
       if (state.step !== 'choose_system' || !Object.hasOwn(MODEL_UPLOAD_SYSTEMS, rawValue)) throw new Error('اختيار النظام الدراسي غير صالح.');
       const sourceSystem = MODEL_UPLOAD_SYSTEMS[rawValue];
-      await saveModelUploadState(userId, { ...state, step: 'await_year', sourceSystem });
+      await saveModelUploadState(userId, { ...state, step: 'choose_year', sourceSystem });
+      const currentYear = new Date().getFullYear();
+      const years = Array.from({ length: 12 }, (_, index) => currentYear - 6 + index)
+        .map(year => [String(year), String(year)]);
+      const rows = buttonRows(years, 'modelupload:year', 3);
+      rows.push([{ text: 'إدخال سنة أخرى', callback_data: 'modelupload:year:other' }]);
+      rows.push([{ text: 'إلغاء', callback_data: 'modelupload:cancel' }]);
       await answer(query);
-      await edit(query, 'النظام الدراسي: ' + sourceSystem + '\nأرسل سنة النموذج في رسالة منفصلة، مثل 2025 أو 2026. أرسل /cancel للإلغاء.');
+      await edit(query, 'النظام الدراسي: ' + sourceSystem + '\nاختر سنة النموذج:', rows);
+      return true;
+    }
+
+    if (action === 'year') {
+      if (state.step !== 'choose_year') throw new Error('اختر النظام الدراسي أولًا.');
+      if (rawValue === 'other') {
+        await saveModelUploadState(userId, { ...state, step: 'await_year' });
+        await answer(query);
+        await edit(query, 'أرسل سنة النموذج بالأرقام، مثل 2019 أو 2032. أرسل /cancel للإلغاء.');
+        return true;
+      }
+      const sourceYear = Number(rawValue);
+      if (!Number.isInteger(sourceYear) || sourceYear < 0 || sourceYear > 2100) throw new Error('سنة النموذج غير صالحة.');
+      await saveModelUploadState(userId, { ...state, step: 'choose_audience', sourceYear });
+      const rows = buttonRows(Object.entries(MODEL_UPLOAD_AUDIENCES).map(([key, label]) => [label, key]), 'modelupload:audience');
+      rows.push([{ text: 'إلغاء', callback_data: 'modelupload:cancel' }]);
+      await answer(query);
+      await edit(query, 'السنة: ' + sourceYear + '\nاختر الفئة المستهدفة:', rows);
       return true;
     }
 

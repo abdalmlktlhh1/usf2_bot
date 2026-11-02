@@ -144,7 +144,7 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null, userId = null
     const canManageQuestions = context && (
       context.isOwner ||
       (context.featureFlags?.modelImport === true &&
-        (context.permissions?.includes('*') || (context.permissions?.includes('questions.write') && context.permissions?.includes('questions.publish'))))
+        (context.permissions?.includes('*') || context.permissions?.includes('questions.write')))
     );
     if (canManageQuestions) rows.push([{ text: '⬆️ رفع نموذج JSON', callback_data: 'menu:action:upload_model' }]);
   }

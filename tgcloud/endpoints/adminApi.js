@@ -896,61 +896,29 @@ async function importModelJson(auth, input) {
   const sourceSystem = cleanString(input.sourceSystem, 'النظام الدراسي', 80);
   if (sourceSystem === '__other__') fail('اكتب اسم النظام الآخر بدلًا من ترك الخيار الافتراضي.');
   const sourceAudience = cleanString(input.sourceAudience, 'الفئة المستهدفة', 20);
-  const allowedPeriods = ['الفترة الأولى', 'الفترة الثانية', 'الفترة الثالثة', 'الفترة الرابعة', 'الفترة الخامسة'];
-  const modelPeriod = cleanString(input.sourceFile, 'الفترة', 80);
-  if (!allowedPeriods.includes(modelPeriod)) fail('فترة النموذج غير صالحة؛ اختر فترة من الأولى إلى الخامسة.');
-  const sourceFile = encodeModelSourceFile(modelPeriod, sourceSystem, sourceAudience);
-  if (!Array.isArray(input.questions) || input.questions.length < 1 || input.questions.length > 500) fail('عدد الأسئلة يجب أن يكون من 1 إلى 500.');
-  let sourceQuestions = input.questions;
-  const catalog = await supabaseContentRequest('dashboard', {}, auth);
-  const selectedCourse = (catalog.courses || []).find((row) => Number(row.id) === courseId);
-  if (!selectedCourse) fail('المقرر المحدد غير موجود.', 'NOT_FOUND');
-  if (selectedCourse.isActive === false) fail('لا يمكن إضافة نموذج إلى مقرر مؤرشف. فعّل المقرر أولًا.', 'COURSE_ARCHIVED');
-  const sourceExists = (catalog.models || []).some((model) =>
-    Number(model.courseId) === courseId &&
-    Number(model.sourceYear) === sourceYear &&
-    String(model.sourceFile || '') === sourceFile);
-  if (sourceExists) fail('يوجد نموذج مسجل مسبقًا لهذه المادة والنظام والسنة والفترة. لن نكرر الأسئلة داخله.', 'MODEL_EXISTS');
-  const selectedSubject = (catalog.subjects || []).find((row) => Number(row.id) === Number(selectedCourse.subjectId));
-  if (!selectedSubject || Number(selectedSubject.levelId) !== levelId) fail('المقرر المختار لا يتبع المستوى المحدد.', 'COURSE_LEVEL_MISMATCH');
-  if (input.useAI === true) {
-    requireFeature(auth, 'assistant');
-    const aiResult = await supabaseContentRequest('analyzeModelJson', { courseId, questions: sourceQuestions }, auth);
-    if (!Array.isArray(aiResult?.questions) || aiResult.questions.length !== sourceQuestions.length) fail('لم يُرجع المساعد الذكي عدد الأسئلة نفسه؛ لم يبدأ الاستيراد.', 'AI_INVALID_RESULT');
-    sourceQuestions = aiResult.questions;
+  if (!['طلاب', 'طالبات'].includes(sourceAudience)) fail('الفئة المستهدفة غير صالحة.');
+  const periods = ['الفترة الأولى', 'الفترة الثانية', 'الفترة الثالثة', 'الفترة الرابعة', 'الفترة الخامسة'];
+  const sourceFile = cleanString(input.sourceFile, 'الفترة', 80);
+  if (!periods.includes(sourceFile)) fail('فترة النموذج غير صالحة؛ اختر فترة من الأولى إلى الخامسة.');
+  if (!Array.isArray(input.questions) || input.questions.length < 1 || input.questions.length > 500) {
+    fail('عدد الأسئلة يجب أن يكون من 1 إلى 500.');
   }
-  const normalized = sourceQuestions.map((raw, index) => {
-    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) fail('بيانات السؤال رقم ' + (index + 1) + ' غير صالحة.');
-    const questionText = cleanString(raw.questionText ?? raw.question ?? raw.text, 'نص السؤال ' + (index + 1), 3000);
-    const rawOptions = raw.options ?? raw.choices;
-    if (!Array.isArray(rawOptions)) fail('خيارات السؤال رقم ' + (index + 1) + ' يجب أن تكون مصفوفة.');
-    const options = rawOptions.map((option) => cleanString(typeof option === 'string' ? option : (option?.text ?? option?.label ?? option?.value), 'الخيار', 500)).filter(Boolean);
-    if (options.length < 2 || options.length > 8) fail('السؤال رقم ' + (index + 1) + ' يجب أن يحتوي من خيارين إلى 8 خيارات.');
-    const answer = raw.correctIndex ?? raw.correctAnswer ?? raw.answerIndex ?? raw.answer;
-    let correctIndex = answer == null || answer === '' ? null : (typeof answer === 'string' && !/^\d+$/.test(answer)
-      ? options.findIndex((option) => option === answer.trim()) : Number(answer));
-    if (correctIndex !== null && (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= options.length)) fail('الإجابة الصحيحة للسؤال رقم ' + (index + 1) + ' غير صالحة؛ استخدم فهرسًا يبدأ من 0 أو نص الخيار.');
-    const classification = typeof raw.classification === 'string' ? raw.classification.trim().slice(0, 160) : '';
-    const reviewFlags = Array.isArray(raw.reviewFlags) ? raw.reviewFlags.filter(v => typeof v === 'string').slice(0, 8) : [];
-    if (classification) reviewFlags.push('تصنيف مقترح بالذكاء الاصطناعي: ' + classification);
-    return {
-      courseId, sourceYear, sourceFile, questionText, options, correctIndex, reviewFlags,
-      explanation: String(raw.explanation ?? raw.explain ?? '').slice(0, 1500),
-      difficulty: ['easy', 'normal', 'hard'].includes(raw.difficulty) ? raw.difficulty : 'normal',
-      sortOrder: Number.isSafeInteger(Number(raw.sortOrder)) && Number(raw.sortOrder) >= 0 ? Number(raw.sortOrder) : index + 1,
-    };
+  const useAI = input.useAI === true;
+  if (useAI) requireFeature(auth, 'assistant');
+
+  const result = await supabaseContentRequest('importModelJson', {
+    levelId, courseId, sourceYear, sourceSystem, sourceAudience,
+    sourceFile, questions: input.questions, useAI,
+  }, auth);
+
+  await audit(auth, result.skipped ? 'import_skipped' : 'import_json', 'model', 0, {
+    levelId, courseId, sourceYear, sourceSystem, sourceAudience, sourceFile,
+    imported: Number(result.imported || 0),
+    awaitingAnswer: Number(result.awaitingAnswer || 0),
+    useAI, skipped: result.skipped === true,
+    source: 'admin_panel',
   });
-  // Save in small concurrent batches; sequential network round-trips made larger imports
-  // exceed the Telegram WebApp callback timeout and appear to fail.
-  const batchSize = 8;
-  let imported = 0;
-  for (let start = 0; start < normalized.length; start += batchSize) {
-    const batch = normalized.slice(start, start + batchSize);
-    await Promise.all(batch.map((question) => supabaseContentRequest('saveQuestion', question, auth)));
-    imported += batch.length;
-  }
-  await audit(auth, 'import_json', 'model', 0, { levelId, courseId, sourceYear, sourceFile, sourceSystem, sourceAudience, imported });
-  return { imported, courseId, sourceYear, sourceFile };
+  return result;
 }
 
 export default async function (input = {}, ctx) {

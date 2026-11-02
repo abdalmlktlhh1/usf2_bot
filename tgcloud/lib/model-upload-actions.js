@@ -91,7 +91,7 @@ export async function handleModelUploadCallback(query) {
   try {
     const auth = await getAdminContext(userId, query.from);
     if (!canUpload(auth)) {
-      await answer(query, 'رفع النماذج غير مفعّل لحسابك، أو تنقصك صلاحية إضافة الأسئلة ونشرها.', true);
+      await answer(query, 'رفع النماذج غير مفعّل لحسابك، أو تنقصك صلاحية تعديل الأسئلة.', true);
       return true;
     }
 

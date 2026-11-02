@@ -1,6 +1,6 @@
 import { api, db } from 'sdk';
 import { eq } from 'sdk/db';
-import { quizSessions, siteSettings } from '../schema.js';
+import { quizSessions } from '../schema.js';
 import {
   homeText,
   questionText,
@@ -46,17 +46,11 @@ async function beginQuiz(chatId, userId) {
 function isJsonFile(document) {
   return String(document?.file_name || '').toLowerCase().endsWith('.json');
 }
-async function showUploadYearPrompt(chatId) {
-  await api.sendMessage({
-    chat_id: chatId,
-    text: 'تم استلام ملف الأسئلة. أرسل سنة النموذج بالأرقام، مثل 2025 أو 2026. أرسل /cancel لإلغاء العملية.',
-  });
-}
 async function handleUploadDocument(message, auth) {
   const { chat } = message;
   const document = message.document;
   if (!canUpload(auth)) {
-    await api.sendMessage({ chat_id: chat.id, text: 'رفع النماذج غير مفعّل لحسابك، أو تنقصك صلاحية إضافة الأسئلة ونشرها.' });
+    await api.sendMessage({ chat_id: chat.id, text: 'رفع النماذج غير مفعّل لحسابك، أو تنقصك صلاحية تعديل الأسئلة.' });
     return;
   }
   const state = await getModelUploadState(message.from.id);

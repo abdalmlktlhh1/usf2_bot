@@ -94,7 +94,7 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null, userId = null
   const byId = new Map(all.map((item) => [Number(item.id), item]));
   const parent = parentId == null ? null : visible.find((item) => Number(item.id) === Number(parentId));
   if (parentId != null && (!parent || parent.type !== 'submenu')) {
-    return getBotMenuKeyboard(isAdmin, null);
+    return getBotMenuKeyboard(isAdmin, null, userId);
   }
   // A nested menu is reachable only when every ancestor is active and visible to this user.
   let ancestor = parent;

@@ -888,7 +888,6 @@ async function recordBackupExport(auth, input) {
 async function importModelJson(auth, input) {
   requireFeature(auth, 'modelImport');
   requirePermission(auth, 'questions.write');
-  requirePermission(auth, 'questions.publish');
   const levelId = positiveId(input.levelId, 'المستوى');
   const courseId = positiveId(input.courseId, 'المقرر');
   requireCourseScope(auth, courseId);

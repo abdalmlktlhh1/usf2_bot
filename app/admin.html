@@ -499,7 +499,7 @@ textarea{min-height:86px;resize:vertical}
           '<div class="field full" id="jsonModelCourseWrap" hidden><label for="jsonModelCourse">المقرر</label><select id="jsonModelCourse" required disabled><option value="">اختر المقرر</option></select><p class="hint">تظهر هذه الخطوة فقط عندما تحتوي المادة على أكثر من مقرر.</p></div>' +
           '<div class="field"><label for="jsonModelSystem">3. النظام الدراسي</label><select id="jsonModelSystem" required disabled><option value="">اختر النظام</option><option value="العام">النظام العام</option><option value="الموازي">النظام الموازي</option><option value="النفقة">نظام النفقة</option><option value="__other__">＋ إضافة نظام آخر</option></select></div>' +
           '<div class="field" id="jsonModelOtherSystemWrap" hidden><label for="jsonModelOtherSystem">اسم النظام الجديد</label><input id="jsonModelOtherSystem" type="text" maxlength="80" placeholder="اكتب اسم النظام"></div>' +
-          '<div class="field"><label for="jsonModelYear">4. سنة النموذج</label><select id="jsonModelYear" required disabled><option value="">اختر السنة</option>' + yearOptions + '</select><p class="hint">السنوات المتاحة من 2020 إلى 2025.</p></div>' +
+          '<div class="field"><label for="jsonModelYear">4. سنة النموذج</label><select id="jsonModelYear" required disabled><option value="">اختر السنة</option>' + yearOptions + '</select><p class="hint">السنوات المتاحة من 2020 إلى 2030.</p></div>' +
           '<div class="field"><label for="jsonModelName">5. الفترة</label><select id="jsonModelName" required disabled><option value="">اختر الفترة</option>' + periodOptions + '</select></div>' +
           '<div class="field full"><label>6. طريقة إدخال الأسئلة</label><div class="model-input-modes"><button type="button" class="active" data-model-input-mode="paste" aria-pressed="true" disabled>⌨ لصق كود JSON</button><button type="button" data-model-input-mode="file" aria-pressed="false" disabled>↥ رفع ملف JSON</button></div>' +
             '<div id="jsonModelPastePanel"><textarea id="jsonModelInput" class="model-json-text" disabled spellcheck="false" placeholder="{&#10;  &quot;questions&quot;: [&#10;    { &quot;question&quot;: &quot;نص السؤال؟&quot;, &quot;options&quot;: [&quot;الخيار الأول&quot;, &quot;الخيار الثاني&quot;], &quot;correctAnswer&quot;: 0 }&#10;  ]&#10;}"></textarea><p class="hint">يمكن إدخال مصفوفة أسئلة مباشرة أو كائن يحتوي على questions. تبدأ فهارس الإجابة الصحيحة من 0.</p></div>' +
@@ -1287,7 +1287,7 @@ textarea{min-height:86px;resize:vertical}
       return;
     }
     if (action === 'importModelJson') {
-      if (!(state?.user?.isOwner || (can('questions.write') && can('questions.publish') && state?.moderatorFeatures?.modelImport === true))) { showNotice('استيراد النماذج غير متاح لحسابك أو لم تُفعّل ميزته من المالك.'); return; }
+      if (!(state?.user?.isOwner || (can('questions.write') && state?.moderatorFeatures?.modelImport === true))) { showNotice('استيراد النماذج غير متاح لحسابك أو لم تُفعّل ميزته من المالك.'); return; }
       const levelId = Number($('jsonModelLevel')?.value);
       const subjectId = Number($('jsonModelSubject')?.value);
       const selectedSubject = (state.subjects || []).find((row) => Number(row.id) === subjectId);

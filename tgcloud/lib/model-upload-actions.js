@@ -179,12 +179,11 @@ export async function handleModelUploadCallback(query) {
       if (state.step !== 'choose_period' || !Object.hasOwn(MODEL_UPLOAD_PERIODS, rawValue)) throw new Error('فترة النموذج غير صالحة.');
       const sourceFile = MODEL_UPLOAD_PERIODS[rawValue];
       await saveModelUploadState(userId, { ...state, step: 'choose_ai', sourceFile });
-      const rows = [[{ text: 'نعم، صنّف بالذكاء الاصطناعي', callback_data: 'modelupload:ai:1' }]];
+      const rows = [];
       if (auth.isOwner || auth.featureFlags?.assistant === true) {
-        rows.push([{ text: 'لا، استورد كما هو', callback_data: 'modelupload:ai:0' }]);
-      } else {
-        rows.push([{ text: 'استورد كما هو', callback_data: 'modelupload:ai:0' }]);
+        rows.push([{ text: 'نعم، صنّف بالذكاء الاصطناعي', callback_data: 'modelupload:ai:1' }]);
       }
+      rows.push([{ text: 'استورد كما هو', callback_data: 'modelupload:ai:0' }]);
       rows.push([{ text: 'إلغاء', callback_data: 'modelupload:cancel' }]);
       await answer(query);
       await edit(query, 'الفترة: ' + sourceFile + '\nهل تريد من المساعد الذكي تصنيف موضوعات الأسئلة؟ لن يغيّر نصوصها أو خياراتها ولن يخمّن الإجابات غير المحددة.', rows);

@@ -484,7 +484,7 @@ textarea{min-height:86px;resize:vertical}
     const periods = ['الفترة الأولى','الفترة الثانية','الفترة الثالثة','الفترة الرابعة','الفترة الخامسة'];
     const periodOptions = periods.map((period) => '<option value="' + escapeHtml(period) + '">' + escapeHtml(period) + '</option>').join('');
     let html = startPage('النماذج والأسئلة','أضف النموذج ضمن مستواه ومادته ونظامه الدراسي، ثم حدّد السنة والفترة وأدخل الأسئلة.','＋ إضافة سؤال','addQuestion',can('questions.write')) + toolbar();
-    if (state?.user?.isOwner || (can('questions.write') && can('questions.publish') && state?.moderatorFeatures?.modelImport === true)) {
+    if (state?.user?.isOwner || (can('questions.write') && state?.moderatorFeatures?.modelImport === true)) {
       html += '<section class="panel model-import-card">' +
         '<div class="model-import-head"><span class="model-import-mark">✦</span><div><h3>إضافة نموذج دراسي</h3><p>أكمل الاختيارات بالترتيب؛ ستُحفظ الأسئلة داخل المادة والنظام والسنة المحددة.</p></div></div>' +
         '<div class="model-flow">' +

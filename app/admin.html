@@ -505,7 +505,7 @@ textarea{min-height:86px;resize:vertical}
             '<div id="jsonModelPastePanel"><textarea id="jsonModelInput" class="model-json-text" disabled spellcheck="false" placeholder="{&#10;  &quot;questions&quot;: [&#10;    { &quot;question&quot;: &quot;نص السؤال؟&quot;, &quot;options&quot;: [&quot;الخيار الأول&quot;, &quot;الخيار الثاني&quot;], &quot;correctAnswer&quot;: 0 }&#10;  ]&#10;}"></textarea><p class="hint">يمكن إدخال مصفوفة أسئلة مباشرة أو كائن يحتوي على questions. تبدأ فهارس الإجابة الصحيحة من 0.</p></div>' +
             '<div id="jsonModelFilePanel" class="model-file-drop" hidden><strong>اختر ملف الأسئلة بصيغة JSON</strong><input id="jsonModelFile" type="file" disabled accept=".json,application/json"><span id="jsonModelFileName" class="model-file-name">لم يتم اختيار ملف بعد</span><p class="hint">سيُقرأ الملف داخل اللوحة ثم يُرسل محتواه للاستيراد؛ لا يتم رفعه إلى خدمة خارجية.</p></div>' +
           '</div>' +
-          '<div class="field full model-import-submit"><div class="model-import-meta">الحد الأقصى 500 سؤال في النموذج الواحد.</div><button type="button" class="btn primary" data-action="importModelJson" id="importModelJsonBtn">⬆ استيراد النموذج والأسئلة</button></div>' +
+          '<div class="field full model-import-submit"><label class="check"><input id="jsonModelAI" type="checkbox"><span>استخدام المساعد الذكي لتصنيف الأسئلة قبل الاستيراد</span></label><div class="model-import-meta">الحد الأقصى 500 سؤال في النموذج الواحد. الإجابات غير المحددة ستظل بلا إجابة حتى يحددها المشرف.</div><button type="button" class="btn primary" data-action="importModelJson" id="importModelJsonBtn">⬆ استيراد النموذج والأسئلة</button></div>' +
         '</div>' +
         '</section>';
     }
@@ -568,12 +568,12 @@ textarea{min-height:86px;resize:vertical}
   function renderModerators() {
     if (!state.canManageModerators) return '<div class="panel empty">هذه الصفحة للمدير الرئيسي فقط.</div>';
     const rows = filtered(state.moderators || [], (r) => r.displayName + ' ' + r.telegramId + ' ' + (ROLE_NAMES[r.roleKey] || r.roleKey));
-    return startPage('المشرفون والصلاحيات','أضف مشرفين وحدد صلاحياتهم والمقررات التي يمكنهم إدارتها.','＋ مشرف جديد','addModerator',true) +
-      '<div class="panel" style="margin-bottom:12px"><b>قاعدة الحماية:</b><span class="muted"> المعرّف 5187563344 هو المالك الثابت؛ لا يمكن تعطيله أو استبداله من هذه الشاشة. منح صلاحية إدارة المشرفين غير متاح لأي دور آخر.</span></div>' +
-      toolbar() + table(['المشرف','معرّف Telegram','الدور','النطاق','الصلاحيات','الحالة','الإجراءات'], rows.map((r) =>
+    return startPage('المشرفون والصلاحيات','أضف مشرفين وحدد صلاحياتهم والمقررات والميزات الإضافية التي يمكنهم استخدامها.','＋ مشرف جديد','addModerator',true) +
+      '<div class="panel" style="margin-bottom:12px"><b>قاعدة الحماية:</b><span class="muted"> المعرّف 5187563344 هو المالك الثابت؛ لا يمكن تعطيله أو استبداله من هذه الشاشة. مفاتيح الميزات لا تظهر إلا للمالك، وتُفحص على الخادم عند كل عملية.</span></div>' +
+      toolbar() + table(['المشرف','معرّف Telegram','الدور','النطاق','الصلاحيات','الميزات الإضافية','الحالة','الإجراءات'], rows.map((r) =>
         '<tr><td><b>' + escapeHtml(r.displayName) + '</b></td><td dir="ltr">' + escapeHtml(r.telegramId) + '</td><td>' +
         escapeHtml(ROLE_NAMES[r.roleKey] || r.roleKey) + '</td><td>' + (r.scopeCourseIds?.includes('*') ? 'جميع المقررات' : escapeHtml((r.scopeCourseIds || []).map(courseName).join('، ') || 'لا توجد مقررات')) +
-        '</td><td>' + escapeHtml((r.permissions || []).length) + ' صلاحية</td><td>' + status(r.isActive) + '</td><td><div class="row-actions">' +
+        '</td><td>' + escapeHtml((r.permissions || []).length) + ' صلاحية</td><td>' + Object.values(r.featureFlags || {}).filter(v => v === true).length + ' من 3</td><td>' + status(r.isActive) + '</td><td><div class="row-actions">' +
         button('تعديل','editModerator',r.telegramId) + button(r.isActive?'سحب الوصول':'تفعيل الوصول','toggleModerator',r.telegramId,r.isActive?'danger':'secondary') +
         '</div></td></tr>'));
   }
@@ -851,6 +851,7 @@ textarea{min-height:86px;resize:vertical}
     }
     if (kind === 'question') {
       const opts = Array.isArray(item.options) ? item.options : ['','','',''];
+      const selectedCorrectIndex = Number.isInteger(item.correctIndex) ? item.correctIndex : -1;
       let options = '';
       for (let i=0;i<Math.max(4,opts.length);i++) options += '<div class="field full"><label for="opt'+i+'">الخيار '+(i+1)+'</label><input id="opt'+i+'" name="opt'+i+'" value="'+escapeHtml(opts[i] || '')+'" maxlength="500"></div>';
       const subjects = state.subjects || [], courses = state.courses || [], levels = state.levels || [], models = state.models || [];
@@ -871,10 +872,10 @@ textarea{min-height:86px;resize:vertical}
         '<div class="field full"><label for="questionModel">3. نموذج المادة</label><select id="questionModel" name="questionModel" required>'+modelOptions+'</select></div>' + '<div class="field full hidden" id="newModelFields"><div class="form-grid">'+field('اسم النموذج الجديد','newModelName','نموذج جديد','text','maxlength="500" required')+field('سنة النموذج الجديد','newModelYear',new Date().getFullYear(),'number','min="0" max="2100" required')+'</div><p class="hint">سيُنشأ النموذج تحت المقرر المحدد، ثم يُحفظ السؤال داخله.</p></div>' +
         selectField('مستوى الصعوبة','difficulty',[{id:'easy',label:'سهل'},{id:'normal',label:'متوسط'},{id:'hard',label:'صعب'}],item.difficulty || 'normal') +
         '<div class="field full"><label for="questionText">4. نص السؤال</label><textarea id="questionText" name="questionText" required maxlength="3000">' + escapeHtml(item.questionText || '') + '</textarea></div>' + options +
-        '<div class="field"><label for="correctIndex">الإجابة الصحيحة</label><select id="correctIndex" name="correctIndex">' +
-        opts.map((v,i)=>'<option value="'+i+'"'+(i===Number(item.correctIndex||0)?' selected':'')+'>'+(i+1)+'. '+escapeHtml(v || 'الخيار '+(i+1))+'</option>').join('') +
-        '</select></div>' + field('ترتيب السؤال','sortOrder',item.sortOrder ?? 0,'number','min="0"') +
-        '<div class="field full"><label for="explanation">التوضيح (اختياري)</label><textarea id="explanation" name="explanation" maxlength="1500">' + escapeHtml(item.explanation || '') + '</textarea></div></div><p class="hint">التسلسل واضح: المستوى ← المادة ← النموذج ← السؤال. أدخل خيارين على الأقل وحدد الإجابة الصحيحة.</p>';
+        '<div class="field"><label for="correctIndex">الإجابة الصحيحة</label><select id="correctIndex" name="correctIndex"><option value=""'+(selectedCorrectIndex<0?' selected':'')+'>لم تحدد بعد</option>' +
+        opts.map((v,i)=>'<option value="'+i+'"'+(i===selectedCorrectIndex?' selected':'')+'>'+(i+1)+'. '+escapeHtml(v || 'الخيار '+(i+1))+'</option>').join('') +
+        '</select><p class="hint">يمكن تركها دون تحديد؛ يستطيع المشرف المخوّل تحديدها لاحقًا من صفحة الاختبار.</p></div>' + field('ترتيب السؤال','sortOrder',item.sortOrder ?? 0,'number','min="0"') +
+        '<div class="field full"><label for="explanation">التوضيح (اختياري)</label><textarea id="explanation" name="explanation" maxlength="1500">' + escapeHtml(item.explanation || '') + '</textarea></div></div><p class="hint">التسلسل واضح: المستوى ← المادة ← النموذج ← السؤال. أدخل خيارين على الأقل؛ يمكن ترك الإجابة الصحيحة فارغة للمشرف.</p>';
     }
     if (kind === 'moderator') {
       const scope = Array.isArray(item.scopeCourseIds) ? item.scopeCourseIds : [];
@@ -884,7 +885,10 @@ textarea{min-height:86px;resize:vertical}
       return '<div class="form-grid">' + field('معرّف Telegram للمشرف','telegramId',item.telegramId || '','number','required min="1"') +
         field('اسم المشرف للعرض','displayName',item.displayName || '') +
         '<div class="field full"><label for="roleKey">الدور الأساسي</label><select id="roleKey" name="roleKey">'+Object.entries(ROLE_NAMES).map(([key,label])=>'<option value="'+key+'"'+((item.roleKey||'academic_manager')===key?' selected':'')+'>'+label+'</option>').join('')+'</select><p class="hint">يمكنك تخصيص الصلاحيات يدويًا بعد اختيار الدور.</p></div>' +
-        '<div class="field full"><span class="label">الصلاحيات</span><div class="permissions">'+permissionChecks+'</div></div>' +
+        '<div class="field full"><span class="label">الصلاحيات الأساسية</span><div class="permissions">'+permissionChecks+'</div></div>' +
+        '<div class="field full"><span class="label">الميزات الإضافية (تحكم المالك)</span><div class="permissions">' +
+        [['quizCorrection','تحديد الإجابة الصحيحة من صفحة الاختبار'],['assistant','استخدام المساعد الذكي لتحليل وتصنيف الأسئلة'],['modelImport','إضافة النماذج عبر كود أو ملف JSON']].map(([key,label])=>'<label class="check"><input type="checkbox" name="featureFlag" value="'+key+'"'+(item.featureFlags?.[key]===true?' checked':'')+'><span>'+label+'</span></label>').join('') +
+        '</div><p class="hint">تفعيل الميزة الإضافية لا يمنح الصلاحيات الأساسية تلقائيًا؛ يجب أيضًا منحه صلاحيات الأسئلة والنشر بحسب العمل المطلوب.</p></div>' +
         '<div class="field full"><div class="scopes"><label><input type="checkbox" id="allScopes"'+(all?' checked':'')+'> السماح بإدارة جميع المقررات</label><p class="hint">إذا لم تُحدد جميع المقررات، اختر المقررات المسموح بها للمشرف. قائمة المقررات لا تتجاوز نطاق الإدارة الذي تمنحه.</p>' +
         '<label for="scopeCourses">المقررات المسموح بها</label><select id="scopeCourses" name="scopeCourses" multiple size="5"'+(all?' disabled':'')+'>'+(state.courses||[]).map(c=>'<option value="'+c.id+'"'+(scope.map(Number).includes(Number(c.id))?' selected':'')+'>'+escapeHtml(c.name)+'</option>').join('')+'</select></div></div></div>';
     }
@@ -971,8 +975,9 @@ textarea{min-height:86px;resize:vertical}
     if(kind==='course') return {id,subjectId:Number(fd.get('subjectId')),name:fd.get('name'),description:fd.get('description'),durationMinutes:Number(fd.get('durationMinutes')||60),passingScore:Number(fd.get('passingScore')||50),sortOrder:Number(fd.get('sortOrder')||0)};
     if(kind==='question'){
       const options=[];for(let i=0;i<8;i++){const value=String(fd.get('opt'+i)||'').trim();if(value)options.push({oldIndex:i,value})}
-      const selectedOld=Number(fd.get('correctIndex'));
-      const correctIndex=options.findIndex(o=>o.oldIndex===selectedOld);
+      const rawSelected=fd.get('correctIndex');
+      const selectedOld=rawSelected===''?-1:Number(rawSelected);
+      const correctIndex=selectedOld<0?null:options.findIndex(o=>o.oldIndex===selectedOld);
       let sourceYear=0,sourceFile='لوحة الإدارة'; const rawModel=fd.get('questionModel');
       if(rawModel==='__new__'){sourceYear=Number(fd.get('newModelYear')||new Date().getFullYear());sourceFile=String(fd.get('newModelName')||'').trim()} else if(rawModel){try{const parsed=JSON.parse(rawModel);sourceYear=Number(parsed[1]||0);sourceFile=String(parsed[2]||'لوحة الإدارة')}catch(_){}}
       return {id,courseId:Number(fd.get('courseId')),sourceYear,sourceFile,questionText:fd.get('questionText'),options:options.map(o=>o.value),correctIndex,explanation:fd.get('explanation'),difficulty:fd.get('difficulty'),sortOrder:Number(fd.get('sortOrder')||0)};
@@ -980,7 +985,7 @@ textarea{min-height:86px;resize:vertical}
     if(kind==='model') return {courseId:Number(fd.get('courseId')),sourceYear:Number(fd.get('sourceYear')||0),sourceFile:fd.get('sourceFile'),newSourceYear:Number(fd.get('newSourceYear')||0),newSourceFile:fd.get('newSourceFile')};
     if(kind==='moderator'){
       const scopeAll=$('allScopes').checked;
-      return {telegramId:Number(fd.get('telegramId')),displayName:fd.get('displayName')||'مشرف',roleKey:fd.get('roleKey'),permissions:fd.getAll('permission'),scopeCourseIds:scopeAll?['*']:Array.from($('scopeCourses').selectedOptions).map(o=>Number(o.value))};
+      return {telegramId:Number(fd.get('telegramId')),displayName:fd.get('displayName')||'مشرف',roleKey:fd.get('roleKey'),permissions:fd.getAll('permission'),scopeCourseIds:scopeAll?['*']:Array.from($('scopeCourses').selectedOptions).map(o=>Number(o.value)),featureFlags:Object.fromEntries(['quizCorrection','assistant','modelImport'].map(key=>[key,fd.getAll('featureFlag').includes(key)]))};
     }
     return {};
   }
@@ -989,8 +994,8 @@ textarea{min-height:86px;resize:vertical}
     const kind=editItem?._kind;const payload=formData();
     const actions={level:'saveLevel',subject:'saveSubject',course:'saveCourse',question:'saveQuestion',model:'renameModel',moderator:'saveModerator',botMenu:'saveBotMenuItem'};
     if(kind==='question' && (!payload.courseId || !payload.sourceFile || !payload.questionText?.trim())){showNotice('اختر المستوى والمقرر والنموذج، أو أدخل بيانات النموذج الجديد.');return;}
-    if(kind==='question' && (payload.options.length<2 || payload.correctIndex<0)){
-      showNotice('أدخل خيارين على الأقل وحدد الإجابة الصحيحة من الخيارات غير الفارغة.');return;
+    if(kind==='question' && (payload.options.length<2 || (payload.correctIndex!==null && (payload.correctIndex<0 || payload.correctIndex>=payload.options.length)))){
+      showNotice('أدخل خيارين على الأقل، ويمكن ترك الإجابة الصحيحة دون تحديد.');return;
     }
     if(kind==='model' && (!payload.sourceFile || !payload.newSourceFile || !payload.courseId)){
       showNotice('اسم النموذج والمقرر مطلوبان.');return;
@@ -1282,7 +1287,7 @@ textarea{min-height:86px;resize:vertical}
       return;
     }
     if (action === 'importModelJson') {
-      if (!state?.user?.isOwner) { showNotice('استيراد النماذج متاح للمدير الرئيسي فقط.'); return; }
+      if (!(state?.user?.isOwner || (can('questions.write') && can('questions.publish') && state?.moderatorFeatures?.modelImport === true))) { showNotice('استيراد النماذج غير متاح لحسابك أو لم تُفعّل ميزته من المالك.'); return; }
       const levelId = Number($('jsonModelLevel')?.value);
       const subjectId = Number($('jsonModelSubject')?.value);
       const selectedSubject = (state.subjects || []).find((row) => Number(row.id) === subjectId);
@@ -1302,8 +1307,8 @@ textarea{min-height:86px;resize:vertical}
       if (!['العام','الموازي','النفقة'].includes(systemChoice) && (systemChoice !== '__other__' || !sourceSystem)) {
         showNotice('اختر النظام الدراسي أو اكتب اسم النظام الآخر.'); return;
       }
-      if (!Number.isInteger(sourceYear) || sourceYear < 2020 || sourceYear > 2025) {
-        showNotice('اختر سنة صحيحة من 2020 إلى 2025.'); return;
+      if (!Number.isInteger(sourceYear) || sourceYear < 0 || sourceYear > 2100) {
+        showNotice('اختر سنة صحيحة.'); return;
       }
       if (!['الفترة الأولى','الفترة الثانية','الفترة الثالثة','الفترة الرابعة','الفترة الخامسة'].includes(sourceFile)) {
         showNotice('اختر فترة النموذج من القائمة.'); return;
@@ -1315,9 +1320,10 @@ textarea{min-height:86px;resize:vertical}
       if (btn) { btn.disabled = true; btn.textContent = 'جارٍ استيراد الأسئلة…'; }
       try {
         const result = await api('importModelJson', {
-          levelId, courseId, sourceYear, sourceSystem, sourceAudience: 'طلاب', sourceFile, questions
+          levelId, courseId, sourceYear, sourceSystem, sourceAudience: 'طلاب', sourceFile, questions,
+          useAI: $('jsonModelAI')?.checked === true
         });
-        showNotice('تم استيراد ' + result.imported + ' سؤالاً إلى ' + sourceFile + ' بنجاح.', true);
+        showNotice('تم استيراد ' + result.imported + ' سؤالاً إلى ' + sourceFile + ' بنجاح.' + (result.awaitingAnswer ? ' · ' + result.awaitingAnswer + ' بلا إجابة محددة' : ''), true);
         $('jsonModelInput').value = '';
         if ($('jsonModelFile')) $('jsonModelFile').value = '';
         if ($('jsonModelFileName')) $('jsonModelFileName').textContent = 'لم يتم اختيار ملف بعد';

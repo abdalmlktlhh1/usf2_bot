@@ -195,11 +195,19 @@ body{background:radial-gradient(ellipse at 8% 3%,rgba(202,219,255,.55),transpare
         <div class="progress-track" role="progressbar" aria-label="التقدم في الاختبار" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1"><div id="progress" class="progress-fill"></div></div>
         <div class="exam-meta-row"><div class="exam-tags"><span id="yearTag" class="exam-tag year">كل السنوات</span><span id="courseTag" class="exam-tag">كل المقررات</span><span id="metaQuestion">السؤال: 1</span></div><div class="exam-tools" aria-label="أدوات الاختبار">
           <button id="bookmarkBtn" class="exam-tool" type="button" aria-label="حفظ السؤال" aria-pressed="false" title="حفظ السؤال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-4-6 4z"></path></svg></button>
-          <button id="reportQuestionBtn" class="exam-tool" type="button" aria-label="الإبلاغ عن خطأ في السؤال" title="الإبلاغ عن خطأ في السؤال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4m0 1h12l-2 4 2 4H5"></path><path d="M10 7v3m0 2v.1"></path></svg></button>
+          <button id="reportQuestionBtn" class="exam-tool" type="button" aria-label="الإبلاغ عن خطأ في السؤال" title="الإبلاغ عن خطأ في السؤال"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4m0 1h12l-2 4 2 4H5"></path><path d="M10 7v3m0 2v.1"></path></svg></button><button id="correctAnswerAdminBtn" class="exam-tool hidden" type="button" aria-label="إعدادات تصحيح السؤال" title="إعدادات تصحيح السؤال">✎</button>
           <button id="fontBtn" class="exam-tool" type="button" aria-label="تكبير الخط" aria-pressed="false" title="تكبير الخط"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 10 4l6 16M6.5 14h7M15 8h6M18 5v6"></path></svg></button>
         </div></div>
       </header>
       <article class="question-card" aria-live="polite"><p id="qKicker" class="q-kicker"></p><div id="questionMeta" class="question-meta"></div><h2 id="qText" class="question-text" tabindex="-1"></h2><div id="choices" class="choices" role="group" aria-label="خيارات الإجابة"></div><p id="feedback" class="choice-feedback hidden" aria-live="polite"></p>
+        <section id="answerCorrectionPanel" class="hidden" aria-label="إعدادات تصحيح السؤال" style="margin:14px 0;padding:14px;border:1px solid #d5e1eb;border-radius:14px;background:#f7fafc">
+          <strong>إعدادات تصحيح السؤال</strong>
+          <p class="subtle" style="margin:4px 0 8px">اختر الإجابة الصحيحة التي تعتمد لهذا السؤال. ستُحفظ في قاعدة البيانات وتظهر لجميع المستخدمين.</p>
+          <label for="correctAnswerChoice">الإجابة الصحيحة</label>
+          <select id="correctAnswerChoice" style="display:block;width:100%;min-height:44px;margin:6px 0 10px;padding:8px;border:1px solid #cbd6e2;border-radius:10px;background:white"><option value="">اختر الإجابة الصحيحة</option></select>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="saveCorrectAnswerBtn" class="btn btn-primary" type="button">حفظ الإجابة</button><button id="cancelCorrectAnswerBtn" class="btn btn-quiet" type="button">إلغاء</button></div>
+          <p id="answerCorrectionStatus" class="subtle" role="status" style="margin:8px 0 0"></p>
+        </section>
         <div class="quiz-actions"><button id="nextBtn" class="btn btn-secondary" type="button">التالي</button><button id="correctBtn" class="btn btn-correct" type="button">✓ تصحيح</button><button id="toggleQNav" class="question-position" type="button" aria-label="اختيار سؤال" aria-expanded="false"><span id="questionPosition">1/1</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"></path></svg></button><button id="prevBtn" class="btn btn-secondary" type="button">السابق</button></div>
       </article>
       <section class="qnav-panel hidden" aria-label="التنقل بين الأسئلة"><div class="qnav-heading"><h2>انتقل إلى سؤال</h2><div class="legend"><span class="legend-item"><i class="legend-dot current-dot"></i>الحالي</span><span class="legend-item"><i class="legend-dot answered-dot"></i>تمت الإجابة</span><span class="legend-item"><i class="legend-dot"></i>بلا إجابة</span></div></div><div id="qNav" class="q-nav"></div></section>
@@ -328,6 +336,8 @@ let session = [],
   startedAt = 0,
   timerInterval = null,
   largeText = false;
+let quizAdminCapabilities = { canCorrect: false, featureFlags: {} };
+let answerCorrectionBusy = false;
 let studentCloudData = null;
 let studentAttemptPromise = null;
 let studentSaveTimer = null;
@@ -681,6 +691,8 @@ function renderQuestion() {
   if (!session.length) return;
   const q = session[current],
     id = q.question_id;
+  $("correctAnswerAdminBtn")?.classList.toggle("hidden", !quizAdminCapabilities.canCorrect);
+  $("answerCorrectionPanel")?.classList.add("hidden");
   const answer = answers[id],
     isChecked = checked.has(id),
     gradeable = isGradeable(q);
@@ -1103,6 +1115,73 @@ $("nextBtn").addEventListener("click", () => {
   } else requestFinish();
 });
 $("correctBtn").addEventListener("click", gradeCurrent);
+function openAnswerCorrectionPanel() {
+  if (!quizAdminCapabilities.canCorrect || !session[current]) return;
+  const q = session[current], select = $("correctAnswerChoice");
+  select.replaceChildren();
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "اختر الإجابة الصحيحة";
+  select.append(placeholder);
+  (q.options || []).forEach((option, index) => {
+    const item = document.createElement("option");
+    item.value = String(index);
+    item.textContent = String.fromCharCode(65 + index) + " · " + String(option ?? "");
+    select.append(item);
+  });
+  const currentAnswer = Number.isInteger(q.correctAnswerIndex) ? q.correctAnswerIndex : -1;
+  if (currentAnswer >= 0) select.value = String(currentAnswer);
+  $("answerCorrectionStatus").textContent = currentAnswer >= 0 ? "الإجابة الحالية: " + (q.options[currentAnswer] || "") : "لم تُحدد إجابة صحيحة لهذا السؤال بعد.";
+  $("answerCorrectionPanel").classList.remove("hidden");
+  select.focus();
+}
+async function saveQuestionCorrectAnswer() {
+  if (!quizAdminCapabilities.canCorrect || answerCorrectionBusy) return;
+  const q = session[current], selected = $("correctAnswerChoice").value;
+  if (!q || selected === "") {
+    $("answerCorrectionStatus").textContent = "اختر الإجابة الصحيحة قبل الحفظ.";
+    return;
+  }
+  const correctIndex = Number(selected);
+  if (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= (q.options || []).length) {
+    $("answerCorrectionStatus").textContent = "الاختيار المحدد غير صالح.";
+    return;
+  }
+  answerCorrectionBusy = true;
+  const button = $("saveCorrectAnswerBtn");
+  button.disabled = true;
+  button.textContent = "جارٍ الحفظ…";
+  $("answerCorrectionStatus").textContent = "يتم حفظ الإجابة في الخادم…";
+  try {
+    const result = await telegramServerlessCall("adminApi", {
+      action: "setQuestionCorrectAnswer",
+      courseId: Number(q.course_id || q.courseId || 0),
+      questionId: String(q.question_id || ""),
+      correctIndex,
+    }, 25000);
+    if (!result?.saved) throw new Error("لم يؤكد الخادم حفظ الإجابة.");
+    q.correctAnswerIndex = correctIndex;
+    for (const row of DATA) {
+      if (String(row.question_id) === String(q.question_id)) row.correctAnswerIndex = correctIndex;
+    }
+    checked.delete(q.question_id);
+    $("answerCorrectionPanel").classList.add("hidden");
+    renderQuestion();
+    renderNav();
+    $("feedback").classList.remove("hidden");
+    $("feedback").textContent = "تم حفظ الإجابة الصحيحة على الخادم: " + String(q.options[correctIndex]);
+    $("feedback").classList.add("ungraded-feedback");
+  } catch (error) {
+    $("answerCorrectionStatus").textContent = error.message || "تعذر حفظ الإجابة.";
+  } finally {
+    answerCorrectionBusy = false;
+    button.disabled = false;
+    button.textContent = "حفظ الإجابة";
+  }
+}
+$("correctAnswerAdminBtn").addEventListener("click", openAnswerCorrectionPanel);
+$("saveCorrectAnswerBtn").addEventListener("click", saveQuestionCorrectAnswer);
+$("cancelCorrectAnswerBtn").addEventListener("click", () => $("answerCorrectionPanel").classList.add("hidden"));
 $("toggleQNav").addEventListener("click", () => {
   const panel = document.querySelector(".qnav-panel");
   const opened = panel.classList.toggle("hidden") === false;
@@ -1916,10 +1995,15 @@ function initBrowse() {
   if (telegramWebApp) telegramWebApp.ready();
   waitForTelegramServerless().then((readyApp) => {
     if (!readyApp?.Serverless?.call) return;
-    readyApp.Serverless.call('adminApi', { action: 'checkAccess' }, (err, result) => {
+    readyApp.Serverless.call('adminApi', { action: 'quizCapabilities' }, (err, result) => {
       if (!err && result?.allowed === true) {
         telegramAdminAccess = true;
+        quizAdminCapabilities = {
+          canCorrect: result.canCorrect === true,
+          featureFlags: result.featureFlags && typeof result.featureFlags === "object" ? result.featureFlags : {},
+        };
         updateAdminEntry();
+        if (session.length) renderQuestion();
       }
     });
   });
@@ -2497,7 +2581,7 @@ function applyCatalogResult(result) {
       number: Number(row.sourceQuestionNumber) || Number(row.sourceIndex) || model.questions.length + 1,
       question: row.questionText || "",
       options: Array.isArray(row.options) ? row.options : [],
-      correctAnswerIndex: Number.isInteger(Number(row.correctIndex)) ? Number(row.correctIndex) : -1,
+      correctAnswerIndex: row.correctIndex !== null && row.correctIndex !== undefined && row.correctIndex !== "" && Number.isInteger(Number(row.correctIndex)) ? Number(row.correctIndex) : -1,
       question_id: row.sourceQuestionId ? String(row.sourceQuestionId) : ("db:" + row.id),
       level: parent.level.id,
       level_label: parent.level.label,

@@ -1,7 +1,7 @@
 import { db } from 'sdk';
 import { asc, eq } from 'sdk/db';
 import { botMenuItems } from '../schema.js';
-import { hasModeratorFeature } from './adminAccess.js';
+import { getAdminContext } from './adminAccess.js';
 
 const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-ui-final3';
 const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-presence2';
@@ -101,7 +101,7 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null, userId = null
   let depth = 0;
   while (ancestor) {
     if (!ancestor.isActive || (ancestor.adminOnly && !isAdmin) || ++depth > 5) {
-      return getBotMenuKeyboard(isAdmin, null);
+      return getBotMenuKeyboard(isAdmin, null, userId);
     }
     ancestor = ancestor.parentId == null ? null : byId.get(Number(ancestor.parentId));
     if (ancestor === undefined) return getBotMenuKeyboard(isAdmin, null);
@@ -139,8 +139,14 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null, userId = null
     }
     if (button) rows.push([button]);
   }
-  if (parentId == null && isAdmin && userId != null && await hasModeratorFeature(userId, 'modelImport')) {
-    rows.push([{ text: '⬆️ رفع نموذج JSON', callback_data: 'menu:action:upload_model' }]);
+  if (parentId == null && isAdmin && userId != null) {
+    const context = await getAdminContext(userId);
+    const canManageQuestions = context && (
+      context.isOwner ||
+      (context.featureFlags?.modelImport === true &&
+        (context.permissions?.includes('*') || (context.permissions?.includes('questions.write') && context.permissions?.includes('questions.publish'))))
+    );
+    if (canManageQuestions) rows.push([{ text: '⬆️ رفع نموذج JSON', callback_data: 'menu:action:upload_model' }]);
   }
   if (parentId != null) {
     rows.push([{ text: '↩️ رجوع', callback_data: parent?.parentId == null ? 'menu:home' : 'menu:open:' + parent.parentId }]);

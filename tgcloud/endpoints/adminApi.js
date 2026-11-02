@@ -902,12 +902,6 @@ async function importModelJson(auth, input) {
   const sourceFile = encodeModelSourceFile(modelPeriod, sourceSystem, sourceAudience);
   if (!Array.isArray(input.questions) || input.questions.length < 1 || input.questions.length > 500) fail('عدد الأسئلة يجب أن يكون من 1 إلى 500.');
   let sourceQuestions = input.questions;
-  if (input.useAI === true) {
-    requireFeature(auth, 'assistant');
-    const aiResult = await supabaseContentRequest('analyzeModelJson', { questions: sourceQuestions }, auth);
-    if (!Array.isArray(aiResult?.questions) || aiResult.questions.length !== sourceQuestions.length) fail('لم يُرجع المساعد الذكي عدد الأسئلة نفسه؛ لم يبدأ الاستيراد.', 'AI_INVALID_RESULT');
-    sourceQuestions = aiResult.questions;
-  }
   const catalog = await supabaseContentRequest('dashboard', {}, auth);
   const selectedCourse = (catalog.courses || []).find((row) => Number(row.id) === courseId);
   if (!selectedCourse) fail('المقرر المحدد غير موجود.', 'NOT_FOUND');
@@ -919,6 +913,12 @@ async function importModelJson(auth, input) {
   if (sourceExists) fail('يوجد نموذج مسجل مسبقًا لهذه المادة والنظام والسنة والفترة. لن نكرر الأسئلة داخله.', 'MODEL_EXISTS');
   const selectedSubject = (catalog.subjects || []).find((row) => Number(row.id) === Number(selectedCourse.subjectId));
   if (!selectedSubject || Number(selectedSubject.levelId) !== levelId) fail('المقرر المختار لا يتبع المستوى المحدد.', 'COURSE_LEVEL_MISMATCH');
+  if (input.useAI === true) {
+    requireFeature(auth, 'assistant');
+    const aiResult = await supabaseContentRequest('analyzeModelJson', { courseId, questions: sourceQuestions }, auth);
+    if (!Array.isArray(aiResult?.questions) || aiResult.questions.length !== sourceQuestions.length) fail('لم يُرجع المساعد الذكي عدد الأسئلة نفسه؛ لم يبدأ الاستيراد.', 'AI_INVALID_RESULT');
+    sourceQuestions = aiResult.questions;
+  }
   const normalized = sourceQuestions.map((raw, index) => {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) fail('بيانات السؤال رقم ' + (index + 1) + ' غير صالحة.');
     const questionText = cleanString(raw.questionText ?? raw.question ?? raw.text, 'نص السؤال ' + (index + 1), 3000);
@@ -1166,8 +1166,10 @@ export default async function (input = {}, ctx) {
   if (action === 'analyzeModelJson') {
     requireFeature(auth, 'assistant');
     requirePermission(auth, 'questions.write');
+    const courseId = positiveId(input.courseId, 'المقرر');
+    requireCourseScope(auth, courseId);
     if (!Array.isArray(input.questions) || input.questions.length < 1 || input.questions.length > 500) fail('عدد الأسئلة يجب أن يكون من 1 إلى 500.');
-    return await supabaseContentRequest('analyzeModelJson', { questions: input.questions }, auth);
+    return await supabaseContentRequest('analyzeModelJson', { courseId, questions: input.questions }, auth);
   }
   if (action === 'importModelJson') return importModelJson(auth, input);
   if (action === 'setQuestionActive') return setQuestionActive(auth, input);

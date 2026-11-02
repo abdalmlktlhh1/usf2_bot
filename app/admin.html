@@ -888,7 +888,7 @@ textarea{min-height:86px;resize:vertical}
         '<div class="field full"><span class="label">الصلاحيات الأساسية</span><div class="permissions">'+permissionChecks+'</div></div>' +
         '<div class="field full"><span class="label">الميزات الإضافية (تحكم المالك)</span><div class="permissions">' +
         [['quizCorrection','تحديد الإجابة الصحيحة من صفحة الاختبار'],['assistant','استخدام المساعد الذكي لتحليل وتصنيف الأسئلة'],['modelImport','إضافة النماذج عبر كود أو ملف JSON']].map(([key,label])=>'<label class="check"><input type="checkbox" name="featureFlag" value="'+key+'"'+(item.featureFlags?.[key]===true?' checked':'')+'><span>'+label+'</span></label>').join('') +
-        '</div><p class="hint">تفعيل الميزة الإضافية لا يمنح الصلاحيات الأساسية تلقائيًا؛ يجب أيضًا منحه صلاحيات الأسئلة والنشر بحسب العمل المطلوب.</p></div>' +
+        '</div><p class="hint">تفعيل الميزة الإضافية لا يمنح الصلاحيات الأساسية تلقائيًا؛ يجب منحه صلاحية تعديل الأسئلة ونطاق المقررات المناسب.</p></div>' +
         '<div class="field full"><div class="scopes"><label><input type="checkbox" id="allScopes"'+(all?' checked':'')+'> السماح بإدارة جميع المقررات</label><p class="hint">إذا لم تُحدد جميع المقررات، اختر المقررات المسموح بها للمشرف. قائمة المقررات لا تتجاوز نطاق الإدارة الذي تمنحه.</p>' +
         '<label for="scopeCourses">المقررات المسموح بها</label><select id="scopeCourses" name="scopeCourses" multiple size="5"'+(all?' disabled':'')+'>'+(state.courses||[]).map(c=>'<option value="'+c.id+'"'+(scope.map(Number).includes(Number(c.id))?' selected':'')+'>'+escapeHtml(c.name)+'</option>').join('')+'</select></div></div></div>';
     }

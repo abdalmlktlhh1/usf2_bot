@@ -1,6 +1,7 @@
 import { api, db } from 'sdk';
 import { and, eq } from 'sdk/db';
 import { quizSessions } from '../schema.js';
+import { handleModelUploadCallback } from '../lib/model-upload-actions.js';
 import {
   QUESTIONS,
   homeText,
@@ -61,7 +62,7 @@ async function showMenu(chatId, userId, messageId, isHelp) {
     chat_id: chatId,
     message_id: messageId,
     text: isHelp ? helpText() : homeText(),
-    reply_markup: await getBotMenuKeyboard(isAdmin),
+    reply_markup: await getBotMenuKeyboard(isAdmin, null, userId),
   });
 }
 
@@ -73,6 +74,8 @@ export default async function (query) {
   const chatId = message?.chat?.id;
   const messageId = message?.message_id;
   const userId = query.from?.id;
+
+  if (await handleModelUploadCallback(query)) return;
 
   // Old Telegram messages may still contain buttons from the retired text-only demo.
   if (data === 'quiz:start' || data.startsWith('quiz:answer:') || data === 'menu:action:quiz' || data === 'menu:action:about') {
@@ -101,7 +104,7 @@ export default async function (query) {
       chat_id: chatId,
       message_id: messageId,
       text: item.description || ('📂 ' + item.text + '\n\nاختر أحد الأزرار التالية:'),
-      reply_markup: await getBotMenuKeyboard(isAdmin, Number(item.id)),
+      reply_markup: await getBotMenuKeyboard(isAdmin, Number(item.id), userId),
     });
     return;
   }
@@ -123,7 +126,7 @@ export default async function (query) {
       chat_id: chatId,
       message_id: messageId,
       text: item.description,
-      reply_markup: await getBotMenuKeyboard(isAdmin, item.parentId == null ? null : Number(item.parentId)),
+      reply_markup: await getBotMenuKeyboard(isAdmin, item.parentId == null ? null : Number(item.parentId), userId),
     });
     return;
   }

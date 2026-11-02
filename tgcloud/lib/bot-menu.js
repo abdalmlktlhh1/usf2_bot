@@ -104,7 +104,7 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null, userId = null
       return getBotMenuKeyboard(isAdmin, null, userId);
     }
     ancestor = ancestor.parentId == null ? null : byId.get(Number(ancestor.parentId));
-    if (ancestor === undefined) return getBotMenuKeyboard(isAdmin, null);
+    if (ancestor === undefined) return getBotMenuKeyboard(isAdmin, null, userId);
   }
   const entries = visible.filter((item) => (item.parentId == null ? null : Number(item.parentId)) === (parentId == null ? null : Number(parentId)));
   const rows = [];

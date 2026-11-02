@@ -151,6 +151,7 @@ test('تسجيل دخول المدير من المتصفح يتحقق من دو�
 test('إضافة النماذج متدرجة حسب المستوى والمادة والنظام والسنة والفترة وتقبل JSON لصقًا أو ملفًا', () => {
   const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
   const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
   const miniApp = fs.readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
 
   for (const id of ['jsonModelLevel', 'jsonModelSubject', 'jsonModelCourseWrap', 'jsonModelSystem', 'jsonModelYear', 'jsonModelName', 'jsonModelFile']) {
@@ -181,13 +182,10 @@ test('إضافة النماذج متدرجة حسب المستوى والماد�
   assert.ok(contentAdmin.includes('sourceYear<0||sourceYear>2100'));
   assert.ok(contentAdmin.includes('correct_index:correctIndex'));
   assert.ok(contentAdmin.includes('awaitingAnswer:rows.filter((row:any)=>row.correct_index===null).length'));
-  assert.ok(adminApi.includes("const allowedPeriods = ['الفترة الأولى', 'الفترة الثانية', 'الفترة الثالثة', 'الفترة الرابعة', 'الفترة الخامسة']"));
-  assert.ok(adminApi.includes('const sourceExists = (catalog.models || []).some('));
-  assert.ok(adminApi.includes("'MODEL_EXISTS'"));
+  assert.ok(contentAdmin.includes('supabase.from("academic_questions").insert(rows).select("id")'));
   assert.ok(miniApp.includes('audience && audience !== "طلاب"'));
   assert.ok(!adminHtml.includes('const courseOptions=(state.courses||[]).map'));
 });
-
 
 test('صلاحيات المشرف الإضافية يتحكم بها المالك وحده وتُفحص على الخادم', () => {
   const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');

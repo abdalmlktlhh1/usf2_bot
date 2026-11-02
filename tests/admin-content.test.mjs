@@ -29,6 +29,7 @@ test('تقدم الطالب محفوظ على الخادم ومربوط بهوي
 
 test('واجهة الإدارة تتحقق من الحساب عبر API ولا تعتمد على إظهار الزر فقط', () => {
   const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
   const miniApp = fs.readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
   const adminPage = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
   assert.match(adminApi, /const OWNER_ID = 5187563344/);
@@ -169,18 +170,70 @@ test('إضافة النماذج متدرجة حسب المستوى والماد�
   for (const period of ['الفترة الأولى','الفترة الثانية','الفترة الثالثة','الفترة الرابعة','الفترة الخامسة']) {
     assert.ok(adminHtml.includes(period), 'missing model period: ' + period);
   }
-  assert.ok(adminHtml.includes('Array.from({length: 6}, (_, index) => 2020 + index)'));
+  assert.ok(adminHtml.includes('Array.from({length: 11}, (_, index) => 2020 + index)'));
+  assert.ok(adminHtml.includes('السنوات المتاحة من 2020 إلى 2030.'));
   assert.ok(adminHtml.includes('data-model-input-mode="paste"'));
   assert.ok(adminHtml.includes('data-model-input-mode="file"'));
   assert.ok(adminHtml.includes('id="jsonModelFile" type="file" disabled accept=".json,application/json"'));
   assert.ok(adminHtml.includes('reader.readAsText(file)'));
   assert.ok(adminHtml.includes("levelId, courseId, sourceYear, sourceSystem, sourceAudience: 'طلاب', sourceFile, questions"));
-  assert.ok(adminApi.includes('sourceYear < 2020 || sourceYear > 2025'));
+  assert.ok(adminApi.includes("supabaseContentRequest('importModelJson'"));
+  assert.ok(contentAdmin.includes('sourceYear<0||sourceYear>2100'));
+  assert.ok(contentAdmin.includes('correct_index:correctIndex'));
+  assert.ok(contentAdmin.includes('awaitingAnswer:rows.filter((row:any)=>row.correct_index===null).length'));
   assert.ok(adminApi.includes("const allowedPeriods = ['الفترة الأولى', 'الفترة الثانية', 'الفترة الثالثة', 'الفترة الرابعة', 'الفترة الخامسة']"));
   assert.ok(adminApi.includes('const sourceExists = (catalog.models || []).some('));
   assert.ok(adminApi.includes("'MODEL_EXISTS'"));
   assert.ok(miniApp.includes('audience && audience !== "طلاب"'));
   assert.ok(!adminHtml.includes('const courseOptions=(state.courses||[]).map'));
+});
+
+
+test('صلاحيات المشرف الإضافية يتحكم بها المالك وحده وتُفحص على الخادم', () => {
+  const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  const access = fs.readFileSync(new URL('../tgcloud/lib/adminAccess.js', import.meta.url), 'utf8');
+
+  for (const key of ['quizCorrection', 'assistant', 'modelImport']) {
+    assert.ok(adminHtml.includes(key), 'missing owner feature toggle: ' + key);
+    assert.ok(adminApi.includes(key), 'missing server feature key: ' + key);
+    assert.ok(access.includes(key), 'missing moderator feature lookup: ' + key);
+  }
+  assert.ok(adminApi.includes("if (!auth.isOwner) fail('إدارة المشرفين مخصصة للمدير الرئيسي فقط."));
+  assert.ok(adminApi.includes("key: 'moderator_features:' + telegramId"));
+  assert.ok(adminApi.includes("if (action === 'setQuestionCorrectAnswer')"));
+  assert.ok(adminApi.includes("requireFeature(auth, 'quizCorrection')"));
+});
+
+test('التصحيح داخل الاختبار يحفظ الإجابة في Supabase ويقيد المشرف بمقرراته', () => {
+  const miniApp = fs.readFileSync(new URL('../app/index.html', import.meta.url), 'utf8');
+  const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
+
+  assert.ok(miniApp.includes('id="correctAnswerAdminBtn"'));
+  assert.ok(miniApp.includes('id="answerCorrectionPanel"'));
+  assert.ok(miniApp.includes("action: \"setQuestionCorrectAnswer\""));
+  assert.ok(miniApp.includes('canCorrectCurrentQuestion()'));
+  assert.ok(adminApi.includes('requireCourseScope(auth, courseId)'));
+  assert.ok(contentAdmin.includes('async function setQuestionCorrectAnswer'));
+  assert.ok(contentAdmin.includes('.update({correct_index:correctIndex,review_status:"approved"'));
+});
+
+test('بوت Telegram يستقبل JSON ويصنفه اختيارياً دون تخمين الإجابات غير المحددة', () => {
+  const message = fs.readFileSync(new URL('../tgcloud/handlers/message.js', import.meta.url), 'utf8');
+  const callbacks = fs.readFileSync(new URL('../tgcloud/lib/model-upload-actions.js', import.meta.url), 'utf8');
+  const menu = fs.readFileSync(new URL('../tgcloud/lib/bot-menu.js', import.meta.url), 'utf8');
+  const contentAdmin = fs.readFileSync(new URL('../supabase/functions/content-admin/index.ts', import.meta.url), 'utf8');
+
+  assert.ok(menu.includes("callback_data: 'menu:action:upload_model'"));
+  assert.ok(message.includes('message.document'));
+  assert.ok(message.includes('api.getFileContent(document.file_id)'));
+  for (const step of ['modelupload:level', 'modelupload:course', 'modelupload:system', 'modelupload:year', 'modelupload:audience', 'modelupload:period', 'modelupload:ai']) {
+    assert.ok(callbacks.includes(step), 'missing upload step: ' + step);
+  }
+  assert.ok(callbacks.includes("supabaseContentRequest('importModelJson'"));
+  assert.ok(contentAdmin.includes('requireFeature(auth,"assistant")'));
+  assert.ok(contentAdmin.includes('rawAnswer==null||rawAnswer===""?null'));
 });
 
 test('حذف النموذج يحذف أسئلته المحددة فقط ويحافظ على النتائج السابقة ويمنع الحذف أثناء اختبار جارٍ', () => {

@@ -13,7 +13,7 @@ import { supabaseContentRequest } from './supabase-content.js';
 
 const hasPermission = (auth, key) => Boolean(auth?.isOwner || auth?.permissions?.includes('*') || auth?.permissions?.includes(key));
 const canUpload = (auth) => Boolean(auth && auth.featureFlags?.modelImport === true &&
-  hasPermission(auth, 'questions.write') && hasPermission(auth, 'questions.publish'));
+  hasPermission(auth, 'questions.write'));
 const buttonRows = (items, prefix, width = 2) => {
   const rows = [];
   for (let i = 0; i < items.length; i += width) {

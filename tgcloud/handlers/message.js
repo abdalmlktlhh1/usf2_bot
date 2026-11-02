@@ -82,9 +82,9 @@ async function handleUploadDocument(message, auth) {
       throw new Error('يجب أن يحتوي الملف على مصفوفة أسئلة من سؤال واحد إلى 500 سؤال.');
     }
     const catalog = await supabaseContentRequest('dashboardSummary', {}, auth);
-    const allowedIds = Array.isArray(auth.scopeCourseIds) ? auth.scopeCourseIds.map(Number) : [];
+    const allowedIds = Array.isArray(auth.scopeCourseIds) ? auth.scopeCourseIds : [];
     const permittedCourses = (catalog.courses || []).filter(course =>
-      auth.isOwner || allowedIds.includes(Number(course.id)) || allowedIds.includes('*')
+      auth.isOwner || allowedIds.includes('*') || allowedIds.map(Number).includes(Number(course.id))
     );
     const allowedSubjects = new Set(permittedCourses.map(course => Number(course.subjectId)));
     const permittedLevels = (catalog.levels || []).filter(level =>

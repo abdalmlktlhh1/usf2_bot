@@ -336,7 +336,14 @@ let session = [],
   startedAt = 0,
   timerInterval = null,
   largeText = false;
-let quizAdminCapabilities = { canCorrect: false, featureFlags: {} };
+let quizAdminCapabilities = { canCorrect: false, isOwner: false, scopeCourseIds: [], featureFlags: {} };
+function canCorrectCurrentQuestion() {
+  const q = session[current];
+  if (!q || !quizAdminCapabilities.canCorrect) return false;
+  const courseId = Number(q.course_id || q.courseId || 0);
+  const scope = Array.isArray(quizAdminCapabilities.scopeCourseIds) ? quizAdminCapabilities.scopeCourseIds : [];
+  return quizAdminCapabilities.isOwner === true || scope.includes('*') || scope.map(Number).includes(courseId);
+}
 let answerCorrectionBusy = false;
 let studentCloudData = null;
 let studentAttemptPromise = null;
@@ -691,7 +698,7 @@ function renderQuestion() {
   if (!session.length) return;
   const q = session[current],
     id = q.question_id;
-  $("correctAnswerAdminBtn")?.classList.toggle("hidden", !quizAdminCapabilities.canCorrect);
+  $("correctAnswerAdminBtn")?.classList.toggle("hidden", !canCorrectCurrentQuestion());
   $("answerCorrectionPanel")?.classList.add("hidden");
   const answer = answers[id],
     isChecked = checked.has(id),
@@ -1116,7 +1123,7 @@ $("nextBtn").addEventListener("click", () => {
 });
 $("correctBtn").addEventListener("click", gradeCurrent);
 function openAnswerCorrectionPanel() {
-  if (!quizAdminCapabilities.canCorrect || !session[current]) return;
+  if (!canCorrectCurrentQuestion() || !session[current]) return;
   const q = session[current], select = $("correctAnswerChoice");
   select.replaceChildren();
   const placeholder = document.createElement("option");
@@ -1136,7 +1143,7 @@ function openAnswerCorrectionPanel() {
   select.focus();
 }
 async function saveQuestionCorrectAnswer() {
-  if (!quizAdminCapabilities.canCorrect || answerCorrectionBusy) return;
+  if (!canCorrectCurrentQuestion() || answerCorrectionBusy) return;
   const q = session[current], selected = $("correctAnswerChoice").value;
   if (!q || selected === "") {
     $("answerCorrectionStatus").textContent = "اختر الإجابة الصحيحة قبل الحفظ.";
@@ -2000,6 +2007,8 @@ function initBrowse() {
         telegramAdminAccess = true;
         quizAdminCapabilities = {
           canCorrect: result.canCorrect === true,
+          isOwner: result.isOwner === true,
+          scopeCourseIds: Array.isArray(result.scopeCourseIds) ? result.scopeCourseIds : [],
           featureFlags: result.featureFlags && typeof result.featureFlags === "object" ? result.featureFlags : {},
         };
         updateAdminEntry();

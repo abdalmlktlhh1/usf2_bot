@@ -226,7 +226,8 @@ test('بوت Telegram يستقبل JSON ويصنفه اختيارياً دون �
   assert.ok(menu.includes("callback_data: 'menu:action:upload_model'"));
   assert.ok(message.includes('message.document'));
   assert.ok(message.includes('api.getFileContent(document.file_id)'));
-  for (const step of ['modelupload:level', 'modelupload:course', 'modelupload:system', 'modelupload:year', 'modelupload:audience', 'modelupload:period', 'modelupload:ai']) {
+  assert.ok(message.includes("callback_data: 'modelupload:level:'"));
+  for (const step of ['modelupload:course', 'modelupload:system', 'modelupload:year', 'modelupload:audience', 'modelupload:period', 'modelupload:ai']) {
     assert.ok(callbacks.includes(step), 'missing upload step: ' + step);
   }
   assert.ok(callbacks.includes("supabaseContentRequest('importModelJson'"));

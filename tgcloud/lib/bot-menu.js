@@ -1,6 +1,7 @@
 import { db } from 'sdk';
 import { asc, eq } from 'sdk/db';
 import { botMenuItems } from '../schema.js';
+import { hasModeratorFeature } from './adminAccess.js';
 
 const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-ui-final3';
 const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-presence2';
@@ -86,7 +87,7 @@ export function validateBotMenuItem(input, rows, currentId = 0) {
   };
 }
 
-export async function getBotMenuKeyboard(isAdmin, parentId = null) {
+export async function getBotMenuKeyboard(isAdmin, parentId = null, userId = null) {
   const all = await ensureDefaultBotMenu();
   const retiredCommands = new Set(['quiz', 'help', 'about']);
   const visible = all.filter((item) => item.isActive && (!item.adminOnly || isAdmin) && !(item.type === 'command' && retiredCommands.has(item.value)));
@@ -137,6 +138,9 @@ export async function getBotMenuKeyboard(isAdmin, parentId = null) {
       button = { text: item.text, callback_data: 'menu:message:' + item.id };
     }
     if (button) rows.push([button]);
+  }
+  if (parentId == null && isAdmin && userId != null && await hasModeratorFeature(userId, 'modelImport')) {
+    rows.push([{ text: '⬆️ رفع نموذج JSON', callback_data: 'menu:action:upload_model' }]);
   }
   if (parentId != null) {
     rows.push([{ text: '↩️ رجوع', callback_data: parent?.parentId == null ? 'menu:home' : 'menu:open:' + parent.parentId }]);

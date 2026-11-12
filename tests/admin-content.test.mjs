@@ -268,6 +268,11 @@ test('لوحة الإدارة توفر نسخة احتياطية للمالك و
   assert.match(adminHtml, /format: 'usf2_bot_content_backup'/);
   assert.match(adminHtml, /questions\.length !== expectedTotal/);
   assert.match(adminHtml, /difficulty: row\.difficulty \?\? null/);
+  assert.match(adminHtml, /correctIndex: row\.correctIndex == null \|\| row\.correctIndex === '' \? null : Number\(row\.correctIndex\)/);
+  assert.match(adminHtml, /sourceQuestionId: row\.sourceQuestionId \?\? null/);
+  assert.match(adminHtml, /sourceQuestionNumber: row\.sourceQuestionNumber == null \? null : Number\(row\.sourceQuestionNumber\)/);
+  assert.match(adminHtml, /sourceIndex: row\.sourceIndex == null \? null : Number\(row\.sourceIndex\)/);
+  assert.match(adminHtml, /difficulty:editItem\?\.difficulty \?\? 'normal'/);
   assert.doesNotMatch(adminHtml, /مستوى الصعوبة|selectField\('مستوى الصعوبة'/);
   assert.match(adminApi, /if \(action === 'recordBackupExport'\) return recordBackupExport\(auth, input\)/);
   assert.match(adminApi, /if \(!auth\.isOwner\) fail\('تصدير النسخة الاحتياطية مخصص للمدير الرئيسي فقط\.'/);

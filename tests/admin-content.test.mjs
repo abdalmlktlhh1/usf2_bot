@@ -38,7 +38,7 @@ test('واجهة الإدارة تتحقق من الحساب عبر API ولا �
   assert.match(adminApi, /لا يمكن تغيير صلاحيات المدير الرئيسي أو استبداله/);
   assert.match(adminPage, /Telegram\.WebApp/);
   assert.match(miniApp, /id="drawerAdminBtn"/);
-  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261031-ehsan-model-hierarchy2"/);
+  assert.match(miniApp, /window\.location\.href = "admin\.html\?v=20261112-owner-content-backup1"/);
 });
 
 test('لوحة المدير تعرض المتواجدين وآخر الحسابات والنشاط مع تحديث الحضور', () => {
@@ -257,4 +257,24 @@ test('حذف النموذج يحذف أسئلته المحددة فقط ويحا
   assert.ok(dbDelete.includes('attemptsPreserved:true'));
   assert.ok(!dbDelete.includes('student_attempts").delete()'));
   assert.ok(!apiDelete.includes("supabaseContentRequest('setModelActive'"));
+});
+
+
+test('لوحة الإدارة توفر نسخة احتياطية للمالك وتحافظ على بيانات الأسئلة المخزنة', () => {
+  const adminHtml = fs.readFileSync(new URL('../app/admin.html', import.meta.url), 'utf8');
+  const adminApi = fs.readFileSync(new URL('../tgcloud/endpoints/adminApi.js', import.meta.url), 'utf8');
+  assert.match(adminHtml, /data-action="exportBackup"/);
+  assert.match(adminHtml, /async function exportContentBackup\(\)/);
+  assert.match(adminHtml, /format: 'usf2_bot_content_backup'/);
+  assert.match(adminHtml, /questions\.length !== expectedTotal/);
+  assert.match(adminHtml, /difficulty: row\.difficulty \?\? null/);
+  assert.match(adminHtml, /correctIndex: row\.correctIndex == null \|\| row\.correctIndex === '' \? null : Number\(row\.correctIndex\)/);
+  assert.match(adminHtml, /sourceQuestionId: row\.sourceQuestionId \?\? null/);
+  assert.match(adminHtml, /sourceQuestionNumber: row\.sourceQuestionNumber == null \? null : Number\(row\.sourceQuestionNumber\)/);
+  assert.match(adminHtml, /sourceIndex: row\.sourceIndex == null \? null : Number\(row\.sourceIndex\)/);
+  assert.match(adminHtml, /difficulty:editItem\?\.difficulty \?\? 'normal'/);
+  assert.doesNotMatch(adminHtml, /مستوى الصعوبة|selectField\('مستوى الصعوبة'/);
+  assert.match(adminApi, /if \(action === 'recordBackupExport'\) return recordBackupExport\(auth, input\)/);
+  assert.match(adminApi, /if \(!auth\.isOwner\) fail\('تصدير النسخة الاحتياطية مخصص للمدير الرئيسي فقط\.'/);
+  assert.match(adminApi, /await audit\(auth, 'export', 'content_backup'/);
 });

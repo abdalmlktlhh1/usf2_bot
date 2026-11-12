@@ -4,7 +4,7 @@ import { botMenuItems } from '../schema.js';
 import { getAdminContext } from './adminAccess.js';
 
 const MINI_APP_URL = 'https://app8964547541.tgcloud.ai/?v=20261030-ehsan-ui-final3';
-const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261030-ehsan-presence2';
+const ADMIN_APP_URL = 'https://app8964547541.tgcloud.ai/admin.html?v=20261112-owner-content-backup1';
 const VALID_TYPES = new Set(['submenu', 'web_app', 'url', 'command', 'message', 'catalog']);
 const VALID_COMMANDS = new Set(['quiz', 'help', 'about', 'home']);
 

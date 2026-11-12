@@ -692,8 +692,12 @@ textarea{min-height:86px;resize:vertical}
       const safeQuestions = questions.map((row) => ({
         id: Number(row.id), courseId: Number(row.courseId), questionText: String(row.questionText || ''),
         options: Array.isArray(row.options) ? row.options.map((option) => String(option)) : [],
-        correctIndex: Number(row.correctIndex), explanation: String(row.explanation || ''),
+        correctIndex: row.correctIndex == null || row.correctIndex === '' ? null : Number(row.correctIndex),
+        explanation: String(row.explanation || ''),
         difficulty: row.difficulty ?? null,
+        sourceQuestionId: row.sourceQuestionId ?? null,
+        sourceQuestionNumber: row.sourceQuestionNumber == null ? null : Number(row.sourceQuestionNumber),
+        sourceIndex: row.sourceIndex == null ? null : Number(row.sourceIndex),
         sourceYear: Number(row.sourceYear) || 0, sourceFile: String(row.sourceFile || 'بلا اسم'),
         sortOrder: Number(row.sortOrder || 0), isActive: row.isActive !== false,
         reviewStatus: row.reviewStatus || null,
@@ -1095,7 +1099,7 @@ textarea{min-height:86px;resize:vertical}
       const correctIndex=selectedOld<0?null:options.findIndex(o=>o.oldIndex===selectedOld);
       let sourceYear=0,sourceFile='لوحة الإدارة'; const rawModel=fd.get('questionModel');
       if(rawModel==='__new__'){sourceYear=Number(fd.get('newModelYear')||new Date().getFullYear());sourceFile=String(fd.get('newModelName')||'').trim()} else if(rawModel){try{const parsed=JSON.parse(rawModel);sourceYear=Number(parsed[1]||0);sourceFile=String(parsed[2]||'لوحة الإدارة')}catch(_){}}
-      return {id,courseId:Number(fd.get('courseId')),sourceYear,sourceFile,questionText:fd.get('questionText'),options:options.map(o=>o.value),correctIndex,explanation:fd.get('explanation'),sortOrder:Number(fd.get('sortOrder')||0)};
+      return {id,courseId:Number(fd.get('courseId')),sourceYear,sourceFile,questionText:fd.get('questionText'),options:options.map(o=>o.value),correctIndex,explanation:fd.get('explanation'),difficulty:editItem?.difficulty ?? 'normal',sortOrder:Number(fd.get('sortOrder')||0)};
     }
     if(kind==='model') return {courseId:Number(fd.get('courseId')),sourceYear:Number(fd.get('sourceYear')||0),sourceFile:fd.get('sourceFile'),newSourceYear:Number(fd.get('newSourceYear')||0),newSourceFile:fd.get('newSourceFile')};
     if(kind==='moderator'){
